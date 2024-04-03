@@ -5,7 +5,7 @@ import sys
 pygame.init()
 
 # Configuraciones de la ventana
-ventana_ancho, ventana_alto = 640, 480
+ventana_ancho, ventana_alto = 1000, 1000
 ventana = pygame.display.set_mode((ventana_ancho, ventana_alto))
 pygame.display.set_caption("Simulador de Navegación de Agentes")
 
@@ -23,7 +23,7 @@ def dibujar_texto(surf, texto, tamaño, x, y):
 
 def transformar_coordenadas(x, y):
     # Ajusta la escala de coordenadas a 100 píxeles por unidad
-    escala = 100
+    escala = 200
     x_nuevo = ventana_ancho / 2 + x * escala
     y_nuevo = ventana_alto / 2 - y * escala
     return int(x_nuevo), int(y_nuevo)
@@ -32,9 +32,24 @@ def cargar_obstaculos(archivo):
     obstaculos = []
     with open(archivo, 'r') as f:
         for linea in f:
-            x, y, radio = map(int, linea.strip().split(','))
-            obstaculos.append((x, y, radio))
+            partes = linea.strip().split(',')
+            obstaculo_id = int(partes[0])
+            vertices = []
+            for i in range(1, len(partes), 2):  # Itera sobre los vértices
+                # Limpia la cadena para asegurarse de que solo contenga números y el punto decimal
+                x_str = partes[i].strip("() ")
+                y_str = partes[i + 1].strip("() ")
+                # Ahora intenta convertir a float
+                x, y = float(x_str), float(y_str)
+                vertices.append((x, y))
+            obstaculos.append(vertices)
     return obstaculos
+
+def dibujar_obstaculos(ventana, obstaculos):
+    for obstaculo in obstaculos:
+        # Transforma y dibuja cada obstáculo como un polígono cerrado
+        vertices_transformados = [transformar_coordenadas(x, y) for x, y in obstaculo]
+        pygame.draw.polygon(ventana, color_obstaculo, vertices_transformados, 3)  # 3 es el grosor de la línea
 
 def cargar_agentes(archivo):
     agentes = {}
@@ -98,6 +113,9 @@ while True:
     for agente_id, (x, y) in agentes.items():
         pygame.draw.circle(ventana, color_agente, (x, y), 10)  # Dibuja el agente con coordenadas ya transformadas
 
+    # Dibuja los obstáculos
+    dibujar_obstaculos(ventana, obstaculos)
+
     # Dibuja el contador de steps en la esquina superior derecha
     dibujar_texto(ventana, f"step: {step}", 36, ventana_ancho - 10, 10)
 
@@ -106,4 +124,4 @@ while True:
 
     # Actualiza la pantalla y espera al siguiente frame
     pygame.display.flip()
-    reloj.tick(1)  # Ajustado para 1 FPS según tu solicitud
+    reloj.tick(60)  # Ajustado para 1 FPS según tu solicitud

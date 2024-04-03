@@ -26,9 +26,22 @@ print('Simulation has %i agents and %i obstacle vertices in it.' %
 
 print('Running simulation')
 
+# Guarda información de obstáculos en un archivo
+with open('obstaculos.txt', 'w') as archivo_obstaculos:
+    for obstaculo_id in range(sim.getNumObstacleVertices()):
+        # Obtiene el vértice actual y el siguiente vértice usando los índices
+        vertice = sim.getObstacleVertex(obstaculo_id)
+        siguiente_vertice_id = sim.getNextObstacleVertexNo(obstaculo_id)
+        siguiente_vertice = sim.getObstacleVertex(siguiente_vertice_id)
+
+        # Accede a los valores x e y directamente de las tuplas
+        archivo_obstaculos.write(f'{obstaculo_id},({vertice[0]}, {vertice[1]}), ({siguiente_vertice[0]}, {siguiente_vertice[1]})\n')
+
+print('Archivo de obstáculos generado con éxito.')
+
 # Abre un archivo para escribir las posiciones de los agentes
 with open('posiciones_agentes.txt', 'w') as archivo_posiciones:
-    for step in range(20):  # Número de steps en la simulación
+    for step in range(1000):  # Número de steps en la simulación
         sim.doStep()
         
         for agent_no in range(sim.getNumAgents()):
@@ -37,10 +50,3 @@ with open('posiciones_agentes.txt', 'w') as archivo_posiciones:
             archivo_posiciones.write(f'{step},{agent_no + 1},{x:.2f},{y:.2f}\n')
 
 print('Archivo de posiciones de agentes generado con éxito.')
-
-# for step in range(20):
-#     sim.doStep()
-
-#     positions = ['(%5.3f, %5.3f)' % sim.getAgentPosition(agent_no)
-#                  for agent_no in (a0, a1, a2, a3)]
-#     print('step=%2i  t=%.3f  %s' % (step, sim.getGlobalTime(), '  '.join(positions)))
