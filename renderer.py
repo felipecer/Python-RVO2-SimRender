@@ -45,6 +45,22 @@ def cargar_obstaculos(archivo):
             obstaculos.append(vertices)
     return obstaculos
 
+def dibujar_grilla(ventana, espaciado, ancho, alto, color):
+    # Dibuja líneas verticales
+    for x in range(0, ancho // 2, espaciado):
+        pygame.draw.line(ventana, color, (ancho // 2 + x, 0), (ancho // 2 + x, alto))
+        pygame.draw.line(ventana, color, (ancho // 2 - x, 0), (ancho // 2 - x, alto))
+    
+    # Dibuja líneas horizontales
+    for y in range(0, alto // 2, espaciado):
+        pygame.draw.line(ventana, color, (0, alto // 2 + y), (ancho, alto // 2 + y))
+        pygame.draw.line(ventana, color, (0, alto // 2 - y), (ancho, alto // 2 - y))
+
+    # Dibuja los ejes centrales
+    pygame.draw.line(ventana, color, (ancho // 2, 0), (ancho // 2, alto))  # Eje vertical
+    pygame.draw.line(ventana, color, (0, alto // 2), (ancho, alto // 2))  # Eje horizontal
+
+
 def dibujar_obstaculos(ventana, obstaculos):
     for obstaculo in obstaculos:
         # Transforma y dibuja cada obstáculo como un polígono cerrado
@@ -91,6 +107,11 @@ step = 0
 
 # Bucle principal de la simulación
 reloj = pygame.time.Clock()
+
+# Ajustes de la grilla
+color_grilla = (200, 200, 200)  # Un gris claro para la grilla
+espaciado_grilla = 100  # Cada 100 píxeles
+
 # Bucle principal de la simulación
 while True:
     for evento in pygame.event.get():
@@ -100,6 +121,9 @@ while True:
 
     # Fondo
     ventana.fill(color_fondo)
+
+    # Dibuja la grilla
+    dibujar_grilla(ventana, espaciado_grilla, ventana_ancho, ventana_alto, color_grilla)
 
     # Actualiza y dibuja agentes según el step actual
     if step in movimientos_agentes:
