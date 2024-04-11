@@ -23,7 +23,7 @@ def dibujar_texto(surf, texto, tamaño, x, y):
 
 def transformar_coordenadas(x, y):
     # Ajusta la escala de coordenadas a 100 píxeles por unidad
-    escala = 200
+    escala = 100
     x_nuevo = ventana_ancho / 2 + x * escala
     y_nuevo = ventana_alto / 2 - y * escala
     return int(x_nuevo), int(y_nuevo)
@@ -148,4 +148,4 @@ while True:
 
     # Actualiza la pantalla y espera al siguiente frame
     pygame.display.flip()
-    reloj.tick(60)  # Ajustado para 1 FPS según tu solicitud
+    reloj.tick(60)
