@@ -7,7 +7,7 @@ sim = rvo2.PyRVOSimulator(1/60., 1.5, 5, 1.5, 2, 0.4, 2)
 # Pass either just the position (the other parameters then use
 # the default values passed to the PyRVOSimulator constructor),
 # or pass all available parameters.
-a0 = sim.addAgent((0, 0))
+a0 = sim.addAgent((-3.0, 0))
 a1 = sim.addAgent((1, 0))
 a2 = sim.addAgent((1, 1))
 a3 = sim.addAgent((0, 1), 1.5, 5, 1.5, 2, 0.4, 2, (0, 0))

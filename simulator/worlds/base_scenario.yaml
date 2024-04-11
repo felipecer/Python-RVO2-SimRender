@@ -1,0 +1,33 @@
+simulation:
+  timeStep: 0.01667
+  agentDefaults:
+    neighborDist: 1.5
+    maxNeighbors: 5
+    timeHorizon: 1.5
+    timeHorizonObst: 2
+    radius: 0.4
+    maxSpeed: 2
+  agents:
+    - position: [-3.0, 0.0]
+      velocity: [0, 0]
+      goal: [5.0, 2.0]
+    - position: [3.0, 0.0]
+      velocity: [0, 0]
+      goal: [-5.0, -2.0]
+  obstacles:
+    - - [2.0, 5.0]
+      - [-2.0, 5.0]
+      - [-2.0, 5.0]
+      - [-2.0, 0.15]
+      - [-2.0, 0.15]
+      - [2.0, 0.15]
+      - [2.0, 0.15]
+      - [2.0, 5.0]
+    - - [2.0, -0.15]
+      - [-2.0, -0.15]
+      - [-2.0, -0.15]
+      - [-2.0, -5.0]
+      - [-2.0, -5.0]
+      - [2.0, -5.0]
+      - [2.0, -5.0]
+      - [2.0, -0.15]
