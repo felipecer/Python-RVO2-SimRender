@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import datetime
+import math
 from world_loader import WorldLoader
 
 class SimulationCore:
@@ -7,10 +8,30 @@ class SimulationCore:
         self.world_loader = world_loader
         self.simulation_id = simulation_id.replace(" ", "_")
         self.steps_buffer = []        
-        _, self.sim, _ = self.world_loader.load_simulation()
+        self.sim_name, self.sim, self.agent_goals = self.world_loader.load_simulation()
+
+    def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):
+        print(agent_position)
+        print(goal_position)
+        vector_to_goal = (goal_position[1][0] - agent_position[0], goal_position[1][1] - agent_position[1])
+        distance = math.sqrt(vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
+        
+        if distance > 0:            
+            return (vector_to_goal[0] / distance * max_speed, vector_to_goal[1] / distance * max_speed)
+        else:
+            return (0, 0)
+
+    def update_agent_velocities(self):
+        for agent_id in range(self.sim.getNumAgents()):
+            agent_position = self.sim.getAgentPosition(agent_id)
+            goal_position = self.agent_goals[agent_id]
+            max_speed = self.sim.getAgentMaxSpeed(agent_id)
+            preferred_velocity = self.calculate_preferred_velocity(agent_position, goal_position, max_speed)
+            self.sim.setAgentPrefVelocity(agent_id, preferred_velocity)
 
     def run_simulation(self, steps):        
         for step in range(steps):
+            self.update_agent_velocities()
             self.sim.doStep()
             self.store_step(step)
 
@@ -42,5 +63,5 @@ class SimulationCore:
 if __name__ == "__main__":
     loader = WorldLoader("./worlds/base_scenario.yaml")    
     sim_core = SimulationCore(loader, "test")   
-    sim_core.run_simulation(2000) 
+    sim_core.run_simulation(5000) 
     sim_core.save_simulation_runs()
