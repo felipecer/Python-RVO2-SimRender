@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import yaml
 import rvo2
 
@@ -53,11 +54,10 @@ class WorldLoader:
         return self.world_name
 
 def load_world(yaml_file):
-    loader = WorldLoader(yaml_file)
-    sim, agent_goals = loader.load_simulation()
-    return sim, agent_goals
+    loader = WorldLoader(yaml_file)    
+    name, sim, agent_goals = loader.load_simulation()    
+    return name, sim, agent_goals
 
-# Ejemplo de uso:
 if __name__ == "__main__":
-    sim, agent_goals = load_world('config.yaml')
-    # Aquí puedes comenzar la simulación y usar sim y agent_goals según sea necesario.
+    name, sim, agent_goals = load_world('./worlds/base_scenario.yaml')    
+    
