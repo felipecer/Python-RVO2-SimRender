@@ -41,6 +41,7 @@ class WorldLoader:
                 config['simulation']['agentDefaults']['maxSpeed'],
                 tuple(agent['velocity'])
             )
+            sim.setAgentPrefVelocity(agent_id, tuple(agent['preferredVelocity']))
             agent_goals.append((agent_id, tuple(agent['goal'])))
 
         # Añadir obstáculos.

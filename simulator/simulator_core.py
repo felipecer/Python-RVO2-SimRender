@@ -9,7 +9,7 @@ class SimulationCore:
         self.steps_buffer = []        
         _, self.sim, _ = self.world_loader.load_simulation()
 
-    def run_simulation(self, steps):
+    def run_simulation(self, steps):        
         for step in range(steps):
             self.sim.doStep()
             self.store_step(step)
