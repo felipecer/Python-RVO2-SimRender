@@ -78,6 +78,16 @@ def cargar_agentes(archivo):
             agente_id += 1
     return agentes
 
+def cargar_metas(archivo):
+    metas = []
+    with open(archivo, 'r') as f:
+        for linea in f:
+            x, y = map(float, linea.strip().split(','))
+            metas.append((x, y))
+    return metas
+
+
+
 def cargar_movimientos(archivo):
     movimientos = {}
     with open(archivo, 'r') as f:
@@ -95,8 +105,15 @@ def cargar_movimientos(archivo):
             movimientos[step].append((agente_id, x, y))
     return movimientos
 
+def dibujar_metas(ventana, metas):
+    for meta in metas:
+        x, y = transformar_coordenadas(*meta)
+        pygame.draw.circle(ventana, color_obstaculo, (x, y), 10)
+
 # Carga de obstáculos y agentes
 obstaculos = cargar_obstaculos('obstaculos.txt')
+
+metas = cargar_metas('metas.txt')
 # agentes = cargar_agentes('agentes.txt')
 agentes = {}
 
@@ -142,6 +159,8 @@ while True:
 
     # Dibuja el contador de steps en la esquina superior derecha
     dibujar_texto(ventana, f"step: {step}", 36, ventana_ancho - 10, 10)
+
+    dibujar_metas(ventana, metas)
 
     # Incrementa el contador de step    
     step += 1

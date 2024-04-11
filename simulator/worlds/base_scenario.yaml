@@ -11,11 +11,11 @@ simulation:
   agents:
     - position: [-3.0, 0.0]
       velocity: [1.0, 0.0]
-      goal: [5.0, 2.0]
+      goal: [4.0, 2.0]
       preferredVelocity: [1.0, 0.0]
     - position: [3.0, 0.0]
       velocity: [-1.0, 0.0]
-      goal: [-5.0, -2.0]
+      goal: [-4.0, -2.0]
       preferredVelocity: [-1.0, 0.0]
   obstacles:
     - - [2.0, 5.0]
