@@ -2,11 +2,11 @@ worldName: "base_scenario"
 simulation:
   timeStep: 0.01667
   agentDefaults:
-    neighborDist: 1.5
+    neighborDist: 0.1
     maxNeighbors: 5
     timeHorizon: 1.5
     timeHorizonObst: 2
-    radius: 0.4
+    radius: 0.1
     maxSpeed: 2
   agents:
     - position: [-3.0, 0.0]

@@ -42,5 +42,5 @@ class SimulationCore:
 if __name__ == "__main__":
     loader = WorldLoader("./worlds/base_scenario.yaml")    
     sim_core = SimulationCore(loader, "test")   
-    sim_core.run_simulation(500) 
+    sim_core.run_simulation(2000) 
     sim_core.save_simulation_runs()
