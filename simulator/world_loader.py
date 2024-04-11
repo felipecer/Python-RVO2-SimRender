@@ -4,10 +4,17 @@ import rvo2
 class WorldLoader:
     def __init__(self, yaml_file):
         self.yaml_file = yaml_file
+        self.world_name = ""
+        self.config = {}
 
     def load_simulation(self):
         with open(self.yaml_file, 'r') as file:
             config = yaml.safe_load(file)
+
+        self.config = config
+
+         # Cargar el nombre del mundo
+        self.world_name = self.config.get('worldName', 'Mundo sin nombre')
 
         # Crear la instancia de la simulación.
         sim = rvo2.PyRVOSimulator(
@@ -42,6 +49,8 @@ class WorldLoader:
 
         # Devolver la simulación configurada y los IDs de los agentes con sus metas.
         return sim, agent_goals
+    def get_world_name(self):
+        return self.world_name
 
 def load_world(yaml_file):
     loader = WorldLoader(yaml_file)

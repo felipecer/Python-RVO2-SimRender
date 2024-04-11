@@ -1,3 +1,4 @@
+worldName: "base_scenario"
 simulation:
   timeStep: 0.01667
   agentDefaults:
