@@ -48,7 +48,7 @@ class WorldLoader:
         sim.processObstacles()
 
         # Devolver la simulación configurada y los IDs de los agentes con sus metas.
-        return sim, agent_goals
+        return self.world_name, sim, agent_goals
     def get_world_name(self):
         return self.world_name
 
