@@ -43,10 +43,11 @@ class RVOSimulationEnv(gym.Env):
 		return flattened_observations, reward, terminated, truncated, info
 		
 	def reset(self):
-		self.sim = self.loader.load_simulation(self.sim)[1]
+		# Cargar nuevamente la configuración de la simulación y asegurarse de asignar correctamente los valores
+		self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
 		self.current_step = 0
+		self.initial_distance = np.linalg.norm(np.array(self.sim.getAgentPosition(0)) - np.array(self.agent_goals[0][1]))
 		return self.step(np.zeros(2))[0]  # Default action on reset
-
 
 	def render(self, mode='human'):
 		# Optional: Implement visualization of the simulation
