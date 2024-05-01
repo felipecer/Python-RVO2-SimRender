@@ -2,17 +2,18 @@
 import datetime
 import math
 from world_loader import WorldLoader
+from renderer.renderer import RVO2Renderer
+import sys
 
 class SimulationCore:
-    def __init__(self, world_loader: WorldLoader, simulation_id: str):
+    def __init__(self, world_loader: WorldLoader, simulation_id: str, renderer = None):
         self.world_loader = world_loader
         self.simulation_id = simulation_id.replace(" ", "_")
         self.steps_buffer = []        
-        self.sim_name, self.sim, self.agent_goals = self.world_loader.load_simulation()
+        self.renderer = renderer
+        self.sim_name, self.sim, self.agent_goals = self.world_loader.get_simulation()
 
-    def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):
-        print(agent_position)
-        print(goal_position)
+    def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):        
         vector_to_goal = (goal_position[1][0] - agent_position[0], goal_position[1][1] - agent_position[1])
         distance = math.sqrt(vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
         
@@ -32,7 +33,12 @@ class SimulationCore:
     def run_simulation(self, steps):        
         for step in range(steps):
             self.update_agent_velocities()
-            self.sim.doStep()
+            self.sim.doStep()            
+            if self.renderer:     
+                agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id)) for agent_id in range(self.sim.getNumAgents())]           
+                # print(agent_positions)
+                self.renderer.render_step_with_agents(agent_positions, step)
+                self.renderer.update_display()
             self.store_step(step)
 
     def store_step(self, step):
@@ -61,7 +67,14 @@ class SimulationCore:
         self.steps_buffer = []
 
 if __name__ == "__main__":
-    loader = WorldLoader("./worlds/base_scenario.yaml")    
-    sim_core = SimulationCore(loader, "test")   
+    if len(sys.argv) != 2:
+        print("Usage: python simulator_core.py <world_file.yaml>")
+        sys.exit(1)    
+    world_file = sys.argv[1]
+    loader = WorldLoader(world_file)    
+    _ = loader.load_simulation()
+    obstacles = loader.get_obstacles()
+    renderer = RVO2Renderer(1000, 1000, obstacles=obstacles)    
+    sim_core = SimulationCore(loader, "test", renderer=renderer)       
     sim_core.run_simulation(5000) 
     sim_core.save_simulation_runs()

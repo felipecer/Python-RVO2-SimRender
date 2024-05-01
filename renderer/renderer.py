@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import pygame
 import sys
-import sys
 
 class RVO2Renderer:
     def __init__(self, width, height, map = None, simulation_steps = {}, obstacles = [], goals = [], agents=[], display_caption = 'Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial'):
@@ -128,6 +127,21 @@ class RVO2Renderer:
         self.draw_agents(step)
         self.draw_goals()
         self.draw_text(f"step: {step}", self.window_width - 10, 10)
+
+    def render_step_with_agents(self, agents, step):
+        self.window.fill(self.background_color)
+        self.draw_grid(100)
+        self.draw_obstacles()        
+        for agent_id, x, y in agents:
+            x, y = self.transform_coordinates(x, y)
+            pygame.draw.circle(self.window, self.agent_color, (x, y), 10)       
+        self.draw_text(f"step: {step}", self.window_width - 10, 10)
+        self.draw_goals()
+        self.draw_text(f"step: {step}", self.window_width - 10, 10)
+
+    def update_display(self):
+        pygame.display.flip()
+        self.clock.tick(60)
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:

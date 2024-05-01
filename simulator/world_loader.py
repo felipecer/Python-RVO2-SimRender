@@ -7,6 +7,12 @@ class WorldLoader:
         self.yaml_file = yaml_file
         self.world_name = ""
         self.config = {}
+        self.obstacles = []
+        self.sim = None
+        self.agent_goals = []
+
+    def get_simulation(self):
+        return self.world_name, self.sim, self.agent_goals
 
     def load_simulation(self):
         with open(self.yaml_file, 'r') as file:
@@ -47,12 +53,19 @@ class WorldLoader:
         # Añadir obstáculos.
         for obstacle in config['simulation']['obstacles']:
             sim.addObstacle([tuple(vertex) for vertex in obstacle])
+            vertices = [tuple(vertex) for vertex in obstacle]
+            self.obstacles.append(vertices)
         sim.processObstacles()
-
+        self.sim = sim
+        self.agent_goals = agent_goals
         # Devolver la simulación configurada y los IDs de los agentes con sus metas.
         return self.world_name, sim, agent_goals
     def get_world_name(self):
         return self.world_name
+    
+    def get_obstacles(self):
+        """Devuelve la lista de obstáculos almacenados."""
+        return self.obstacles
 
 def load_world(yaml_file):
     loader = WorldLoader(yaml_file)    
