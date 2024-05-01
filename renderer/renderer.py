@@ -1,151 +1,145 @@
+#!/usr/bin/env python
 import pygame
 import sys
+import sys
 
-# Inicialización de Pygame
-pygame.init()
+class RVO2Renderer:
+    def __init__(self, width, height, map = None, simulation_steps = {}, obstacles = [], goals = [], agents=[], display_caption = 'Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial'):
+        self.font_name = font_name
+        self.font_size = font_size
+        self.font_color = font_color
+        self.map = map
+        self.obstacles = obstacles
+        self.goals = goals
+        self.clock = pygame.time.Clock()
+        self.agents = agents
+        self.simulation_steps = simulation_steps
 
-# Configuraciones de la ventana
-ventana_ancho, ventana_alto = 1000, 1000
-ventana = pygame.display.set_mode((ventana_ancho, ventana_alto))
-pygame.display.set_caption("Simulador de Navegación de Agentes")
+        # Pygame Initialization
+        pygame.init()
+        
+        # Window settings
+        self.window_width, self.window_height = width, height
+        self.window = pygame.display.set_mode((self.window_width, self.window_height))
+        pygame.display.set_caption(display_caption)
 
-# Colores
-color_agente = (0, 255, 0)  # Verde
-color_obstaculo = (255, 0, 0)  # Rojo
-color_fondo = (255, 255, 255)  # Negro
+        # Colors
+        self.agent_color = (0, 255, 0)  # Verde
+        self.obstacle_color = (255, 0, 0)  # Rojo
+        self.background_color = (255, 255, 255) # Blanco
 
-def dibujar_texto(surf, texto, tamaño, x, y):
-    font = pygame.font.Font(pygame.font.match_font('arial'), tamaño)
-    text_surface = font.render(texto, True, (0, 0, 0))  # Texto blanco
-    text_rect = text_surface.get_rect()
-    text_rect.topright = (x, y)
-    surf.blit(text_surface, text_rect)
+    def load_simulation_steps_file(self, file):
+        simulation_steps = {}
+        with open(file, 'r') as f:
+            for line in f:
+                line_split = line.strip().split(',')    
+                step = int(line_split[0])
+                agent_id = int(line_split[1])
+                x, y = map(float, line_split[2:])
+                if step not in simulation_steps:
+                    simulation_steps[step] = []
+                simulation_steps[step].append((agent_id, x, y))
+        self.simulation_steps = simulation_steps
 
-def transformar_coordenadas(x, y):
-    # Ajusta la escala de coordenadas a 100 píxeles por unidad
-    escala = 100
-    x_nuevo = ventana_ancho / 2 + x * escala
-    y_nuevo = ventana_alto / 2 - y * escala
-    return int(x_nuevo), int(y_nuevo)
+    def load_obstacles_file(self, file):
+        obstacles = []
+        with open(file, 'r') as f:
+            for line in f:
+                parts = line.strip().split(',')
+                obstacle_id = int(parts[0])
+                vertices = []
+                for i in range(1, len(parts), 2):
+                    x_str = parts[i].strip("() ")
+                    y_str = parts[i + 1].strip("() ")
+                    x, y = float(x_str), float(y_str)
+                    vertices.append((x, y))
+                obstacles.append(vertices)
+        self.obstacles = obstacles
 
-def cargar_obstaculos(archivo):
-    obstaculos = []
-    with open(archivo, 'r') as f:
-        for linea in f:
-            partes = linea.strip().split(',')
-            obstaculo_id = int(partes[0])
-            vertices = []
-            for i in range(1, len(partes), 2):  # Itera sobre los vértices
-                # Limpia la cadena para asegurarse de que solo contenga números y el punto decimal
-                x_str = partes[i].strip("() ")
-                y_str = partes[i + 1].strip("() ")
-                # Ahora intenta convertir a float
-                x, y = float(x_str), float(y_str)
-                vertices.append((x, y))
-            obstaculos.append(vertices)
-    return obstaculos
+    def load_goals_file(self, file):
+        goals = []
+        with open(file, 'r') as f:
+            for line in f:
+                x, y = map(float, line.strip().split(','))
+                goals.append((x, y))
+        self.goals = goals
 
-def dibujar_grilla(ventana, espaciado, ancho, alto, color):
-    # Dibuja líneas verticales
-    for x in range(0, ancho // 2, espaciado):
-        pygame.draw.line(ventana, color, (ancho // 2 + x, 0), (ancho // 2 + x, alto))
-        pygame.draw.line(ventana, color, (ancho // 2 - x, 0), (ancho // 2 - x, alto))
+    def draw_text(self, text, x, y):
+        font = pygame.font.Font(pygame.font.match_font(self.font_name), self.font_size)
+        text_surface = font.render(text, True, self.font_color)
+        text_rect = text_surface.get_rect()
+        text_rect.topright = (x, y)
+        self.window.blit(text_surface, text_rect)  
+
+    def transform_coordinates(self, x, y):        
+        scale = 100
+        x_new = self.window_width / 2 + x * scale
+        y_new = self.window_height / 2 - y * scale
+        return int(x_new), int(y_new)
     
-    # Dibuja líneas horizontales
-    for y in range(0, alto // 2, espaciado):
-        pygame.draw.line(ventana, color, (0, alto // 2 + y), (ancho, alto // 2 + y))
-        pygame.draw.line(ventana, color, (0, alto // 2 - y), (ancho, alto // 2 - y))
+    def draw_grid(self, spacing):
+        color = (200, 200, 200)
+        for x in range(0, self.window_width // 2, spacing):
+            pygame.draw.line(self.window, color, (self.window_width // 2 + x, 0), (self.window_width // 2 + x, self.window_height))
+            pygame.draw.line(self.window, color, (self.window_width // 2 - x, 0), (self.window_width // 2 - x, self.window_height))
+        
+        for y in range(0, self.window_height // 2, spacing):
+            pygame.draw.line(self.window, color, (0, self.window_height // 2 + y), (self.window_width, self.window_height // 2 + y))
+            pygame.draw.line(self.window, color, (0, self.window_height // 2 - y), (self.window_width, self.window_height // 2 - y))
 
-    # Dibuja los ejes centrales
-    pygame.draw.line(ventana, color, (ancho // 2, 0), (ancho // 2, alto))  # Eje vertical
-    pygame.draw.line(ventana, color, (0, alto // 2), (ancho, alto // 2))  # Eje horizontal
+        pygame.draw.line(self.window, color, (self.window_width // 2, 0), (self.window_width // 2, self.window_height))
+        pygame.draw.line(self.window, color, (0, self.window_height // 2), (self.window_width, self.window_height // 2))
 
+    def draw_terrain(self):
+        pass
+    
+    def draw_obstacles(self):
+        for obstacle in self.obstacles:
+            vertices_transformed = [self.transform_coordinates(x, y) for x, y in obstacle]
+            pygame.draw.polygon(self.window, self.obstacle_color, vertices_transformed, 3)    
 
-def dibujar_obstaculos(ventana, obstaculos):
-    for obstaculo in obstaculos:
-        # Transforma y dibuja cada obstáculo como un polígono cerrado
-        vertices_transformados = [transformar_coordenadas(x, y) for x, y in obstaculo]
-        pygame.draw.polygon(ventana, color_obstaculo, vertices_transformados, 3)  # 3 es el grosor de la línea
+    def draw_agents(self, step):
+        if step in self.simulation_steps:
+            for agent_id, x, y in self.simulation_steps[step]:
+                x, y = self.transform_coordinates(x, y)
+                pygame.draw.circle(self.window, self.agent_color, (x, y), 10)        
+    
+    def draw_goals(self):
+        for goal in self.goals:
+            x, y = self.transform_coordinates(*goal)
+            pygame.draw.circle(self.window, self.obstacle_color, (x, y), 10)               
 
-def cargar_agentes(archivo):
-    agentes = {}
-    with open(archivo, 'r') as f:
-        agente_id = 1
-        for linea in f:
-            x, y = map(float, linea.strip().split(','))
-            x_transformado, y_transformado = transformar_coordenadas(x, y)
-            agentes[agente_id] = (x_transformado, y_transformado)
-            agente_id += 1
-    return agentes
+    def game_loop(self):    
+        step = 0                  
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            self.render_step(step)
+            step += 1            
+            pygame.display.flip()
+            self.clock.tick(60)
 
-def cargar_movimientos(archivo):
-    movimientos = {}
-    with open(archivo, 'r') as f:
-        for linea in f:
-            # Separamos el proceso de conversión para tratar adecuadamente los valores de x y y como float
-            partes = linea.strip().split(',')
-            step = int(partes[0])
-            agente_id = int(partes[1])
-            x, y = float(partes[2]), float(partes[3])  # Tratamos x y y como float
-            
-            # Transformamos las coordenadas x y y aquí si es necesario, dependiendo de si deseas aplicar la transformación
-            # de coordenadas en este punto o más adelante
-            if step not in movimientos:
-                movimientos[step] = []
-            movimientos[step].append((agente_id, x, y))
-    return movimientos
+    def render_step(self, step):
+        self.window.fill(self.background_color)
+        self.draw_grid(100)
+        self.draw_obstacles()
+        self.draw_agents(step)
+        self.draw_goals()
+        self.draw_text(f"step: {step}", self.window_width - 10, 10)
 
-# Carga de obstáculos y agentes
-obstaculos = cargar_obstaculos('obstaculos.txt')
-# agentes = cargar_agentes('agentes.txt')
-agentes = {}
+if __name__ == '__main__':
+    if len(sys.argv) != 4:
+        print("Usage: python renderer.py <obstacles_file> <goals_file> <agents_file>")
+        sys.exit(1)
+    
+    obstacles_file = sys.argv[1]
+    goals_file = sys.argv[2]
+    agents_file = sys.argv[3]
 
-movimientos_agentes = cargar_movimientos('movimientos_agentes.txt')
-
-# Inicialización del contador de steps
-step = 0
-
-# Bucle principal de la simulación
-reloj = pygame.time.Clock()
-
-# Ajustes de la grilla
-color_grilla = (200, 200, 200)  # Un gris claro para la grilla
-espaciado_grilla = 100  # Cada 100 píxeles
-
-# Bucle principal de la simulación
-while True:
-    for evento in pygame.event.get():
-        if evento.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-    # Fondo
-    ventana.fill(color_fondo)
-
-    # Dibuja la grilla
-    dibujar_grilla(ventana, espaciado_grilla, ventana_ancho, ventana_alto, color_grilla)
-
-    # Actualiza y dibuja agentes según el step actual
-    if step in movimientos_agentes:
-        for movimiento in movimientos_agentes[step]:
-            print(movimiento)
-            agente_id, x, y = movimiento
-            # Aquí aplicamos la transformación a las nuevas posiciones antes de actualizar los agentes
-            x_transformado, y_transformado = transformar_coordenadas(x, y)
-            agentes[agente_id] = (x_transformado, y_transformado)  # Actualiza la posición del agente con coordenadas transformadas
-
-    for agente_id, (x, y) in agentes.items():
-        pygame.draw.circle(ventana, color_agente, (x, y), 10)  # Dibuja el agente con coordenadas ya transformadas
-
-    # Dibuja los obstáculos
-    dibujar_obstaculos(ventana, obstaculos)
-
-    # Dibuja el contador de steps en la esquina superior derecha
-    dibujar_texto(ventana, f"step: {step}", 36, ventana_ancho - 10, 10)
-
-    # Incrementa el contador de step    
-    step += 1
-
-    # Actualiza la pantalla y espera al siguiente frame
-    pygame.display.flip()
-    reloj.tick(60)
+    renderer = RVO2Renderer(1000, 1000)
+    renderer.load_obstacles_file(obstacles_file)
+    renderer.load_goals_file(goals_file)
+    renderer.load_simulation_steps_file(agents_file)
+    renderer.game_loop()   
