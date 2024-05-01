@@ -9,7 +9,7 @@ class WorldLoader:
         self.config = {}
         self.obstacles = []
         self.sim = None
-        self.agent_goals = []
+        self.agent_goals = {}
 
     def get_simulation(self):
         return self.world_name, self.sim, self.agent_goals
@@ -35,7 +35,7 @@ class WorldLoader:
         )
 
         # Añadir agentes y sus metas.
-        agent_goals = []
+        agent_goals = {}
         for agent in config['simulation']['agents']:
             agent_id = sim.addAgent(
                 tuple(agent['position']),
@@ -48,7 +48,7 @@ class WorldLoader:
                 tuple(agent['velocity'])
             )
             sim.setAgentPrefVelocity(agent_id, tuple(agent['preferredVelocity']))
-            agent_goals.append((agent_id, tuple(agent['goal'])))
+            agent_goals[agent_id] = tuple(agent['goal'])
 
         # Añadir obstáculos.
         for obstacle in config['simulation']['obstacles']:
@@ -66,6 +66,9 @@ class WorldLoader:
     def get_obstacles(self):
         """Devuelve la lista de obstáculos almacenados."""
         return self.obstacles
+    
+    def get_goals(self):
+        return self.agent_goals
 
 def load_world(yaml_file):
     loader = WorldLoader(yaml_file)    

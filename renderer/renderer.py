@@ -3,7 +3,7 @@ import pygame
 import sys
 
 class RVO2Renderer:
-    def __init__(self, width, height, map = None, simulation_steps = {}, obstacles = [], goals = [], agents=[], display_caption = 'Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial'):
+    def __init__(self, width, height, map = None, simulation_steps = {}, obstacles = [], goals = {}, agents=[], display_caption = 'Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial'):
         self.font_name = font_name
         self.font_size = font_size
         self.font_color = font_color
@@ -56,11 +56,13 @@ class RVO2Renderer:
         self.obstacles = obstacles
 
     def load_goals_file(self, file):
-        goals = []
+        goals = {}
         with open(file, 'r') as f:
+            i = 0
             for line in f:
                 x, y = map(float, line.strip().split(','))
-                goals.append((x, y))
+                goals[i] = (x, y)
+                i += 1
         self.goals = goals
 
     def draw_text(self, text, x, y):
@@ -103,8 +105,8 @@ class RVO2Renderer:
                 x, y = self.transform_coordinates(x, y)
                 pygame.draw.circle(self.window, self.agent_color, (x, y), 10)        
     
-    def draw_goals(self):
-        for goal in self.goals:
+    def draw_goals(self):        
+        for goal in self.goals.values():            
             x, y = self.transform_coordinates(*goal)
             pygame.draw.circle(self.window, self.obstacle_color, (x, y), 10)               
 

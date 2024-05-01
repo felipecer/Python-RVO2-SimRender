@@ -14,7 +14,7 @@ class SimulationCore:
         self.sim_name, self.sim, self.agent_goals = self.world_loader.get_simulation()
 
     def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):        
-        vector_to_goal = (goal_position[1][0] - agent_position[0], goal_position[1][1] - agent_position[1])
+        vector_to_goal = (goal_position[0] - agent_position[0], goal_position[1] - agent_position[1])
         distance = math.sqrt(vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
         
         if distance > 0:            
@@ -24,8 +24,8 @@ class SimulationCore:
 
     def update_agent_velocities(self):
         for agent_id in range(self.sim.getNumAgents()):
-            agent_position = self.sim.getAgentPosition(agent_id)
-            goal_position = self.agent_goals[agent_id]
+            agent_position = self.sim.getAgentPosition(agent_id)            
+            goal_position = self.agent_goals[agent_id]            
             max_speed = self.sim.getAgentMaxSpeed(agent_id)
             preferred_velocity = self.calculate_preferred_velocity(agent_position, goal_position, max_speed)
             self.sim.setAgentPrefVelocity(agent_id, preferred_velocity)
@@ -35,8 +35,7 @@ class SimulationCore:
             self.update_agent_velocities()
             self.sim.doStep()            
             if self.renderer:     
-                agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id)) for agent_id in range(self.sim.getNumAgents())]           
-                # print(agent_positions)
+                agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id)) for agent_id in range(self.sim.getNumAgents())]                           
                 self.renderer.render_step_with_agents(agent_positions, step)
                 self.renderer.update_display()
             self.store_step(step)
@@ -74,7 +73,8 @@ if __name__ == "__main__":
     loader = WorldLoader(world_file)    
     _ = loader.load_simulation()
     obstacles = loader.get_obstacles()
-    renderer = RVO2Renderer(1000, 1000, obstacles=obstacles)    
+    goals = loader.get_goals()    
+    renderer = RVO2Renderer(1000, 1000, obstacles=obstacles, goals=goals)    
     sim_core = SimulationCore(loader, "test", renderer=renderer)       
     sim_core.run_simulation(5000) 
     sim_core.save_simulation_runs()
