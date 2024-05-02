@@ -9,17 +9,17 @@ class RVOSimulationEnv(gym.Env):
 	metadata = {'render.modes': ['human']}
 
 	def __init__(self, config_file=None):
-			super(RVOSimulationEnv, self).__init__()
-			self.loader = WorldLoader(config_file)
-			self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
+		super(RVOSimulationEnv, self).__init__()
+		self.loader = WorldLoader(config_file)
+		self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
 
-			self.num_agents = self.sim.getNumAgents()
-			self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
-			self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(4 * (self.num_agents - 1),), dtype=np.float32)
-			# Initialize distances and max time per episode
-			self.initial_distance = np.linalg.norm(np.array(self.sim.getAgentPosition(0)) - np.array(self.agent_goals[0][1]))
-			self.time_limit = 1000  # Set the time limit per episode
-			self.current_step = 0
+		self.num_agents = self.sim.getNumAgents()
+		self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+		self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(4 * (self.num_agents - 1),), dtype=np.float32)
+		# Initialize distances and max time per episode
+		self.initial_distance = np.linalg.norm(np.array(self.sim.getAgentPosition(0)) - np.array(self.agent_goals[0][1]))
+		self.time_limit = 200  # Set the time limit per episode
+		self.current_step = 0
 	
 	def _get_obs(self):
 		observations = []
