@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
@@ -82,7 +83,9 @@ if __name__ == "__main__":
 	env = RVOSimulationEnv('./simulator/worlds/base_scenario.yaml')
 	observations = env.reset()
 	done = False
+	i = 0
 	while not done:
 			action = env.action_space.sample()  # Take random actions
 			observations, reward, done, truncated, info = env.step(action)
-			print(f"Step reward: {reward}")
+			print(f"Step {i} reward: {reward}")
+			i += 1			
