@@ -2,6 +2,16 @@
 import pygame
 import sys
 
+class RVO2TextRenderer:
+    def __init__(self, text_renderer) -> None:
+        pass
+
+    def init_window(self):
+        pass
+
+    def render_steps(self, agents, step):        
+        pass
+
 class RVO2Renderer:
     def __init__(self, width, height, map = None, simulation_steps = {}, obstacles = [], goals = {}, agents=[], display_caption = 'Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial'):
         self.font_name = font_name
@@ -12,20 +22,29 @@ class RVO2Renderer:
         self.goals = goals
         self.clock = pygame.time.Clock()
         self.agents = agents
-        self.simulation_steps = simulation_steps
-
-        # Pygame Initialization
-        pygame.init()
-        
+        self.simulation_steps = simulation_steps               
         # Window settings
-        self.window_width, self.window_height = width, height
-        self.window = pygame.display.set_mode((self.window_width, self.window_height))
-        pygame.display.set_caption(display_caption)
-
+        self.window = None
+        self.window_width, self.window_height = width, height        
+        self.display_caption = display_caption
         # Colors
         self.agent_color = (0, 255, 0)  # Verde
         self.obstacle_color = (255, 0, 0)  # Rojo
-        self.background_color = (255, 255, 255) # Blanco
+        self.background_color = (255, 255, 255) # Blanco    
+        self.rendering_is_active = False
+
+    def _pygame_event_manager(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.rendering_is_active = False 
+                break    
+
+    def init_window(self):
+        # Pygame Initialization
+        pygame.init()
+        self.window = pygame.display.set_mode((self.window_width, self.window_height))
+        pygame.display.set_caption(self.display_caption)
+        self.rendering_is_active = True
 
     def load_simulation_steps_file(self, file):
         simulation_steps = {}
@@ -131,6 +150,9 @@ class RVO2Renderer:
         self.draw_text(f"step: {step}", self.window_width - 10, 10)
 
     def render_step_with_agents(self, agents, step):
+        self._pygame_event_manager()
+        if not self.rendering_is_active:
+            return
         self.window.fill(self.background_color)
         self.draw_grid(100)
         self.draw_obstacles()        
@@ -139,11 +161,16 @@ class RVO2Renderer:
             pygame.draw.circle(self.window, self.agent_color, (x, y), 10)       
         self.draw_text(f"step: {step}", self.window_width - 10, 10)
         self.draw_goals()
-        self.draw_text(f"step: {step}", self.window_width - 10, 10)
+        # self.draw_text(f"step: {step}", self.window_width - 10, 10)
+        pygame.display.flip()
+        self.clock.tick(60)
 
     def update_display(self):
         pygame.display.flip()
         self.clock.tick(60)
+    
+    def finish_simulation(self):
+        pygame.quit()
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
@@ -158,4 +185,5 @@ if __name__ == '__main__':
     renderer.load_obstacles_file(obstacles_file)
     renderer.load_goals_file(goals_file)
     renderer.load_simulation_steps_file(agents_file)
+    renderer.init_window()
     renderer.game_loop()   

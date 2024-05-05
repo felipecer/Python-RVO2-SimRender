@@ -11,7 +11,12 @@ class SimulationCore:
         self.simulation_id = simulation_id.replace(" ", "_")
         self.steps_buffer = []        
         self.renderer = renderer
-        self.sim_name, self.sim, self.agent_goals = self.world_loader.get_simulation()
+        self.sim_name, self.sim, self.agent_goals = self.world_loader.get_simulation()        
+
+    def _init_renderer(self):
+        if not self.renderer:
+            return
+        self.renderer.init_window()   
 
     def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):        
         vector_to_goal = (goal_position[0] - agent_position[0], goal_position[1] - agent_position[1])
@@ -36,8 +41,8 @@ class SimulationCore:
             self.sim.doStep()            
             if self.renderer:     
                 agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id)) for agent_id in range(self.sim.getNumAgents())]                           
-                self.renderer.render_step_with_agents(agent_positions, step)
-                self.renderer.update_display()
+                if self.renderer.rendering_is_active:
+                    self.renderer.render_step_with_agents(agent_positions, step)                
             self.store_step(step)
 
     def store_step(self, step):
@@ -75,6 +80,7 @@ if __name__ == "__main__":
     obstacles = loader.get_obstacles()
     goals = loader.get_goals()    
     renderer = RVO2Renderer(1000, 1000, obstacles=obstacles, goals=goals)    
+    renderer.init_window()
     sim_core = SimulationCore(loader, "test", renderer=renderer)       
     sim_core.run_simulation(5000) 
     sim_core.save_simulation_runs()
