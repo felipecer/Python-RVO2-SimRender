@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import gymnasium as gym
-from multi_agent_environment.simple import RVOSimulationEnv
+from rl_environments.single_agent.simple import RVOSimulationEnv
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3 import PPO
 

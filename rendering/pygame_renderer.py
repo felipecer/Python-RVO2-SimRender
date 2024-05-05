@@ -2,17 +2,7 @@
 import pygame
 import sys
 
-class RVO2TextRenderer:
-    def __init__(self, text_renderer) -> None:
-        pass
-
-    def init_window(self):
-        pass
-
-    def render_steps(self, agents, step):        
-        pass
-
-class RVO2Renderer:
+class PygameRenderer:
     def __init__(self, width, height, map = None, simulation_steps = {}, obstacles = [], goals = {}, agents=[], display_caption = 'Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial'):
         self.font_name = font_name
         self.font_size = font_size
@@ -181,7 +171,7 @@ if __name__ == '__main__':
     goals_file = sys.argv[2]
     agents_file = sys.argv[3]
 
-    renderer = RVO2Renderer(1000, 1000)
+    renderer = PygameRenderer(1000, 1000)
     renderer.load_obstacles_file(obstacles_file)
     renderer.load_goals_file(goals_file)
     renderer.load_simulation_steps_file(agents_file)

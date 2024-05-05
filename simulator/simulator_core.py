@@ -2,7 +2,7 @@
 import datetime
 import math
 from world_loader import WorldLoader
-from renderer.renderer import RVO2Renderer
+from rendering.pygame_renderer import PygameRenderer
 import sys
 
 class SimulationCore:
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     _ = loader.load_simulation()
     obstacles = loader.get_obstacles()
     goals = loader.get_goals()    
-    renderer = RVO2Renderer(1000, 1000, obstacles=obstacles, goals=goals)    
+    renderer = PygameRenderer(1000, 1000, obstacles=obstacles, goals=goals)    
     renderer.init_window()
     sim_core = SimulationCore(loader, "test", renderer=renderer)       
     sim_core.run_simulation(5000) 
