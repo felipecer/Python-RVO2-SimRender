@@ -2,8 +2,8 @@
 import pygame
 import sys
 
-class PygameRenderer:
-    def __init__(self, width, height, map = None, simulation_steps = {}, obstacles = [], goals = {}, agents=[], display_caption = 'Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial'):
+class PyGameRenderer:
+    def __init__(self, width, height, grid_scale= 100, map = None, simulation_steps = {}, obstacles = [], goals = {}, agents=[], display_caption = 'Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial'):
         self.font_name = font_name
         self.font_size = font_size
         self.font_color = font_color
@@ -12,7 +12,8 @@ class PygameRenderer:
         self.goals = goals
         self.clock = pygame.time.Clock()
         self.agents = agents
-        self.simulation_steps = simulation_steps               
+        self.simulation_steps = simulation_steps 
+        self.grid_scale = grid_scale              
         # Window settings
         self.window = None
         self.window_width, self.window_height = width, height        
@@ -82,7 +83,7 @@ class PygameRenderer:
         self.window.blit(text_surface, text_rect)  
 
     def transform_coordinates(self, x, y):        
-        scale = 100
+        scale = self.grid_scale
         x_new = self.window_width / 2 + x * scale
         y_new = self.window_height / 2 - y * scale
         return int(x_new), int(y_new)
@@ -171,7 +172,7 @@ if __name__ == '__main__':
     goals_file = sys.argv[2]
     agents_file = sys.argv[3]
 
-    renderer = PygameRenderer(1000, 1000)
+    renderer = PyGameRenderer(1000, 1000)
     renderer.load_obstacles_file(obstacles_file)
     renderer.load_goals_file(goals_file)
     renderer.load_simulation_steps_file(agents_file)
