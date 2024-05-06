@@ -93,22 +93,34 @@ class PyGameRenderer:
 
     def draw_grid(self, spacing):
         color = (200, 200, 200)
-        for x in range(0, self.window_width // 2, spacing):
-            pygame.draw.line(self.window, color, (self.window_width //
-                             2 + x, 0), (self.window_width // 2 + x, self.window_height))
-            pygame.draw.line(self.window, color, (self.window_width //
-                             2 - x, 0), (self.window_width // 2 - x, self.window_height))
+        center_x = self.window_width // 2
+        center_y = self.window_height // 2
 
-        for y in range(0, self.window_height // 2, spacing):
-            pygame.draw.line(self.window, color, (0, self.window_height //
-                             2 + y), (self.window_width, self.window_height // 2 + y))
-            pygame.draw.line(self.window, color, (0, self.window_height //
-                             2 - y), (self.window_width, self.window_height // 2 - y))
+        # Draw vertical lines
+        for x_offset in range(0, center_x + 1, spacing):
+            if x_offset == 0:  # This is the central vertical line
+                pygame.draw.line(self.window, color, (center_x, 0),
+                                 (center_x, self.window_height))
+            else:
+                # Draw line to the right of center
+                pygame.draw.line(self.window, color, (center_x + x_offset, 0),
+                                 (center_x + x_offset, self.window_height))
+                # Draw line to the left of center
+                pygame.draw.line(self.window, color, (center_x - x_offset, 0),
+                                 (center_x - x_offset, self.window_height))
 
-        pygame.draw.line(self.window, color, (self.window_width //
-                         2, 0), (self.window_width // 2, self.window_height))
-        pygame.draw.line(self.window, color, (0, self.window_height // 2),
-                         (self.window_width, self.window_height // 2))
+        # Draw horizontal lines
+        for y_offset in range(0, center_y + 1, spacing):
+            if y_offset == 0:  # This is the central horizontal line
+                pygame.draw.line(self.window, color, (0, center_y),
+                                 (self.window_width, center_y))
+            else:
+                # Draw line above center
+                pygame.draw.line(self.window, color, (0, center_y +
+                                                      y_offset), (self.window_width, center_y + y_offset))
+                # Draw line below center
+                pygame.draw.line(self.window, color, (0, center_y -
+                                                      y_offset), (self.window_width, center_y - y_offset))
 
     def draw_terrain(self):
         pass
@@ -140,8 +152,7 @@ class PyGameRenderer:
                     sys.exit()
             self.render_step(step)
             step += 1
-            pygame.display.flip()
-            self.clock.tick(60)
+            self.update_display()
 
     def render_step(self, step):
         self.window.fill(self.background_color)
@@ -163,8 +174,7 @@ class PyGameRenderer:
             pygame.draw.circle(self.window, self.agent_color, (x, y), 10)
         self.draw_text(f"step: {step}", self.window_width - 10, 10)
         self.draw_goals()
-        pygame.display.flip()
-        self.clock.tick(60)
+        self.update_display()
 
     def update_display(self):
         pygame.display.flip()

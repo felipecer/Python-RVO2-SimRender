@@ -1,15 +1,17 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from rendering.pygame_renderer import PyGameRenderer
 import os
 
 
 class PyGameRendererTestCase(unittest.TestCase):
-    def setUp(self):
+    @patch('pygame.display.set_mode')
+    def setUp(self, mock_set_mode):
         # Disable sound to avoid ALSA errors during tests
-        # Use the 'dummy' audio driver to avoid initializing the sound system
         os.environ['SDL_AUDIODRIVER'] = 'dummy'
+        self.mock_window = mock_set_mode.return_value
         self.renderer = PyGameRenderer(1000, 1000)
+        self.renderer.setup()
 
     def tearDown(self):
         self.renderer.dispose()
@@ -67,6 +69,23 @@ class PyGameRendererTestCase(unittest.TestCase):
         self.renderer.draw_goals()
         self.assertEqual(mock_draw_circle.call_count, 2)
 
+    def test_draw_text(self):
+        # Assume setup has already created self.mock_window via setUp
+        text = "Test"
+        x = 500
+        y = 500
+        self.renderer.draw_text(text, x, y)
+        self.mock_window.blit.assert_called()
+
+    @patch('pygame.draw.line')
+    def test_draw_grid(self, mock_draw_line):
+        spacing = 100
+        self.renderer.draw_grid(spacing)
+        expected_lines_count = (self.renderer.window_width // spacing + 1) + \
+            (self.renderer.window_height // spacing + 1)
+
+        self.assertEqual(mock_draw_line.call_count, expected_lines_count)
+
     def test_transform_coordinates_center(self):
         x, y = self.renderer.transform_coordinates(0, 0)
         self.assertEqual(x, 500)
@@ -81,3 +100,21 @@ class PyGameRendererTestCase(unittest.TestCase):
         x, y = self.renderer.transform_coordinates(-1, -1)
         self.assertEqual(x, 400)  # 500 - 1*100
         self.assertEqual(y, 600)  # 500 + 1*100
+
+    def test_dispose(self):
+        with patch('pygame.quit') as mock_pygame_quit:
+            self.renderer.dispose()
+            mock_pygame_quit.assert_called_once()
+
+    def test_render_step(self):
+        with patch.object(self.renderer, 'draw_grid') as mock_draw_grid, \
+                patch.object(self.renderer, 'draw_obstacles') as mock_draw_obstacles, \
+                patch.object(self.renderer, 'draw_agents') as mock_draw_agents, \
+                patch.object(self.renderer, 'draw_goals') as mock_draw_goals, \
+                patch.object(self.renderer, 'draw_text') as mock_draw_text:
+            self.renderer.render_step(1)
+            mock_draw_grid.assert_called_once()
+            mock_draw_obstacles.assert_called_once()
+            mock_draw_agents.assert_called_once_with(1)
+            mock_draw_goals.assert_called_once()
+            mock_draw_text.assert_called_once()
