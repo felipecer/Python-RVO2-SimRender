@@ -106,6 +106,11 @@ class PyGameRendererTestCase(unittest.TestCase):
             self.renderer.dispose()
             mock_pygame_quit.assert_called_once()
 
+    @patch('pygame.display.flip')
+    def test_update_display(self, mock_flip):
+        self.renderer.update_display()
+        mock_flip.assert_called_once()
+
     def test_render_step(self):
         with patch.object(self.renderer, 'draw_grid') as mock_draw_grid, \
                 patch.object(self.renderer, 'draw_obstacles') as mock_draw_obstacles, \
