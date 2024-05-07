@@ -2,7 +2,7 @@
 import datetime
 import math
 from world_loader import WorldLoader
-from rendering.pygame_renderer import PyGameRenderer
+from rendering.pygame_renderer import PyGameRenderer, Grid
 import sys
 
 
@@ -87,7 +87,8 @@ if __name__ == "__main__":
     _ = loader.load_simulation()
     obstacles = loader.get_obstacles()
     goals = loader.get_goals()
-    renderer = PyGameRenderer(1000, 1000, obstacles=obstacles, goals=goals)
+    grid = Grid(1000, 1000, 100)
+    renderer = PyGameRenderer(1000, 1000, obstacles=obstacles, goals=goals, grid=grid, cell_size=grid.spacing)
     renderer.setup()
     sim_core = SimulationCore(loader, "test", renderer=renderer)
     sim_core.run_simulation(5000)
