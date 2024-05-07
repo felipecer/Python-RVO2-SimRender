@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import pygame
 import sys
+from rendering.interfaces import RendererInterface
 
 class Grid:
     def __init__(self, window_width, window_height, spacing):
@@ -37,7 +38,7 @@ class Grid:
         pygame.draw.line(window, color_axis, (self.window_width // 2, 0), (self.window_width // 2, self.window_height))
         pygame.draw.line(window, color_axis, (0, self.window_height // 2), (self.window_width, self.window_height // 2))
 
-class PyGameRenderer:
+class PyGameRenderer(RendererInterface):
     def __init__(self, width, height, grid, map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial', cell_size= 50):
         self.font_name = font_name
         self.font_size = font_size
@@ -59,13 +60,16 @@ class PyGameRenderer:
         self.agent_color = (0, 255, 0)  # Verde
         self.obstacle_color = (255, 0, 0)  # Rojo
         self.background_color = (255, 255, 255)  # Blanco
-        self.rendering_is_active = False
+        self._rendering_is_active = False
 
     def _pygame_event_manager(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.rendering_is_active = False
+                self._rendering_is_active = False
                 break
+
+    def is_active(self):
+        return self._rendering_is_active
 
     def setup(self):
         # Pygame Initialization
@@ -73,7 +77,7 @@ class PyGameRenderer:
         self.window = pygame.display.set_mode(
             (self.window_width, self.window_height))
         pygame.display.set_caption(self.display_caption)
-        self.rendering_is_active = True
+        self._rendering_is_active = True
 
     def load_simulation_steps_file(self, file):
         simulation_steps = {}
@@ -172,7 +176,7 @@ class PyGameRenderer:
 
     def render_step_with_agents(self, agents, step):
         self._pygame_event_manager()
-        if not self.rendering_is_active:
+        if not self._rendering_is_active:
             return
         self.window.fill(self.background_color)
         self.draw_grid()

@@ -3,11 +3,12 @@ import datetime
 import math
 from world_loader import WorldLoader
 from rendering.pygame_renderer import PyGameRenderer, Grid
+from rendering.interfaces import RendererInterface
 import sys
 
 
 class SimulationCore:
-    def __init__(self, world_loader: WorldLoader, simulation_id: str, renderer=None):
+    def __init__(self, world_loader: WorldLoader, simulation_id: str, renderer:RendererInterface=None):
         self.world_loader = world_loader
         self.simulation_id = simulation_id.replace(" ", "_")
         self.steps_buffer = []
@@ -45,7 +46,7 @@ class SimulationCore:
             if self.renderer:
                 agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
                                    for agent_id in range(self.sim.getNumAgents())]
-                if self.renderer.rendering_is_active:
+                if self.renderer.is_active():
                     self.renderer.render_step_with_agents(
                         agent_positions, step)
             self.store_step(step)

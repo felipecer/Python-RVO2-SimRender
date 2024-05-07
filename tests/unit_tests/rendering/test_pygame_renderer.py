@@ -20,7 +20,7 @@ class PyGameRendererTestCase(unittest.TestCase):
     def test_setup(self, mock_set_mode):
         self.renderer.setup()
         mock_set_mode.assert_called_once_with((1000, 1000))
-        self.assertTrue(self.renderer.rendering_is_active)
+        self.assertTrue(self.renderer._rendering_is_active)
 
     def test_load_simulation_steps_file(self):
         test_file_content = "0,1,100,100\n1,2,200,200"
