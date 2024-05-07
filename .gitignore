@@ -53,3 +53,4 @@ venv.bak/
 
 # Pyre type checker
 .pyre/
+simulator/runs/*
