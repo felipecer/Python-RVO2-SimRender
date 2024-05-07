@@ -2,8 +2,44 @@
 import pygame
 import sys
 
+class Grid:
+    def __init__(self, window_width, window_height, spacing):
+        self.window_width = window_width
+        self.window_height = window_height
+        self.spacing = spacing
+    
+    def draw(self, window):
+        color = (200, 200, 200)
+        color_axis = (0, 0, 0)
+
+        # Draw vertical lines
+        for x in range(0, self.window_width // 2, self.spacing):
+            pygame.draw.line(window, color, (self.window_width // 2 + x, 0), (self.window_width // 2 + x, self.window_height))
+            pygame.draw.line(window, color, (self.window_width // 2 - x, 0), (self.window_width // 2 - x, self.window_height))
+        
+            # Draw small vertical axes every 10 cells
+            if ((x/self.spacing)%10) == 0:
+                # pygame.draw.line(window, color_axis, (self.window_width // 2 - x, 0), (self.window_width // 2 - x, self.window_height))
+                pygame.draw.line(window, color_axis, (self.window_width // 2 - x, self.window_height // 2 - self.spacing // 2), (self.window_width // 2 - x, self.window_height // 2 + self.spacing // 2))
+                pygame.draw.line(window, color_axis, (self.window_width // 2 + x, self.window_height // 2 - self.spacing // 2), (self.window_width // 2 + x, self.window_height // 2 + self.spacing // 2))
+
+        # Draw horizontal lines
+        for y in range(0, self.window_height // 2, self.spacing):
+            pygame.draw.line(window, color, (0, self.window_height // 2 + y), (self.window_width, self.window_height // 2 + y))
+            pygame.draw.line(window, color, (0, self.window_height // 2 - y), (self.window_width, self.window_height // 2 - y))
+
+            # Draw small horizontal axes every 10 cells
+            if ((y/self.spacing)%10) == 0:
+                pygame.draw.line(window, color_axis, (self.window_width // 2 - self.spacing // 2, self.window_width // 2 - y), (self.window_width // 2 + self.spacing // 2, self.window_height // 2 - y))
+                pygame.draw.line(window, color_axis, (self.window_width // 2 - self.spacing // 2, self.window_width // 2 + y), (self.window_width // 2 + self.spacing // 2, self.window_height // 2 + y))
+
+        # Draw center lines
+        pygame.draw.line(window, color_axis, (self.window_width // 2, 0), (self.window_width // 2, self.window_height))
+        pygame.draw.line(window, color_axis, (0, self.window_height // 2), (self.window_width, self.window_height // 2))
+
+
 class RVO2Renderer:
-    def __init__(self, width, height, map = None, simulation_steps = {}, obstacles = [], goals = {}, agents=[], display_caption = 'Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial'):
+    def __init__(self, width, height, grid = None, map = None, simulation_steps = {}, obstacles = [], goals = {}, agents=[], display_caption = 'Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial', cell_size= 50):
         self.font_name = font_name
         self.font_size = font_size
         self.font_color = font_color
@@ -13,6 +49,8 @@ class RVO2Renderer:
         self.clock = pygame.time.Clock()
         self.agents = agents
         self.simulation_steps = simulation_steps
+        self.grid = grid
+        self.cell_size = cell_size
 
         # Pygame Initialization
         pygame.init()
@@ -72,24 +110,15 @@ class RVO2Renderer:
         text_rect.topright = (x, y)
         self.window.blit(text_surface, text_rect)  
 
-    def transform_coordinates(self, x, y):        
-        scale = 100
+    def transform_coordinates(self, x, y, scale=50):        
+        # scale = 100
+        scale = self.cell_size
         x_new = self.window_width / 2 + x * scale
         y_new = self.window_height / 2 - y * scale
         return int(x_new), int(y_new)
     
     def draw_grid(self, spacing):
-        color = (200, 200, 200)
-        for x in range(0, self.window_width // 2, spacing):
-            pygame.draw.line(self.window, color, (self.window_width // 2 + x, 0), (self.window_width // 2 + x, self.window_height))
-            pygame.draw.line(self.window, color, (self.window_width // 2 - x, 0), (self.window_width // 2 - x, self.window_height))
-        
-        for y in range(0, self.window_height // 2, spacing):
-            pygame.draw.line(self.window, color, (0, self.window_height // 2 + y), (self.window_width, self.window_height // 2 + y))
-            pygame.draw.line(self.window, color, (0, self.window_height // 2 - y), (self.window_width, self.window_height // 2 - y))
-
-        pygame.draw.line(self.window, color, (self.window_width // 2, 0), (self.window_width // 2, self.window_height))
-        pygame.draw.line(self.window, color, (0, self.window_height // 2), (self.window_width, self.window_height // 2))
+        self.grid.draw(self.window)
 
     def draw_terrain(self):
         pass
@@ -153,8 +182,9 @@ if __name__ == '__main__':
     obstacles_file = sys.argv[1]
     goals_file = sys.argv[2]
     agents_file = sys.argv[3]
+    grid = Grid(1000, 1000, 50)
 
-    renderer = RVO2Renderer(1000, 1000)
+    renderer = RVO2Renderer(1000, 1000, grid=grid, cell_size=grid.spacing)
     renderer.load_obstacles_file(obstacles_file)
     renderer.load_goals_file(goals_file)
     renderer.load_simulation_steps_file(agents_file)
