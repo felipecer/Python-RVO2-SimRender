@@ -10,7 +10,7 @@ class Grid:
         self.spacing = spacing
     
     def draw(self, window):
-        color = (200, 200, 200)
+        color = (180, 203, 211)
         color_axis = (0, 0, 0)
 
         # Draw vertical lines
@@ -59,7 +59,7 @@ class PyGameRenderer(RendererInterface):
         # Colors
         self.agent_color = (0, 255, 0)  # Verde
         self.obstacle_color = (255, 0, 0)  # Rojo
-        self.background_color = (255, 255, 255)  # Blanco
+        self.background_color = (195, 215, 224)  # Blanco
         self._rendering_is_active = False
 
     def _pygame_event_manager(self):
