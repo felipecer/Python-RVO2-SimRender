@@ -3,6 +3,7 @@ import datetime
 import math
 from world_loader import WorldLoader
 from rendering.pygame_renderer import PyGameRenderer, Grid
+from rendering.text_renderer import TextRenderer
 from rendering.interfaces import RendererInterface
 import sys
 
@@ -89,7 +90,8 @@ if __name__ == "__main__":
     obstacles = loader.get_obstacles()
     goals = loader.get_goals()
     grid = Grid(1000, 1000, 100)
-    renderer = PyGameRenderer(1000, 1000, obstacles=obstacles, goals=goals, grid=grid, cell_size=grid.spacing)
+    # renderer = PyGameRenderer(1000, 1000, obstacles=obstacles, goals=goals, grid=grid, cell_size=grid.spacing)
+    renderer = TextRenderer()
     renderer.setup()
     sim_core = SimulationCore(loader, "test", renderer=renderer)
     sim_core.run_simulation(5000)
