@@ -25,7 +25,7 @@ class RVOSimulationEnv(gym.Env):
         # Initialize distances and max time per episode
         self.initial_distance = np.linalg.norm(
             np.array(self.sim.getAgentPosition(0)) - np.array(self.agent_goals[0][1]))
-        self.time_limit = 500  # Set the time limit per episode
+        self.time_limit = 2000  # Set the time limit per episode
         self.current_step = 0
         self.render_mode = render_mode
         self._render_buffer = []
@@ -129,42 +129,18 @@ class RVOSimulationEnv(gym.Env):
             self._gui_renderer.render_step_with_agents(
                 agents=agents, step=step)
 
-    # def calculate_reward(self, agent_id):
-    #     reward = 0
-    #     agent_position = np.array(self.sim.getAgentPosition(agent_id))
-    #     goal_position = np.array(self.agent_goals[agent_id][1])
-
-    #     current_distance = np.sum(np.abs(agent_position - goal_position))
-
-    #     # Adjusting the penalty and reward based on the distance
-    #     distance_penalty = 20 * (current_distance / self.initial_distance)
-
-    #     # Collision penalty
-    #     if self.check_collision(agent_id):
-    #         reward -= 10
-
-    #     # Proportional reward for moving closer to the goal
-    #     # reward += 2 * (self.initial_distance - current_distance) / self.initial_distance
-
-    #     # Major reward for reaching the goal and scaled penalty based on distance
-    #     if self.is_done(agent_id):
-    #         reward += 10000
-    #     else:
-    #         reward -= distance_penalty
-
-    #     return reward
     def calculate_reward(self, agent_id):
         reward = 0
-        # agent_position = np.array(
-        #     self.sim.getAgentPosition(agent_id))
-        # goal_position = np.array(self.agent_goals[agent_id][1])
-        # current_distance = np.sum(
-        #     np.abs(agent_position - goal_position))
+        agent_position = np.array(
+            self.sim.getAgentPosition(agent_id))
+        goal_position = np.array(self.agent_goals[agent_id][1])
+        current_distance = np.sum(
+            np.abs(agent_position - goal_position))
 
-        # # Adjusting the penalty and reward based on the distance
-        # distance_penalty = 20 * \
-        #     (current_distance / self.initial_distance)
-        distance_penalty = 0
+        # Adjusting the penalty and reward based on the distance
+        distance_penalty = 20 * \
+            (current_distance / self.initial_distance)
+        # distance_penalty = 0
         reward -= -10
 
         # Collision penalty
@@ -176,7 +152,7 @@ class RVOSimulationEnv(gym.Env):
 
             # Major reward for reaching the goal and scaled penalty based on distance
         if self.is_done(agent_id):
-            reward += 10000
+            reward += 50000
         else:
             reward -= distance_penalty
         return reward
@@ -185,7 +161,7 @@ class RVOSimulationEnv(gym.Env):
         _, goal = self.agent_goals[agent_id]
         distance = np.linalg.norm(
             np.array(self.sim.getAgentPosition(agent_id)) - np.array(goal))
-        return bool(distance < 0.1)
+        return bool(distance < 0.01)
 
     def check_collision(self, agent_id):
         position = self.sim.getAgentPosition(agent_id)
