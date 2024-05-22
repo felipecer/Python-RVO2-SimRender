@@ -24,6 +24,8 @@ class WorldLoader:
         # Cargar el nombre del mundo
         self.world_name = self.config.get('worldName', 'Mundo sin nombre')
 
+        # print(config)
+
         # Crear la instancia de la simulación.
         sim = rvo2.PyRVOSimulator(
             config['simulation']['timeStep'],
@@ -38,6 +40,7 @@ class WorldLoader:
         # Añadir agentes y sus metas.
         agent_goals = {}
         for agent in config['simulation']['agents']:
+            # print(agent)
             agent_id = sim.addAgent(
                 tuple(agent['position']),
                 config['simulation']['agentDefaults']['neighborDist'],
