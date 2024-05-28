@@ -44,16 +44,16 @@ class RVOSimulationEnv(gym.Env):
             np.array(self.sim.getAgentPosition(agent_id)) - np.array(self.agent_goals[agent_id]))
 
     def _get_obs(self):
-        observations = []    
+        observations = []
         [x_goal, y_goal] = self.agent_goals[0]
         pos = self.sim.getAgentPosition(0)
         vel = self.sim.getAgentVelocity(0)
-        observations.extend([x_goal - pos[0], y_goal - pos[1], vel[0], vel[1] ])
+        observations.extend([x_goal - pos[0], y_goal - pos[1], vel[0], vel[1]])
         return np.array(observations, dtype=np.float32)
 
     def _get_info(self):
         return {}
-    
+
     # def calculate_preferred_velocity(self, agent_id):
     #     goal = self.agent_goals[agent_id]
     #     agent = self.sim.getAgentPosition(agent_id)
@@ -67,7 +67,7 @@ class RVOSimulationEnv(gym.Env):
     #         return pref_vel
     #     else:
     #         return (0, 0)
-        
+
     def calculate_preferred_velocity(self, agent_id, action):
         max_speed = self.sim.getAgentMaxSpeed(agent_id)
         x_vel = min(max_speed, action[0])
@@ -76,8 +76,9 @@ class RVOSimulationEnv(gym.Env):
 
     def update_agent_velocities(self, agent_id, action=None):
         if action is None:
-            return        
-        preferred_velocity = self.calculate_preferred_velocity(agent_id, action)
+            return
+        preferred_velocity = self.calculate_preferred_velocity(
+            agent_id, action)
         self.sim.setAgentPrefVelocity(agent_id, preferred_velocity)
 
     def step(self, action):
@@ -104,7 +105,7 @@ class RVOSimulationEnv(gym.Env):
         self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
         self.current_step = 0
         self.initial_distance = self._calc_distance_to_goal(0)
-        
+
         info = self._get_info()
         obs = self._get_obs()
         if self.render_mode is not None:
@@ -136,7 +137,7 @@ class RVOSimulationEnv(gym.Env):
                 agents=agents, step=step)
 
     def calculate_reward(self, agent_id):
-        reward = 0 
+        reward = 0
         reward += -10
         if self.is_done(agent_id):
             reward += 10000
@@ -168,7 +169,6 @@ if __name__ == "__main__":
     observations = env.reset()
     done = False
     i = 0
-    print("aqui llegue")
     while not done:
         action = env.action_space.sample()  # Take random actions
         print(f"Action: {action}")
