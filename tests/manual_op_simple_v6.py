@@ -16,7 +16,7 @@ KEYBINDINGS = {
     'c': (1, -1),
 }
 
-STEP_SIZE = 0.4
+STEP_SIZE = 0.5
 
 
 def getKey():
@@ -37,19 +37,24 @@ if __name__ == "__main__":
     observations = env.reset()
     done = False
     i = 0
+    action = (0, 0)
     while not done:
         # accumulate reward
         cumulative_reward = []
         key = getKey()
-        if key in KEYBINDINGS:
-            action = KEYBINDINGS[key]
-            action = (action[0] * STEP_SIZE, action[1] * STEP_SIZE)
+        
+        if key in KEYBINDINGS.keys():
+            new_action = KEYBINDINGS[key]
+            action = list(action)
+            action[0] += new_action[0] * STEP_SIZE
+            action[1] += new_action[1] * STEP_SIZE
+            action = tuple(action)
             print(f"Action: {action}")
             observations, reward, done, truncated, info = env.step(action)
         else:
             if key == '\x03':
                 break
-            action = (0, 0)
+            
             print(f"Action: {action}")
             observations, reward, done, truncated, info = env.step(action)
 

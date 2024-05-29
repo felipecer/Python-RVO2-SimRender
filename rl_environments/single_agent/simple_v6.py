@@ -40,8 +40,9 @@ class RVOSimulationEnv(gym.Env):
         self.sim.setAgentPrefVelocity(0, (1, 1))
 
     def _calc_distance_to_goal(self, agent_id):
-        return np.linalg.norm(
+        distance = np.linalg.norm(
             np.array(self.sim.getAgentPosition(agent_id)) - np.array(self.agent_goals[agent_id]))
+        return distance
 
     def _get_obs(self):
         observations = []
@@ -53,20 +54,6 @@ class RVOSimulationEnv(gym.Env):
 
     def _get_info(self):
         return {}
-
-    # def calculate_preferred_velocity(self, agent_id):
-    #     goal = self.agent_goals[agent_id]
-    #     agent = self.sim.getAgentPosition(agent_id)
-    #     vector_to_goal = (
-    #         goal[0] - agent[0], goal[1] - agent[1])
-    #     max_speed = self.sim.getAgentMaxSpeed(agent_id)
-    #     distance = self._calc_distance_to_goal(0)
-
-    #     if distance > 0:
-    #         pref_vel = (vector_to_goal[0] / distance * max_speed, vector_to_goal[1] / distance * max_speed)
-    #         return pref_vel
-    #     else:
-    #         return (0, 0)
 
     def calculate_preferred_velocity(self, agent_id, action):
         max_speed = self.sim.getAgentMaxSpeed(agent_id)
@@ -144,10 +131,8 @@ class RVOSimulationEnv(gym.Env):
         return reward
 
     def is_done(self, agent_id):
-        _, goal = self.agent_goals[agent_id]
-        distance = np.linalg.norm(
-            np.array(self.sim.getAgentPosition(agent_id)) - np.array(goal))
-        return distance < 0.5
+        distance = self._calc_distance_to_goal(agent_id)
+        return distance <= 0.01
 
     def check_collision(self, agent_id):
         position = self.sim.getAgentPosition(agent_id)
