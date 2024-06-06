@@ -24,7 +24,7 @@ class RVOSimulationEnv(gym.Env):
             low=-np.inf, high=np.inf, shape=(4,), dtype=np.float32)
         # Initialize distances and max time per episode
         self.initial_distance = self._calc_distance_to_goal(0)
-        self.time_limit = 500  # Set the time limit per episode
+        self.time_limit = 2000  # Set the time limit per episode
         self.current_step = 0
         self.render_mode = render_mode
         self._render_buffer = []

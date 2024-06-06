@@ -61,3 +61,4 @@ simulator/runs/*
 Thumbs.db
 
 .idea/
+logs/
