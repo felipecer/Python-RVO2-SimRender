@@ -21,10 +21,10 @@ class RVOSimulationEnv(gym.Env):
         self.action_space = spaces.Box(
             low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(4,), dtype=np.float32)
+            low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
         # Initialize distances and max time per episode
         self.initial_distance = self._calc_distance_to_goal(0)
-        self.time_limit = 2000  # Set the time limit per episode
+        self.time_limit = 1000  # Set the time limit per episode
         self.current_step = 0
         self.render_mode = render_mode
         self._render_buffer = []
@@ -49,16 +49,22 @@ class RVOSimulationEnv(gym.Env):
         [x_goal, y_goal] = self.agent_goals[0]
         pos = self.sim.getAgentPosition(0)
         vel = self.sim.getAgentVelocity(0)
-        observations.extend([x_goal - pos[0], y_goal - pos[1], vel[0], vel[1]])
+        observations.extend([x_goal - pos[0], y_goal - pos[1]])
         return np.array(observations, dtype=np.float32)
 
     def _get_info(self):
         return {}
 
     def calculate_preferred_velocity(self, agent_id, action):
-        max_speed = self.sim.getAgentMaxSpeed(agent_id)
-        x_vel = min(max_speed, action[0])
-        y_vel = min(max_speed, action[1])
+        max_speed = 1  # self.sim.getAgentMaxSpeed(agent_id)
+        if action[0] < 0:
+            x_vel = max(-1*max_speed, action[0])
+        else:
+            x_vel = min(max_speed, action[0])
+        if action[1] < 0:
+            y_vel = max(-1*max_speed, action[1])
+        else:
+            y_vel = min(max_speed, action[1])
         return (x_vel, y_vel)
 
     def update_agent_velocities(self, agent_id, action=None):
@@ -74,6 +80,11 @@ class RVOSimulationEnv(gym.Env):
         self.update_agent_velocities(agent_id=0, action=action)
 
         self.current_step += 1
+        # for agent_id in range(self.sim.getNumAgents()):
+        #     agent_velocity = self.sim.getAgentVelocity(agent_id)
+        #     agent_pref_velocity = self.sim.getAgentPrefVelocity(agent_id)
+        #     print(
+        #         f"Step: {self.current_step} | Agent {agent_id}: Actual Velocity = {agent_velocity}, Preferred Velocity = {agent_pref_velocity}")
         agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
                            for agent_id in range(self.sim.getNumAgents())]
         self._render_buffer.append((self.current_step, agent_positions))
@@ -132,7 +143,7 @@ class RVOSimulationEnv(gym.Env):
 
     def is_done(self, agent_id):
         distance = self._calc_distance_to_goal(agent_id)
-        return distance <= 0.01
+        return distance <= 0.05
 
     def check_collision(self, agent_id):
         position = self.sim.getAgentPosition(agent_id)
