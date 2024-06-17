@@ -2,12 +2,14 @@
 import datetime
 import math
 from world_loader import WorldLoader
-from rendering.pygame_renderer import PyGameRenderer
+from rendering.pygame_renderer import PyGameRenderer, Grid
+from rendering.text_renderer import TextRenderer
+from rendering.interfaces import RendererInterface
 import sys
 
 
 class SimulationCore:
-    def __init__(self, world_loader: WorldLoader, simulation_id: str, renderer=None):
+    def __init__(self, world_loader: WorldLoader, simulation_id: str, renderer: RendererInterface = None):
         self.world_loader = world_loader
         self.simulation_id = simulation_id.replace(" ", "_")
         self.steps_buffer = []
@@ -42,10 +44,17 @@ class SimulationCore:
         for step in range(steps):
             self.update_agent_velocities()
             self.sim.doStep()
+
+            for agent_id in range(self.sim.getNumAgents()):
+                agent_velocity = self.sim.getAgentVelocity(agent_id)
+                agent_pref_velocity = self.sim.getAgentPrefVelocity(agent_id)
+                print(
+                    f"Step: {step} | Agent {agent_id}: Actual Velocity = {agent_velocity}, Preferred Velocity = {agent_pref_velocity}")
+
             if self.renderer:
                 agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
                                    for agent_id in range(self.sim.getNumAgents())]
-                if self.renderer.rendering_is_active:
+                if self.renderer.is_active():
                     self.renderer.render_step_with_agents(
                         agent_positions, step)
             self.store_step(step)
@@ -87,7 +96,10 @@ if __name__ == "__main__":
     _ = loader.load_simulation()
     obstacles = loader.get_obstacles()
     goals = loader.get_goals()
-    renderer = PyGameRenderer(1000, 1000, obstacles=obstacles, goals=goals)
+    grid = Grid(1000, 1000, 100)
+    renderer = PyGameRenderer(
+        1000, 1000, obstacles=obstacles, goals=goals, grid=grid, cell_size=grid.spacing)
+    # renderer = TextRenderer()
     renderer.setup()
     sim_core = SimulationCore(loader, "test", renderer=renderer)
     sim_core.run_simulation(5000)

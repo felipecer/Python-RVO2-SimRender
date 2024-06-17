@@ -6,16 +6,16 @@ from stable_baselines3 import PPO
 
 if __name__ == "__main__":
     vec_env = make_vec_env(RVOSimulationEnv, n_envs=32,  env_kwargs={
-                           "config_file": './simulator/worlds/base_scenario.yaml', "render_mode": None})
-    # model = PPO("MlpPolicy", vec_env, verbose=1, device='cpu')
-    model = PPO.load("ppo_rvo", vec_env, verbose=1, device='cpu')
+                           "config_file": './simulator/worlds/base_scenario_only_agents.yaml', "render_mode": None})
+    model = PPO("MlpPolicy", vec_env, verbose=1, device='cpu')
+    # model = PPO.load("ppo_rvo", vec_env, verbose=1, device='cpu')
     model.learn(total_timesteps=1000000, progress_bar=True)
     model.save("ppo_rvo")
     print("Entrenamiento terminado")
     del model
     vec_env = make_vec_env(RVOSimulationEnv, n_envs=4,  env_kwargs={
                            "config_file": './simulator/worlds/base_scenario.yaml', "render_mode": 'rgb'})
-    model = PPO.load("ppo_rvo")
+    model = PPO.load("ppo_rvo_v4")
     obs = vec_env.reset()
     while True:
         action, _states = model.predict(obs)

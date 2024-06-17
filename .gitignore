@@ -54,3 +54,11 @@ venv.bak/
 # Pyre type checker
 .pyre/
 simulator/runs/*
+
+.vscode/
+
+.DS_Store
+Thumbs.db
+
+.idea/
+logs/
