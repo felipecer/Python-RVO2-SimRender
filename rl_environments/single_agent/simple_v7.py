@@ -25,7 +25,7 @@ class RVOSimulationEnv(gym.Env):
 
         # Inicializar GoalSpawner
         self.goal_spawner = GoalSpawner(
-            seed=self.seed, empty_radius=0.2, num_iterations=5, step_radius=0.5)
+            seed=self.seed, empty_radius=0.2, num_iterations=4, step_radius=0.5)
 
         self.num_agents = self.sim.getNumAgents()
         self.action_space = spaces.Box(
@@ -35,7 +35,7 @@ class RVOSimulationEnv(gym.Env):
         self.agent_goals = [self.goal_spawner.get_next_goal()]
         # print(f"Initial goal: {self.agent_goals[0]}")
         self.initial_distance = self._calc_distance_to_goal(0)
-        self.time_limit = 200
+        self.time_limit = 500
         self.current_step = 0
         self.render_mode = render_mode
         self._render_buffer = []
