@@ -10,11 +10,11 @@ import math
 from rl_environments.utils.spawners import GoalSpawner
 
 
-class RVOSimulationEnv(gym.Env):
+class RVOSimulationEnv2(gym.Env):
     metadata = {'render.modes': ['ansi', 'rgb']}
 
     def __init__(self, config_file=None, render_mode="rgb", seed=None):
-        super(RVOSimulationEnv, self).__init__()
+        super(RVOSimulationEnv2, self).__init__()
         self.loader = WorldLoader(config_file)
         self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
         if seed is None:
@@ -87,27 +87,30 @@ class RVOSimulationEnv(gym.Env):
 
         self.current_step += 1
         agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
-                           for agent_id in range(self.sim.getNumAgents())]
+                        for agent_id in range(self.sim.getNumAgents())]
         self._render_buffer.append((self.current_step, agent_positions))
         current_goal_reached = self.is_done(0)
 
         flattened_observations = self._get_obs()
         reward = self.calculate_reward(0)
-        terminated = False 
+        terminated = current_goal_reached
         truncated = self.current_step >= self.time_limit
         info = self._get_info()
         if self.render_mode is not None:
             if current_goal_reached:
-                self._gui_renderer.goals[0] = self.agent_goals[0]
+                self._set_next_goal(0)
             self.render()
         return flattened_observations, reward, terminated, truncated, info
 
     def reset(self, seed=None, options=None):
         self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
         self.current_step = 0
-        # Resetear GoalSpawner
-        self.goal_spawner.reset(seed=seed)
-        self.agent_goals = [self.goal_spawner.get_next_goal()]
+        if seed is not None:
+            self.seed = seed
+            self._random_number_generator = np.random.default_rng(self.seed)
+            self.goal_spawner.reset(rng=self._random_number_generator)
+            self.agent_goals = [self.goal_spawner.get_next_goal()]  
+            
         self.initial_distance = self._calc_distance_to_goal(0)
 
         info = self._get_info()
@@ -115,6 +118,7 @@ class RVOSimulationEnv(gym.Env):
         if self.render_mode is not None:
             self.render()
         return obs, info
+
 
     def _set_next_goal(self, agent_id):
         self.agent_goals[agent_id] = self.goal_spawner.get_next_goal()
@@ -147,8 +151,8 @@ class RVOSimulationEnv(gym.Env):
         reward = -10
         if self.is_done(agent_id):
             reward += 10000
-            self._set_next_goal(agent_id)
         return reward
+
 
     def is_done(self, agent_id):
         distance = self._calc_distance_to_goal(agent_id)
@@ -169,7 +173,7 @@ class RVOSimulationEnv(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOSimulationEnv('./simulator/worlds/simple.yaml', render_mode='rgb')
+    env = RVOSimulationEnv2('./simulator/worlds/simple.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0
