@@ -35,7 +35,7 @@ class RVOSimulationEnv2(gym.Env):
         self.agent_goals = [self.goal_spawner.get_next_goal()]
         # print(f"Initial goal: {self.agent_goals[0]}")
         self.initial_distance = self._calc_distance_to_goal(0)
-        self.time_limit = 500
+        self.time_limit = 1000
         self.current_step = 0
         self.render_mode = render_mode
         self._render_buffer = []
@@ -105,12 +105,12 @@ class RVOSimulationEnv2(gym.Env):
     def reset(self, seed=None, options=None):
         self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
         self.current_step = 0
-        if seed is not None:
-            self.seed = seed
-            self._random_number_generator = np.random.default_rng(self.seed)
-            self.goal_spawner.reset(rng=self._random_number_generator)
-            self.agent_goals = [self.goal_spawner.get_next_goal()]  
-            
+        # if seed is not None:
+        #     self.seed = seed
+        #     self._random_number_generator = np.random.default_rng(self.seed)
+        #     self.goal_spawner.reset(rng=self._random_number_generator)
+        #     self.agent_goals = [self.goal_spawner.get_next_goal()]  
+
         self.initial_distance = self._calc_distance_to_goal(0)
 
         info = self._get_info()
