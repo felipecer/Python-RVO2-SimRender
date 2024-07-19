@@ -166,7 +166,7 @@ class RVOSimulationEnv2(gym.Env):
     def is_done(self, agent_id):
         distance = self._calc_distance_to_goal(agent_id)
         # print(f"Step: {self.current_step}, Distance to goal: {distance}")
-        return distance <= 0.1
+        return distance <= 0.05
 
     def check_collision(self, agent_id):
         position = self.sim.getAgentPosition(agent_id)

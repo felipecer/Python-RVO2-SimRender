@@ -6,11 +6,11 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3 import PPO
 
 def train():
-    vec_env = make_vec_env(RVOSimulationEnv2, n_envs=128, env_kwargs={
+    vec_env = make_vec_env(RVOSimulationEnv2, n_envs=32, env_kwargs={
                            "config_file": './simulator/worlds/simple.yaml', "render_mode": None, "seed": 13})
     model = PPO("MlpPolicy", vec_env,  n_steps=256, verbose=1, device='cpu',
                 tensorboard_log="./tests/logs/ppo_rvo_simple_test2/")
-    model.learn(total_timesteps=1000000, progress_bar=True)
+    model.learn(total_timesteps=10000000, progress_bar=True)
     model.save("./tests/logs/saves/ppo_rvo_simple_test2")
     print("Entrenamiento terminado")
     del model

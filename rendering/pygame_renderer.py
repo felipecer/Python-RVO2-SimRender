@@ -82,7 +82,7 @@ class PyGameRenderer(RendererInterface):
         #     (self.window_width, self.window_height))
         # self.ui_manager.ui_theme.load_fonts()
         self.delay_slider = None
-        self.delay = 100
+        self.delay = 10
 
     def _pygame_event_manager(self):
         for event in pygame.event.get():
