@@ -17,6 +17,11 @@ class RVOSimulationEnv2(gym.Env):
         super(RVOSimulationEnv2, self).__init__()
         self.loader = WorldLoader(config_file)
         self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
+
+        self._last_goal_reached = -1
+
+        self._current_initial_position = self.sim.getAgentPosition(0)
+        
         if seed is None:
             self.seed = 7
         else:
@@ -25,7 +30,7 @@ class RVOSimulationEnv2(gym.Env):
 
         # Inicializar GoalSpawner
         self.goal_spawner = GoalSpawner(
-            seed=self.seed, empty_radius=0.2, num_iterations=4, step_radius=0.5)
+            seed=self.seed, empty_radius=0.1, num_iterations=4, step_radius=0.5)
 
         self.num_agents = self.sim.getNumAgents()
         self.action_space = spaces.Box(
@@ -35,7 +40,7 @@ class RVOSimulationEnv2(gym.Env):
         self.agent_goals = [self.goal_spawner.get_next_goal()]
         # print(f"Initial goal: {self.agent_goals[0]}")
         self.initial_distance = self._calc_distance_to_goal(0)
-        self.time_limit = 1000
+        self.time_limit = 256
         self.current_step = 0
         self.render_mode = render_mode
         self._render_buffer = []
@@ -86,31 +91,35 @@ class RVOSimulationEnv2(gym.Env):
         self.update_agent_velocities(agent_id=0, action=action)
 
         self.current_step += 1
-        agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
-                        for agent_id in range(self.sim.getNumAgents())]
+        agent_positions = [
+            (agent_id, *self.sim.getAgentPosition(agent_id))
+            for agent_id in range(self.sim.getNumAgents())
+        ]
         self._render_buffer.append((self.current_step, agent_positions))
+        reward = self.calculate_reward(0)
         current_goal_reached = self.is_done(0)
+        if current_goal_reached:
+            self._last_goal_reached += 1
+            self._set_next_goal(0)
+            self._current_initial_position = self.sim.getAgentPosition(0)
 
         flattened_observations = self._get_obs()
-        reward = self.calculate_reward(0)
+        
         terminated = current_goal_reached
         truncated = self.current_step >= self.time_limit
         info = self._get_info()
+
         if self.render_mode is not None:
             if current_goal_reached:
-                self._set_next_goal(0)
+                self._gui_renderer.goals[0] = self.agent_goals[0]
             self.render()
+
         return flattened_observations, reward, terminated, truncated, info
 
     def reset(self, seed=None, options=None):
-        self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
+        # self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
+        self.sim.setAgentPosition(0, self._current_initial_position)
         self.current_step = 0
-        # if seed is not None:
-        #     self.seed = seed
-        #     self._random_number_generator = np.random.default_rng(self.seed)
-        #     self.goal_spawner.reset(rng=self._random_number_generator)
-        #     self.agent_goals = [self.goal_spawner.get_next_goal()]  
-
         self.initial_distance = self._calc_distance_to_goal(0)
 
         info = self._get_info()
@@ -156,7 +165,8 @@ class RVOSimulationEnv2(gym.Env):
 
     def is_done(self, agent_id):
         distance = self._calc_distance_to_goal(agent_id)
-        return distance <= 0.05
+        # print(f"Step: {self.current_step}, Distance to goal: {distance}")
+        return distance <= 0.1
 
     def check_collision(self, agent_id):
         position = self.sim.getAgentPosition(agent_id)
