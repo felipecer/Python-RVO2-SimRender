@@ -9,7 +9,6 @@ from rendering.text_renderer import TextRenderer
 import math
 from rl_environments.utils.spawners import GoalSpawner
 
-
 class RVOSimulationEnv2(gym.Env):
     metadata = {'render.modes': ['ansi', 'rgb']}
 
@@ -161,7 +160,6 @@ class RVOSimulationEnv2(gym.Env):
         if self.is_done(agent_id):
             reward += 10000
         return reward
-
 
     def is_done(self, agent_id):
         distance = self._calc_distance_to_goal(agent_id)
