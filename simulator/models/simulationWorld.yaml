@@ -39,3 +39,20 @@ Simulation:
           - [1.0, 1.0]
           - [2.0, 2.0]
           - [3.0, 3.0]
+  obstacles:
+    - name: "Rectangle"
+      center: [2.0, 2.0]
+      width: 4.0
+      height: 2.0
+    - name: "Triangle"
+      center: [5.0, 5.0]
+      side_length: 3.0
+    - name: "Circle"
+      center: [7.0, 7.0]
+      radius: 3.0
+    - name: "Polygon"
+      vertices:
+        - [0.0, 0.0]
+        - [1.0, 0.0]
+        - [1.0, 1.0]
+        - [0.0, 1.0]

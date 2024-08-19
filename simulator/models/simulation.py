@@ -1,13 +1,31 @@
-from typing import List, Union
-from pydantic import BaseModel, ValidationError
+from typing import List, Union, Optional
+from pydantic import BaseModel, ValidationError, model_validator
 import yaml
-from agent import AgentDefaults, LineDistributionPattern, CircleDistributionPattern, ExplicitDistributionPattern, InsufficientPositionsError, AgentGroup, DISTRIBUTION_PATTERNS_REGISTRY
+from agent import AgentDefaults, AgentGroup, DISTRIBUTION_PATTERNS_REGISTRY
 from pprint import pprint
+from obstacle import RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape, OBSTACLE_SHAPES_REGISTRY
 
 class Simulation(BaseModel):
     timeStep: float
     agentDefaults: AgentDefaults
     agents: List[AgentGroup]
+    obstacles: Optional[List[Union[RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape]]] = None
+
+    @model_validator(mode='before')
+    def validate_obstacles(cls, values):
+        obstacle_data = values.get('obstacles', [])
+        validated_obstacles = []
+        for obstacle in obstacle_data:
+            obstacle_type = obstacle.get('name')
+            if obstacle_type in OBSTACLE_SHAPES_REGISTRY:
+                obstacle_class = OBSTACLE_SHAPES_REGISTRY[obstacle_type]
+                validated_obstacle = obstacle_class(**obstacle)
+                validated_obstacles.append(validated_obstacle)
+            else:
+                raise ValueError(f"Unknown obstacle type: {obstacle_type}")
+        
+        values['obstacles'] = validated_obstacles
+        return values
 
     class Config:
         arbitrary_types_allowed = True
@@ -20,46 +38,26 @@ def main():
             pprint(data, indent=2)  # Pretty print del YAML cargado
             
             # Crear la instancia de Simulation usando Pydantic
-            simulation = Simulation(
-                timeStep=data['Simulation']['timeStep'],
-                agentDefaults=AgentDefaults(**data['Simulation']['agentDefaults']),
-                agents=[AgentGroup(**group) for group in data['Simulation']['agents']]
-            )
+            simulation = Simulation(**data['Simulation'])
             pprint(simulation.dict(), indent=2)  # Pretty print de la configuración de la simulación
             
             # Generar posiciones para cada grupo de agentes y sus metas
-            all_agents = []
             for agent_group in simulation.agents:
-                pattern = agent_group.pattern  # Acceder al patrón del grupo de agentes
-                agent_defaults = agent_group.agent_defaults or simulation.agentDefaults
-                
-                try:
-                    positions = pattern.generate_positions()
-                    print(f"Generated positions for {pattern.__class__.__name__}:")
-                    pprint(positions, indent=4)
-                    for position in positions:
-                        agent = {
-                            "position": position,
-                            "maxSpeed": agent_defaults.maxSpeed,
-                            "radius": agent_defaults.radius,
-                            "timeHorizon": agent_defaults.timeHorizon,
-                            "timeHorizonObst": agent_defaults.timeHorizonObst,
-                            "maxNeighbors": agent_defaults.maxNeighbors,
-                            "neighborDist": agent_defaults.neighborDist,
-                            "velocity": agent_defaults.velocity
-                        }
-                        all_agents.append(agent)
-                    print(f"Generated agents for {pattern.__class__.__name__}:")
-                    pprint(all_agents, indent=4)
+                positions = agent_group.pattern.generate_positions()
+                print(f"Generated positions for {agent_group.pattern.__class__.__name__}:")
+                pprint(positions, indent=4)
 
-                    # Imprimir las posiciones de las metas si están definidas
-                    if agent_group.goals:
-                        goal_positions = agent_group.goals.pattern.generate_positions()
-                        print(f"Generated goal positions for {pattern.__class__.__name__}:")
-                        pprint(goal_positions, indent=4)
+                if agent_group.goals:
+                    goal_positions = agent_group.goals.pattern.generate_positions()
+                    print(f"Generated goal positions for {agent_group.pattern.__class__.__name__}:")
+                    pprint(goal_positions, indent=4)
 
-                except InsufficientPositionsError as e:
-                    print(f"Error in pattern '{pattern.__class__.__name__}': {e}")
+            # Generar formas para cada obstáculo
+            if simulation.obstacles:
+                for obstacle in simulation.obstacles:
+                    shape = obstacle.generate_shape()
+                    print(f"Generated shape for {obstacle.name}:")
+                    pprint(shape, indent=4)
 
         except yaml.YAMLError as exc:
             print(f"Error reading YAML file: {exc}")
