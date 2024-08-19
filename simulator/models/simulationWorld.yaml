@@ -9,15 +9,33 @@ Simulation:
     neighborDist: 15.0
     velocity: [0.0, 0.0]
   agents:
-    - pattern: "LineDistributionPattern"
-      count: 3
-      x_value: 1.0
-      y_start: 1.0
-      y_end: 3.0
-      std_dev: 0.1
-    - pattern: "ExplicitDistributionPattern"
-      count: 3
-      positions:
-        - [1.0, 1.0]
-        - [2.0, 2.0]
-        - [3.0, 3.0]
+    - agent_defaults:
+        maxSpeed: 1.0
+        radius: 0.5
+        timeHorizon: 5.0
+        timeHorizonObst: 5.0
+        maxNeighbors: 10
+        neighborDist: 15.0
+        velocity: [0.0, 0.0]
+      pattern:
+        name: "LineDistributionPattern"
+        count: 3
+        x_value: 1.0
+        y_start: 1.0
+        y_end: 3.0
+        std_dev: 0.1
+      goals:        
+        radius: 0.5
+        pattern:
+          name: "CircleDistributionPattern"
+          count: 3
+          center: [5.0, 5.0]
+          radius: 2.0
+          std_dev: 0.05
+    - pattern:
+        name: "ExplicitDistributionPattern"
+        count: 3
+        positions:
+          - [1.0, 1.0]
+          - [2.0, 2.0]
+          - [3.0, 3.0]

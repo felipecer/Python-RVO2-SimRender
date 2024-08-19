@@ -1,13 +1,13 @@
 from typing import List, Union
 from pydantic import BaseModel, ValidationError
 import yaml
-from agent import AgentDefaults, LineDistributionPattern, CircleDistributionPattern, ExplicitDistributionPattern, InsufficientPositionsError, DISTRIBUTION_PATTERNS_REGISTRY
-
+from agent import AgentDefaults, LineDistributionPattern, CircleDistributionPattern, ExplicitDistributionPattern, InsufficientPositionsError, AgentGroup, DISTRIBUTION_PATTERNS_REGISTRY
+from pprint import pprint
 
 class Simulation(BaseModel):
     timeStep: float
     agentDefaults: AgentDefaults
-    agents: List[Union[LineDistributionPattern, CircleDistributionPattern, ExplicitDistributionPattern]]
+    agents: List[AgentGroup]
 
     class Config:
         arbitrary_types_allowed = True
@@ -17,35 +17,26 @@ def main():
     with open("./simulator/models/simulationWorld.yaml", 'r') as stream:
         try:
             data = yaml.safe_load(stream)
-            print(data)
+            pprint(data, indent=2)  # Pretty print del YAML cargado
             
-            # Preparar la lista de agentes para Pydantic
-            agent_objects = []
-            for agent_data in data['Simulation']['agents']:
-                pattern_name = agent_data.get('pattern')  # Obtener el nombre del patrón sin eliminarlo
-                
-                if pattern_name in DISTRIBUTION_PATTERNS_REGISTRY:
-                    pattern_class = DISTRIBUTION_PATTERNS_REGISTRY[pattern_name]
-                    agent_object = pattern_class(**agent_data)  # pattern permanece en agent_data
-                    agent_objects.append(agent_object)
-                else:
-                    print(f"Pattern {pattern_name} not found in registry.")
-
             # Crear la instancia de Simulation usando Pydantic
             simulation = Simulation(
                 timeStep=data['Simulation']['timeStep'],
                 agentDefaults=AgentDefaults(**data['Simulation']['agentDefaults']),
-                agents=agent_objects
+                agents=[AgentGroup(**group) for group in data['Simulation']['agents']]
             )
-            print(simulation)
+            pprint(simulation.dict(), indent=2)  # Pretty print de la configuración de la simulación
             
-            # Generar posiciones para cada grupo de agentes
+            # Generar posiciones para cada grupo de agentes y sus metas
             all_agents = []
             for agent_group in simulation.agents:
+                pattern = agent_group.pattern  # Acceder al patrón del grupo de agentes
                 agent_defaults = agent_group.agent_defaults or simulation.agentDefaults
                 
                 try:
-                    positions = agent_group.generate_positions()
+                    positions = pattern.generate_positions()
+                    print(f"Generated positions for {pattern.__class__.__name__}:")
+                    pprint(positions, indent=4)
                     for position in positions:
                         agent = {
                             "position": position,
@@ -58,9 +49,17 @@ def main():
                             "velocity": agent_defaults.velocity
                         }
                         all_agents.append(agent)
-                    print(f"Generated agents for {agent_group.__class__.__name__}: {all_agents}")
+                    print(f"Generated agents for {pattern.__class__.__name__}:")
+                    pprint(all_agents, indent=4)
+
+                    # Imprimir las posiciones de las metas si están definidas
+                    if agent_group.goals:
+                        goal_positions = agent_group.goals.pattern.generate_positions()
+                        print(f"Generated goal positions for {pattern.__class__.__name__}:")
+                        pprint(goal_positions, indent=4)
+
                 except InsufficientPositionsError as e:
-                    print(f"Error in pattern '{agent_group.__class__.__name__}': {e}")
+                    print(f"Error in pattern '{pattern.__class__.__name__}': {e}")
 
         except yaml.YAMLError as exc:
             print(f"Error reading YAML file: {exc}")

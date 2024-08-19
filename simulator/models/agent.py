@@ -20,10 +20,9 @@ class AgentDefaults(BaseModel):
     velocity: Tuple[float, float] = (0.0, 0.0)
 
 class SpatialDistributionPattern(BaseModel, ABC):
-    count: int
-    agent_defaults: Optional[AgentDefaults] = None
+    count: int    
     std_dev: Optional[float] = 0.0
-    pattern: Optional[str] = None
+    name: Optional[str] = None
 
     @abstractmethod
     def generate_positions(self) -> List[Tuple[float, float]]:  
@@ -32,14 +31,11 @@ class SpatialDistributionPattern(BaseModel, ABC):
     @model_validator(mode='after')
     def validate_pattern(cls, values):
         # Asignar pattern basado en el nombre de la clase si no está presente
-        if not values.pattern:
-            values.pattern = cls.__name__
-
-        print("Values during validation:", values)  # Aquí deberías ver 'pattern'
-        print("Registry:", DISTRIBUTION_PATTERNS_REGISTRY)
+        if not values.name:
+            values.name = cls.__name__ 
         
-        if values.pattern not in DISTRIBUTION_PATTERNS_REGISTRY:
-            raise ValueError(f"Pattern {values.pattern} is not registered.")
+        if values.name not in DISTRIBUTION_PATTERNS_REGISTRY:
+            raise ValueError(f"Pattern {values.name} is not registered.")
         
         return values
 
@@ -106,4 +102,20 @@ class ExplicitDistributionPattern(SpatialDistributionPattern):
             )
         return self.positions[:self.count]
 
-    
+class GoalGroup(BaseModel):
+    radius: float
+    pattern: Union[LineDistributionPattern, CircleDistributionPattern, ExplicitDistributionPattern]
+
+def instantiate_pattern(data):
+    pattern_name = data.pop('name')
+    if pattern_name in DISTRIBUTION_PATTERNS_REGISTRY:
+        pattern_class = DISTRIBUTION_PATTERNS_REGISTRY[pattern_name]
+        return pattern_class(**data)
+    else:
+        raise ValueError(f"Pattern {pattern_name} not found in registry.")
+
+
+class AgentGroup(BaseModel):
+    agent_defaults: Optional[AgentDefaults] = None
+    pattern: Union[LineDistributionPattern, CircleDistributionPattern, ExplicitDistributionPattern]
+    goals: Optional[GoalGroup] = None
