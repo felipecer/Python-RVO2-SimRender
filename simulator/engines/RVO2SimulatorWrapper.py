@@ -26,6 +26,7 @@ class RVO2SimulatorWrapper:
         self.sim = None  # Instancia del simulador RVO2, se inicializará más tarde
         self.agent_goals = {}  # Diccionario para almacenar los objetivos de los agentes
         self.steps_buffer = []  # Buffer para almacenar los datos de cada paso de la simulación
+        self.obstacles = []
 
 
     def _init_renderer(self):
@@ -115,8 +116,13 @@ class RVO2SimulatorWrapper:
 
         # Añadir obstáculos a la simulación
         if config.obstacles:
+            
+            
             for obstacle_shape in config.obstacles:
-                self.sim.addObstacle(obstacle_shape.generate_shape())
+                shape =obstacle_shape.generate_shape()
+                # print("Shape: ", shape, " Type: ", type(shape[0]))   
+                self.renderer.obstacles.append(shape)        
+                self.sim.addObstacle(shape)
             self.sim.processObstacles()
 
     def run_simulation(self, steps: int):
@@ -139,7 +145,6 @@ class RVO2SimulatorWrapper:
             self.store_step(step)
 
     def process_goals(self):
-        pprint(self.agent_goals, indent=2)
         goals = self.agent_goals
         self.renderer.goals = goals
 
@@ -184,12 +189,8 @@ class RVO2SimulatorWrapper:
         for agent_id in range(self.sim.getNumAgents()):
             if agent_id >= num_goals:
                 continue
-            print("num_agents: ", self.sim.getNumAgents())
-            agent_position = self.sim.getAgentPosition(agent_id)
-            print("agent position: ", agent_position)
-            
+            agent_position = self.sim.getAgentPosition(agent_id)            
             goal_position = self.agent_goals[agent_id]
-            print("goal position: ", goal_position)
             if goal_position:
                 vector_to_goal = (
                     goal_position[0] - agent_position[0],

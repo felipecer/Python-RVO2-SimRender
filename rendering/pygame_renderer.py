@@ -169,6 +169,7 @@ class PyGameRenderer(RendererInterface):
         pass
 
     def draw_obstacles(self):
+        print(self.obstacles)
         for obstacle in self.obstacles:
             vertices_transformed = [
                 self.transform_coordinates(x, y) for x, y in obstacle]
@@ -182,11 +183,8 @@ class PyGameRenderer(RendererInterface):
                 pygame.draw.circle(self.window, self.agent_color, (x, y), 10)
 
     def draw_goals(self):
-        print(self.goals)
         goals = self.goals.values()
-        print(goals)
         for goal in goals:
-            print("goals: ", goal)
             x, y = self.transform_coordinates(*goal)
             pygame.draw.circle(self.window, self.obstacle_color, (x, y), 10)
 
