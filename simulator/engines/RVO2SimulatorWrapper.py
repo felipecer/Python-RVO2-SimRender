@@ -180,9 +180,14 @@ class RVO2SimulatorWrapper:
         """
         Actualiza las velocidades preferidas de los agentes en la simulación.
         """
+        num_goals = len(self.agent_goals)
         for agent_id in range(self.sim.getNumAgents()):
+            if agent_id >= num_goals:
+                continue
+            print("num_agents: ", self.sim.getNumAgents())
             agent_position = self.sim.getAgentPosition(agent_id)
             print("agent position: ", agent_position)
+            
             goal_position = self.agent_goals[agent_id]
             print("goal position: ", goal_position)
             if goal_position:
