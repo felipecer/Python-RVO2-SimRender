@@ -1,9 +1,9 @@
 from typing import List, Union, Optional
 from pydantic import BaseModel, ValidationError, model_validator
 import yaml
-from agent import AgentDefaults, AgentGroup, DISTRIBUTION_PATTERNS_REGISTRY
+from simulator.models.agent import AgentDefaults, AgentGroup, DISTRIBUTION_PATTERNS_REGISTRY
 from pprint import pprint
-from obstacle import RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape, OBSTACLE_SHAPES_REGISTRY
+from simulator.models.obstacle import RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape, OBSTACLE_SHAPES_REGISTRY
 
 class Simulation(BaseModel):
     timeStep: float
