@@ -35,7 +35,7 @@ def main():
     with open("./simulator/models/simulationWorld.yaml", 'r') as stream:
         try:
             data = yaml.safe_load(stream)
-            pprint(data, indent=2)  # Pretty print del YAML cargado
+            # pprint(data, indent=2)  # Pretty print del YAML cargado
             
             # Crear la instancia de Simulation usando Pydantic
             simulation = Simulation(**data['Simulation'])
@@ -44,20 +44,20 @@ def main():
             # Generar posiciones para cada grupo de agentes y sus metas
             for agent_group in simulation.agents:
                 positions = agent_group.pattern.generate_positions()
-                print(f"Generated positions for {agent_group.pattern.__class__.__name__}:")
-                pprint(positions, indent=4)
+                # print(f"Generated positions for {agent_group.pattern.__class__.__name__}:")
+                # pprint(positions, indent=4)
 
                 if agent_group.goals:
                     goal_positions = agent_group.goals.pattern.generate_positions()
-                    print(f"Generated goal positions for {agent_group.pattern.__class__.__name__}:")
-                    pprint(goal_positions, indent=4)
+                    # print(f"Generated goal positions for {agent_group.pattern.__class__.__name__}:")
+                    # pprint(goal_positions, indent=4)
 
             # Generar formas para cada obstáculo
             if simulation.obstacles:
                 for obstacle in simulation.obstacles:
                     shape = obstacle.generate_shape()
-                    print(f"Generated shape for {obstacle.name}:")
-                    pprint(shape, indent=4)
+                    # print(f"Generated shape for {obstacle.name}:")
+                    # pprint(shape, indent=4)
 
         except yaml.YAMLError as exc:
             print(f"Error reading YAML file: {exc}")

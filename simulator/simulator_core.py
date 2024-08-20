@@ -7,7 +7,6 @@ from rendering.text_renderer import TextRenderer
 from rendering.interfaces import RendererInterface
 import sys
 
-
 class SimulationCore:
     def __init__(self, world_loader: WorldLoader, simulation_id: str, renderer: RendererInterface = None):
         self.world_loader = world_loader

@@ -4,7 +4,7 @@ import pygame
 # from pygame_gui.elements import UIHorizontalSlider
 import sys
 from rendering.interfaces import RendererInterface
-
+import pprint
 
 class Grid:
     def __init__(self, window_width, window_height, spacing):
@@ -182,7 +182,11 @@ class PyGameRenderer(RendererInterface):
                 pygame.draw.circle(self.window, self.agent_color, (x, y), 10)
 
     def draw_goals(self):
-        for goal in self.goals.values():
+        print(self.goals)
+        goals = self.goals.values()
+        print(goals)
+        for goal in goals:
+            print("goals: ", goal)
             x, y = self.transform_coordinates(*goal)
             pygame.draw.circle(self.window, self.obstacle_color, (x, y), 10)
 

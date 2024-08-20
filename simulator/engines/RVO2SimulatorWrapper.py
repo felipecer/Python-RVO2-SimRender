@@ -75,10 +75,22 @@ class RVO2SimulatorWrapper:
         )
 
         # Añadir agentes y guardar sus metas
-        for agent_group in config.agents:
+        # Inicialización del contador global de agent_id
+        global_agent_id = 0
+
+        # Iteramos sobre cada grupo de agentes
+        for agent_group in config.agents:            
             positions = agent_group.pattern.generate_positions()
-            for position in positions:
+            pprint(agent_group.pattern.name)
+
+            # Generamos las posiciones de las metas para este grupo si existen
+            goals = agent_group.goals.pattern.generate_positions() if agent_group.goals else None
+            
+            # Iteramos sobre las posiciones generadas de los agentes
+            for local_agent_index, position in enumerate(positions):
                 agent_defaults = agent_group.agent_defaults or config.agentDefaults
+                
+                # Agregamos el agente a la simulación de rvo2 y obtenemos su ID global
                 agent_id = self.sim.addAgent(
                     tuple(position),
                     agent_defaults.neighborDist,
@@ -89,8 +101,17 @@ class RVO2SimulatorWrapper:
                     agent_defaults.maxSpeed,
                     agent_defaults.velocity
                 )
+                
+                # Configuramos la velocidad preferida del agente
                 self.sim.setAgentPrefVelocity(agent_id, agent_defaults.velocity)
-                self.agent_goals[agent_id] = agent_group.goals.pattern.generate_positions() if agent_group.goals else None
+        
+                # Si hay metas definidas para el grupo de agentes
+                if goals:
+                    # Asignamos la meta correcta al agente usando el índice local
+                    self.agent_goals[agent_id] = goals[local_agent_index]
+                
+                # Incrementamos el ID global del agente para el siguiente agente
+                global_agent_id += 1
 
         # Añadir obstáculos a la simulación
         if config.obstacles:
@@ -116,6 +137,11 @@ class RVO2SimulatorWrapper:
                     self.renderer.render_step_with_agents(agent_positions, step)
 
             self.store_step(step)
+
+    def process_goals(self):
+        pprint(self.agent_goals, indent=2)
+        goals = self.agent_goals
+        self.renderer.goals = goals
 
     def store_step(self, step: int):
         """
@@ -156,9 +182,10 @@ class RVO2SimulatorWrapper:
         """
         for agent_id in range(self.sim.getNumAgents()):
             agent_position = self.sim.getAgentPosition(agent_id)
-            goal_positions = self.agent_goals[agent_id]
-            if goal_positions:
-                goal_position = goal_positions[0]  # Tomamos la primera posición de la lista
+            print("agent position: ", agent_position)
+            goal_position = self.agent_goals[agent_id]
+            print("goal position: ", goal_position)
+            if goal_position:
                 vector_to_goal = (
                     goal_position[0] - agent_position[0],
                     goal_position[1] - agent_position[1]
@@ -207,6 +234,7 @@ def main():
 
     # Configurar el renderizador si se requiere
     grid = Grid(1000, 1000, 100)
+    
     renderer = PyGameRenderer(
         1000, 1000, obstacles=[], goals={}, grid=grid, cell_size=grid.spacing
     )
@@ -214,7 +242,7 @@ def main():
 
     # Inicializar el simulador con el renderizador y la configuración validada
     rvo2_simulator = RVO2SimulatorWrapper(simulation_config, "test_simulation", renderer=renderer)
-
+    rvo2_simulator.process_goals()
     # Inicializar la simulación
     rvo2_simulator.initialize_simulation()
     # Ejecutar la simulación

@@ -2,7 +2,6 @@
 import yaml
 import rvo2
 
-
 class WorldLoader:
     def __init__(self, yaml_file):
         self.yaml_file = yaml_file
