@@ -66,13 +66,13 @@ class RVO2SimulatorWrapper:
         """
         config = self.world_config  # Accede a la configuración del mundo.
         self.sim = rvo2.PyRVOSimulator(
-            config.timeStep,
-            config.agentDefaults.neighborDist,
-            config.agentDefaults.maxNeighbors,
-            config.agentDefaults.timeHorizon,
-            config.agentDefaults.timeHorizonObst,
-            config.agentDefaults.radius,
-            config.agentDefaults.maxSpeed
+            config.time_step,
+            config.agent_defaults.neighbor_dist,
+            config.agent_defaults.max_neighbors,
+            config.agent_defaults.time_horizon,
+            config.agent_defaults.time_horizon_obst,
+            config.agent_defaults.radius,
+            config.agent_defaults.max_speed
         )
 
         # Añadir agentes y guardar sus metas
@@ -89,17 +89,17 @@ class RVO2SimulatorWrapper:
             
             # Iteramos sobre las posiciones generadas de los agentes
             for local_agent_index, position in enumerate(positions):
-                agent_defaults = agent_group.agent_defaults or config.agentDefaults
+                agent_defaults = agent_group.agent_defaults or config.agent_defaults
                 
                 # Agregamos el agente a la simulación de rvo2 y obtenemos su ID global
                 agent_id = self.sim.addAgent(
                     tuple(position),
-                    agent_defaults.neighborDist,
-                    agent_defaults.maxNeighbors,
-                    agent_defaults.timeHorizon,
-                    agent_defaults.timeHorizonObst,
+                    agent_defaults.neighbor_dist,
+                    agent_defaults.max_neighbors,
+                    agent_defaults.time_horizon,
+                    agent_defaults.time_horizon_obst,
                     agent_defaults.radius,
-                    agent_defaults.maxSpeed,
+                    agent_defaults.max_speed,
                     agent_defaults.velocity
                 )
                 
@@ -225,7 +225,7 @@ def main():
             data = yaml.safe_load(stream)
             # pprint(data, indent=2)  # Pretty print del YAML cargado
 
-            simulation_config = Simulation(**data['Simulation'])
+            simulation_config = Simulation(**data['simulation'])
             # pprint(simulation_config.dict(), indent=2)  # Pretty print de la configuración de la simulación
 
     except FileNotFoundError:

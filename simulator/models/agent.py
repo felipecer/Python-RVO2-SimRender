@@ -11,12 +11,12 @@ def register_distribution_pattern(cls):
     return cls
 
 class AgentDefaults(BaseModel):
-    neighborDist: float
-    maxNeighbors: float
-    timeHorizon: float 
-    timeHorizonObst: float 
+    neighbor_dist: float
+    max_neighbors: float
+    time_horizon: float 
+    time_horizon_obst: float 
     radius: float
-    maxSpeed: float
+    max_speed: float
     velocity: Tuple[float, float] = (0.0, 0.0)
 
 class SpatialDistributionPattern(BaseModel, ABC):

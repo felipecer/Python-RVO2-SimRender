@@ -1,21 +1,27 @@
-Simulation:
-  timeStep: 0.25
-  agentDefaults:
-    maxSpeed: 1.0
+simulation:
+  time_step: 0.25
+  map_settings:
+    x_min: -5.0
+    x_max: 5.0
+    y_min: -5.0
+    y_max: 5.0
+    grid_resolution: 0.1
+  agent_defaults:
+    max_speed: 1.0
     radius: 0.5
-    timeHorizon: 5.0
-    timeHorizonObst: 5.0
-    maxNeighbors: 10
-    neighborDist: 15.0
+    time_horizon: 5.0
+    time_horizon_obst: 5.0
+    max_neighbors: 10
+    neighbor_dist: 15.0
     velocity: [0.0, 0.0]
   agents:
     - agent_defaults:
-        maxSpeed: 1.0
+        max_speed: 1.0
         radius: 0.5
-        timeHorizon: 5.0
-        timeHorizonObst: 5.0
-        maxNeighbors: 10
-        neighborDist: 15.0
+        time_horizon: 5.0
+        time_horizon_obst: 5.0
+        max_neighbors: 10
+        neighbor_dist: 15.0
         velocity: [0.0, 0.0]
       pattern:
         name: "LineDistributionPattern"
@@ -40,17 +46,17 @@ Simulation:
           - [-2.0, 2.0]
           - [2.0, -2.0]
   obstacles:
-    - name: "Rectangle"
+    - name: "rectangle"
       center: [-2.0, -2.0]
       width: 1.0
       height: 2.0
-    - name: "Triangle"
+    - name: "triangle"
       center: [3.0, 3.0]
       side_length: 1.5
-    - name: "Circle"
+    - name: "circle"
       center: [-3.0, -3.0]
       radius: 1.5
-    - name: "Polygon"
+    - name: "polygon"
       vertices:
         - [4.0, 4.0]
         - [4.5, 4.0]

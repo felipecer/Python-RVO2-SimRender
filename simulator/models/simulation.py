@@ -5,9 +5,17 @@ from simulator.models.agent import AgentDefaults, AgentGroup, DISTRIBUTION_PATTE
 from pprint import pprint
 from simulator.models.obstacle import RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape, OBSTACLE_SHAPES_REGISTRY
 
+class MapSettings(BaseModel):
+    x_min: float
+    x_max: float
+    y_min: float
+    y_max: float
+    grid_resolution: float
+
 class Simulation(BaseModel):
-    timeStep: float
-    agentDefaults: AgentDefaults
+    time_step: float
+    map_settings: Optional[MapSettings] = None
+    agent_defaults: AgentDefaults
     agents: List[AgentGroup]
     obstacles: Optional[List[Union[RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape]]] = None
 

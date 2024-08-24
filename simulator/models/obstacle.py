@@ -36,7 +36,7 @@ class ObstacleShape(BaseModel, ABC):
         return values
 
 # Registro con alias simplificados
-@register_obstacle_shape(alias="Rectangle")
+@register_obstacle_shape(alias="rectangle")
 class RectangleShape(ObstacleShape):
     center: Tuple[float, float]
     width: float
@@ -53,7 +53,7 @@ class RectangleShape(ObstacleShape):
             (cx - w_half, cy + h_half)
         ]
 
-@register_obstacle_shape(alias="Triangle")
+@register_obstacle_shape(alias="triangle")
 class EquilateralTriangleShape(ObstacleShape):
     center: Tuple[float, float]
     side_length: float
@@ -68,7 +68,7 @@ class EquilateralTriangleShape(ObstacleShape):
             (cx + self.side_length / 2, cy - (1/3) * h)   # Vértice inferior derecho
         ]
 
-@register_obstacle_shape(alias="Circle")
+@register_obstacle_shape(alias="circle")
 class CircleShape(ObstacleShape):
     center: Tuple[float, float]
     radius: float
@@ -81,7 +81,7 @@ class CircleShape(ObstacleShape):
             for i in range(36)  # Aproximación con 36 puntos
         ]
 
-@register_obstacle_shape(alias="Polygon")
+@register_obstacle_shape(alias="polygon")
 class PolygonShape(ObstacleShape):
     vertices: List[Tuple[float, float]]
 
