@@ -1,35 +1,36 @@
 from typing import Optional
 import rvo2
 from pydantic import BaseModel, ValidationError
-from rendering.interfaces import RendererInterface
-from rendering.text_renderer import TextRenderer
 import math
 import datetime
 import sys
 import yaml
 from rendering.pygame_renderer import Grid, PyGameRenderer
+from simulator.models.observer import SimulationSubject
 from simulator.models.simulation import Simulation
+from simulator.models.messages import (
+    SimulationInitializedMessage,
+    AgentPositionsUpdateMessage,
+    ObstaclesProcessedMessage,
+    GoalsProcessedMessage
+)
 
-class RVO2SimulatorWrapper:
-    def __init__(self, world_config: BaseModel, simulation_id: str, renderer: RendererInterface = TextRenderer):
+class RVO2SimulatorWrapper(SimulationSubject):
+    def __init__(self, world_config: BaseModel, simulation_id: str):
+        super().__init__()
         """
         Inicializa el simulador RVO2 con la configuración del mundo y un renderizador opcional.
 
         Args:
             world_config (BaseModel): La configuración del mundo en formato de Pydantic.
-            renderer (RendererInterface, opcional): Instancia del renderizador que implementa RendererInterface.
+            simulation_id (str): El ID de la simulación actual.
         """
         self.world_config = world_config  # Almacena la configuración del mundo proporcionada
         self.simulation_id = simulation_id  # Almacena el ID de la simulación
-        self.renderer = renderer  # Almacena el renderizador si se proporciona
         self.sim = None  # Instancia del simulador RVO2, se inicializará más tarde
         self.agent_goals = {}  # Diccionario para almacenar los objetivos de los agentes
         self.steps_buffer = []  # Buffer para almacenar los datos de cada paso de la simulación
         self.obstacles = []
-
-    def _init_renderer(self):
-        if self.renderer:
-            self.renderer.setup()
 
     def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):
         vector_to_goal = (
@@ -102,13 +103,13 @@ class RVO2SimulatorWrapper:
 
         # Añadir obstáculos a la simulación
         if config.obstacles:
-            
-            
             for obstacle_shape in config.obstacles:
-                shape =obstacle_shape.generate_shape()
-                self.renderer.obstacles.append(shape)        
+                shape =obstacle_shape.generate_shape()       
                 self.sim.addObstacle(shape)
             self.sim.processObstacles()
+
+        # Notificar a los observadores sobre la inicialización
+        self.notify_observers(SimulationInitializedMessage())
 
     def run_simulation(self, steps: int):
         """
@@ -121,17 +122,11 @@ class RVO2SimulatorWrapper:
             self.update_agent_velocities()
             self.sim.doStep()
 
-            if self.renderer:
-                agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
-                                   for agent_id in range(self.sim.getNumAgents())]
-                if self.renderer.is_active():
-                    self.renderer.render_step_with_agents(agent_positions, step)
+            agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
+                               for agent_id in range(self.sim.getNumAgents())]
 
+            self.notify_observers(AgentPositionsUpdateMessage(step=step, agent_positions=agent_positions))
             self.store_step(step)
-
-    def process_goals(self):
-        goals = self.agent_goals
-        self.renderer.goals = goals
 
     def store_step(self, step: int):
         """
@@ -154,7 +149,7 @@ class RVO2SimulatorWrapper:
         Guarda los resultados de la simulación en un archivo.
         """
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{self.simulation_config.worldName}_{self.simulation_id}_{timestamp}.txt".replace(
+        filename = f"nombre_hardcodeado_{self.simulation_id}_{timestamp}.txt".replace(
             " ", "_")
 
         with open(filename, 'w') as file:
@@ -204,12 +199,10 @@ def main():
     
     world_file = sys.argv[1]
 
-    # Leer y validar el archivo YAML
     try:
         with open(world_file, 'r') as stream:
             data = yaml.safe_load(stream)
-            simulation_config = Simulation(**data['simulation'])
-
+            world_config = Simulation(**data['simulation'])
 
     except FileNotFoundError:
         print(f"File {world_file} not found.")
@@ -221,28 +214,22 @@ def main():
         print(f"Validation error: {exc}")
         sys.exit(1)
 
-    # Cálculo único de window_width y window_height
-    window_width = int((simulation_config.map_settings.x_max - simulation_config.map_settings.x_min) * simulation_config.map_settings.cell_size)
-    window_height = int((simulation_config.map_settings.y_max - simulation_config.map_settings.y_min) * simulation_config.map_settings.cell_size)
+    window_width = int((world_config.map_settings.x_max - world_config.map_settings.x_min) * world_config.map_settings.cell_size)
+    window_height = int((world_config.map_settings.y_max - world_config.map_settings.y_min) * world_config.map_settings.cell_size)
 
     renderer = PyGameRenderer(
         window_width,
         window_height,
-        obstacles=[], goals={}, cell_size=int(simulation_config.map_settings.cell_size)
+        obstacles=[], goals={}, cell_size=int(world_config.map_settings.cell_size)
     )
     renderer.setup()
 
-    # Inicializar el simulador con el renderizador y la configuración validada
-    rvo2_simulator = RVO2SimulatorWrapper(simulation_config, "test_simulation", renderer=renderer)
-    rvo2_simulator.process_goals()
-    # Inicializar la simulación
+    # Inicializar el simulador y registrar el renderizador como observador
+    rvo2_simulator = RVO2SimulatorWrapper(world_config, "test_simulation")
+    rvo2_simulator.register_observer(renderer)
     rvo2_simulator.initialize_simulation()
-    # Ejecutar la simulación
     rvo2_simulator.run_simulation(5000)
-
-    # Guardar los resultados de la simulación
     rvo2_simulator.save_simulation_runs()
 
 if __name__ == "__main__":
     main()
-
