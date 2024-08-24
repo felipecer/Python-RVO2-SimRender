@@ -17,6 +17,8 @@ class Grid:
         color_axis = (0, 0, 0)
 
         # Draw vertical lines
+        print(type(self.window_width))
+        print(type(self.window_height))
         for x in range(0, self.window_width // 2, self.spacing):
             pygame.draw.line(window, color, (self.window_width // 2 + x, 0),
                              (self.window_width // 2 + x, self.window_height))

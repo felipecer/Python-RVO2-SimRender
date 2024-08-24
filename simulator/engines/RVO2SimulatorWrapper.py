@@ -28,6 +28,11 @@ class RVO2SimulatorWrapper:
         self.steps_buffer = []  # Buffer para almacenar los datos de cada paso de la simulación
         self.obstacles = []
 
+        # Configurar el grid y el mapa según map_settings
+        self.grid_resolution = world_config.map_settings.grid_resolution
+        self.map_width = int((world_config.map_settings.x_max - world_config.map_settings.x_min) / self.grid_resolution)
+        self.map_height = int((world_config.map_settings.y_max - world_config.map_settings.y_min) / self.grid_resolution)
+
 
     def _init_renderer(self):
         if self.renderer:
@@ -238,11 +243,17 @@ def main():
         print(f"Validation error: {exc}")
         sys.exit(1)
 
-    # Configurar el renderizador si se requiere
-    grid = Grid(1000, 1000, 100)
+     # Configurar el renderizador con los parámetros de map_settings
+    grid = Grid(
+        int((simulation_config.map_settings.x_max - simulation_config.map_settings.x_min) * simulation_config.map_settings.grid_resolution),
+        int((simulation_config.map_settings.y_max - simulation_config.map_settings.y_min) * simulation_config.map_settings.grid_resolution),
+        int(simulation_config.map_settings.grid_resolution)
+    ) 
     
     renderer = PyGameRenderer(
-        1000, 1000, obstacles=[], goals={}, grid=grid, cell_size=grid.spacing
+        int(simulation_config.map_settings.x_max - simulation_config.map_settings.x_min) * simulation_config.map_settings.grid_resolution,
+        int(simulation_config.map_settings.y_max - simulation_config.map_settings.y_min) * simulation_config.map_settings.grid_resolution,
+        obstacles=[], goals={}, grid=grid, cell_size=grid.spacing
     )
     renderer.setup()
 
