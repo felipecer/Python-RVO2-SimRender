@@ -1,4 +1,5 @@
 from typing import Optional
+from rendering.text_renderer import TextRenderer
 import rvo2
 from pydantic import BaseModel, ValidationError
 import math
@@ -229,9 +230,13 @@ def main():
     )
     renderer.setup()
 
+    text_renderer = TextRenderer()
+    text_renderer.setup()
+
     # Inicializar el simulador y registrar el renderizador como observador
     rvo2_simulator = RVO2SimulatorWrapper(world_config, "test_simulation")
     rvo2_simulator.register_observer(renderer)
+    rvo2_simulator.register_observer(text_renderer)
     rvo2_simulator.initialize_simulation()
     rvo2_simulator.run_simulation(5000)
     rvo2_simulator.save_simulation_runs()
