@@ -4,7 +4,6 @@ import pygame
 # from pygame_gui.elements import UIHorizontalSlider
 import sys
 from rendering.interfaces import RendererInterface
-import pprint
 
 class Grid:
     def __init__(self, window_width, window_height, spacing):
@@ -17,8 +16,6 @@ class Grid:
         color_axis = (0, 0, 0)
 
         # Draw vertical lines
-        print(type(self.window_width))
-        print(type(self.window_height))
         for x in range(0, self.window_width // 2, self.spacing):
             pygame.draw.line(window, color, (self.window_width // 2 + x, 0),
                              (self.window_width // 2 + x, self.window_height))
@@ -171,7 +168,6 @@ class PyGameRenderer(RendererInterface):
         pass
 
     def draw_obstacles(self):
-        print(self.obstacles)
         for obstacle in self.obstacles:
             vertices_transformed = [
                 self.transform_coordinates(x, y) for x, y in obstacle]

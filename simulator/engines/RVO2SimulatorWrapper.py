@@ -9,7 +9,6 @@ import sys
 import yaml
 from rendering.pygame_renderer import Grid, PyGameRenderer
 from simulator.models.simulation import Simulation
-from pprint import pprint
 
 class RVO2SimulatorWrapper:
     def __init__(self, world_config: BaseModel, simulation_id: str, renderer: RendererInterface = TextRenderer):
@@ -46,17 +45,6 @@ class RVO2SimulatorWrapper:
             )
         else:
             return (0, 0)
-        
-    def update_agent_velocities(self):
-        for agent_id in range(self.sim.getNumAgents()):
-            agent_position = self.sim.getAgentPosition(agent_id)
-            goal_positions = self.agent_goals[agent_id]
-            if goal_positions:
-                goal_position = goal_positions[0]  # Se toma la primera meta de la lista
-                preferred_velocity = self.calculate_preferred_velocity(
-                    agent_position, goal_position, self.sim.getAgentMaxSpeed(agent_id)
-                )
-                self.sim.setAgentPrefVelocity(agent_id, preferred_velocity)
 
     def initialize_simulation(self):
         """
@@ -81,7 +69,6 @@ class RVO2SimulatorWrapper:
         # Iteramos sobre cada grupo de agentes
         for agent_group in config.agents:            
             positions = agent_group.pattern.generate_positions()
-            pprint(agent_group.pattern.name)
 
             # Generamos las posiciones de las metas para este grupo si existen
             goals = agent_group.goals.pattern.generate_positions() if agent_group.goals else None
@@ -119,7 +106,6 @@ class RVO2SimulatorWrapper:
             
             for obstacle_shape in config.obstacles:
                 shape =obstacle_shape.generate_shape()
-                # print("Shape: ", shape, " Type: ", type(shape[0]))   
                 self.renderer.obstacles.append(shape)        
                 self.sim.addObstacle(shape)
             self.sim.processObstacles()
@@ -222,10 +208,8 @@ def main():
     try:
         with open(world_file, 'r') as stream:
             data = yaml.safe_load(stream)
-            # pprint(data, indent=2)  # Pretty print del YAML cargado
-
             simulation_config = Simulation(**data['simulation'])
-            # pprint(simulation_config.dict(), indent=2)  # Pretty print de la configuración de la simulación
+
 
     except FileNotFoundError:
         print(f"File {world_file} not found.")
@@ -240,13 +224,6 @@ def main():
     # Cálculo único de window_width y window_height
     window_width = int((simulation_config.map_settings.x_max - simulation_config.map_settings.x_min) * simulation_config.map_settings.cell_size)
     window_height = int((simulation_config.map_settings.y_max - simulation_config.map_settings.y_min) * simulation_config.map_settings.cell_size)
-
-    # Usar las variables calculadas en ambos lugares
-    grid = Grid(
-        window_width,
-        window_height,
-        int(simulation_config.map_settings.cell_size)
-    )
 
     renderer = PyGameRenderer(
         window_width,
