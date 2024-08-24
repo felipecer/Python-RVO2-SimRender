@@ -73,6 +73,7 @@ class RVO2SimulatorWrapper(SimulationSubject):
 
             # Generamos las posiciones de las metas para este grupo si existen
             goals = agent_group.goals.pattern.generate_positions() if agent_group.goals else None
+            print(f"Goals: {goals}")
             
             # Iteramos sobre las posiciones generadas de los agentes
             for local_agent_index, position in enumerate(positions):
@@ -95,6 +96,7 @@ class RVO2SimulatorWrapper(SimulationSubject):
         
                 # Si hay metas definidas para el grupo de agentes
                 if goals:
+                    self.notify_observers(GoalsProcessedMessage(step=-1, goals=self.agent_goals))
                     # Asignamos la meta correcta al agente usando el índice local
                     self.agent_goals[agent_id] = goals[local_agent_index]
                 
@@ -109,13 +111,10 @@ class RVO2SimulatorWrapper(SimulationSubject):
                 self.sim.addObstacle(shape)
                 obstacle_shapes.append(shape)
             self.sim.processObstacles()
-            self.notify_observers(ObstaclesProcessedMessage(obstacles=obstacle_shapes))
-
-        if goals:
-            self.notify_observers(GoalsProcessedMessage(goals=self.agent_goals))
+            self.notify_observers(ObstaclesProcessedMessage(step=-1, obstacles=obstacle_shapes))       
 
         # Notificar a los observadores sobre la inicialización
-        self.notify_observers(SimulationInitializedMessage())
+        self.notify_observers(SimulationInitializedMessage(step=-1))
 
     def run_simulation(self, steps: int):
         """
