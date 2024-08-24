@@ -55,7 +55,7 @@ class Grid:
 
 
 class PyGameRenderer(RendererInterface):
-    def __init__(self, width, height, grid, map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial', cell_size=50):
+    def __init__(self, width, height, map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial', cell_size=50):
         self.font_name = font_name
         self.font_size = font_size
         self.font_color = font_color
@@ -65,8 +65,8 @@ class PyGameRenderer(RendererInterface):
         self.clock = pygame.time.Clock()
         self.agents = agents
         self.simulation_steps = simulation_steps
-        self.grid = grid
-        self.cell_size = cell_size
+        self.cell_size = cell_size        
+        self.grid = Grid(width, height, cell_size)   
 
         # Window settings
         self.window = None

@@ -243,17 +243,21 @@ def main():
         print(f"Validation error: {exc}")
         sys.exit(1)
 
-     # Configurar el renderizador con los parámetros de map_settings
+    # Cálculo único de window_width y window_height
+    window_width = int((simulation_config.map_settings.x_max - simulation_config.map_settings.x_min) * simulation_config.map_settings.grid_resolution)
+    window_height = int((simulation_config.map_settings.y_max - simulation_config.map_settings.y_min) * simulation_config.map_settings.grid_resolution)
+
+    # Usar las variables calculadas en ambos lugares
     grid = Grid(
-        int((simulation_config.map_settings.x_max - simulation_config.map_settings.x_min) * simulation_config.map_settings.grid_resolution),
-        int((simulation_config.map_settings.y_max - simulation_config.map_settings.y_min) * simulation_config.map_settings.grid_resolution),
+        window_width,
+        window_height,
         int(simulation_config.map_settings.grid_resolution)
-    ) 
-    
+    )
+
     renderer = PyGameRenderer(
-        int(simulation_config.map_settings.x_max - simulation_config.map_settings.x_min) * simulation_config.map_settings.grid_resolution,
-        int(simulation_config.map_settings.y_max - simulation_config.map_settings.y_min) * simulation_config.map_settings.grid_resolution,
-        obstacles=[], goals={}, grid=grid, cell_size=grid.spacing
+        window_width,
+        window_height,
+        obstacles=[], goals={}, cell_size=int(simulation_config.map_settings.grid_resolution)
     )
     renderer.setup()
 
