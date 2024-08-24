@@ -28,12 +28,6 @@ class RVO2SimulatorWrapper:
         self.steps_buffer = []  # Buffer para almacenar los datos de cada paso de la simulación
         self.obstacles = []
 
-        # Configurar el grid y el mapa según map_settings
-        self.grid_resolution = world_config.map_settings.grid_resolution
-        self.map_width = int((world_config.map_settings.x_max - world_config.map_settings.x_min) / self.grid_resolution)
-        self.map_height = int((world_config.map_settings.y_max - world_config.map_settings.y_min) / self.grid_resolution)
-
-
     def _init_renderer(self):
         if self.renderer:
             self.renderer.setup()
@@ -244,20 +238,20 @@ def main():
         sys.exit(1)
 
     # Cálculo único de window_width y window_height
-    window_width = int((simulation_config.map_settings.x_max - simulation_config.map_settings.x_min) * simulation_config.map_settings.grid_resolution)
-    window_height = int((simulation_config.map_settings.y_max - simulation_config.map_settings.y_min) * simulation_config.map_settings.grid_resolution)
+    window_width = int((simulation_config.map_settings.x_max - simulation_config.map_settings.x_min) * simulation_config.map_settings.cell_size)
+    window_height = int((simulation_config.map_settings.y_max - simulation_config.map_settings.y_min) * simulation_config.map_settings.cell_size)
 
     # Usar las variables calculadas en ambos lugares
     grid = Grid(
         window_width,
         window_height,
-        int(simulation_config.map_settings.grid_resolution)
+        int(simulation_config.map_settings.cell_size)
     )
 
     renderer = PyGameRenderer(
         window_width,
         window_height,
-        obstacles=[], goals={}, cell_size=int(simulation_config.map_settings.grid_resolution)
+        obstacles=[], goals={}, cell_size=int(simulation_config.map_settings.cell_size)
     )
     renderer.setup()
 

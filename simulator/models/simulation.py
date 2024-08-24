@@ -10,7 +10,7 @@ class MapSettings(BaseModel):
     x_max: float
     y_min: float
     y_max: float
-    grid_resolution: int
+    cell_size: int
 
 class Simulation(BaseModel):
     time_step: float
