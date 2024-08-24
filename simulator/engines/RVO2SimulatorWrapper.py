@@ -103,10 +103,16 @@ class RVO2SimulatorWrapper(SimulationSubject):
 
         # Añadir obstáculos a la simulación
         if config.obstacles:
+            obstacle_shapes = []
             for obstacle_shape in config.obstacles:
-                shape =obstacle_shape.generate_shape()       
+                shape = obstacle_shape.generate_shape()       
                 self.sim.addObstacle(shape)
+                obstacle_shapes.append(shape)
             self.sim.processObstacles()
+            self.notify_observers(ObstaclesProcessedMessage(obstacles=obstacle_shapes))
+
+        if goals:
+            self.notify_observers(GoalsProcessedMessage(goals=self.agent_goals))
 
         # Notificar a los observadores sobre la inicialización
         self.notify_observers(SimulationInitializedMessage())
