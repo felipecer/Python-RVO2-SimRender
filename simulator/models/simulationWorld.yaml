@@ -62,3 +62,11 @@ simulation:
         - [4.5, 4.0]
         - [4.5, 4.5]
         - [4.0, 4.5]
+  dynamics:
+    - name: "goal_respawn"
+      event_type: "goal_reached"
+      seed: 42
+      num_iterations: 20
+      max_radius: 5.0
+      step_radius: 1.0
+      empty_radius: 1.5

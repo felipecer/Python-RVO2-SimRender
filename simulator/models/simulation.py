@@ -1,9 +1,11 @@
-from typing import List, Union, Optional
+from typing import Dict, List, Union, Optional
 from pydantic import BaseModel, ValidationError, model_validator
 import yaml
 from simulator.models.agent import AgentDefaults, AgentGroup, DISTRIBUTION_PATTERNS_REGISTRY
 from pprint import pprint
 from simulator.models.obstacle import RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape, OBSTACLE_SHAPES_REGISTRY
+from simulator.models.simulation_configuration.simulation_dynamics import SIMULATION_DYNAMICS_REGISTRY, SimulationDynamic
+from simulator.models.simulation_configuration.simulation_events import EVENT_TYPES_REGISTRY, SimulationEvent
 
 class MapSettings(BaseModel):
     x_min: float
@@ -18,7 +20,26 @@ class Simulation(BaseModel):
     agent_defaults: AgentDefaults
     agents: List[AgentGroup]
     obstacles: Optional[List[Union[RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape]]] = None
+    dynamics: Optional[List[SimulationDynamic]] = None
 
+    @model_validator(mode='before')
+    def validate_dynamics(cls, values):
+        dynamic_data = values.get('dynamics', [])
+        validated_dynamics = []
+        for dynamic in dynamic_data:
+            dynamic_type = dynamic.get('name')  # Cambiado a 'name'
+            if dynamic_type is None:
+                raise ValueError("Each dynamic must have a 'name' field.")
+            if dynamic_type in SIMULATION_DYNAMICS_REGISTRY:
+                dynamic_class = SIMULATION_DYNAMICS_REGISTRY[dynamic_type]
+                validated_dynamic = dynamic_class(**dynamic)
+                validated_dynamics.append(validated_dynamic)
+            else:
+                raise ValueError(f"Unknown dynamic type: {dynamic_type}")
+        
+        values['dynamics'] = validated_dynamics
+        return values
+    
     @model_validator(mode='before')
     def validate_obstacles(cls, values):
         obstacle_data = values.get('obstacles', [])
@@ -31,10 +52,10 @@ class Simulation(BaseModel):
                 validated_obstacles.append(validated_obstacle)
             else:
                 raise ValueError(f"Unknown obstacle type: {obstacle_type}")
-        
+    
         values['obstacles'] = validated_obstacles
         return values
-
+    
     class Config:
         arbitrary_types_allowed = True
 
@@ -43,10 +64,10 @@ def main():
     with open("./simulator/models/simulationWorld.yaml", 'r') as stream:
         try:
             data = yaml.safe_load(stream)
-            # pprint(data, indent=2)  # Pretty print del YAML cargado
+            pprint(data, indent=2)  # Pretty print del YAML cargado
             
             # Crear la instancia de Simulation usando Pydantic
-            simulation = Simulation(**data['Simulation'])
+            simulation = Simulation(**data['simulation'])
             pprint(simulation.dict(), indent=2)  # Pretty print de la configuración de la simulación
             
             # Generar posiciones para cada grupo de agentes y sus metas
@@ -66,6 +87,11 @@ def main():
                     shape = obstacle.generate_shape()
                     # print(f"Generated shape for {obstacle.name}:")
                     # pprint(shape, indent=4)
+
+            # Verificar las dinámicas y sus tipos
+            if simulation.dynamics:
+                for dynamic in simulation.dynamics:
+                    print(f"Dynamic '{dynamic.name}' parsed and registered.")
 
         except yaml.YAMLError as exc:
             print(f"Error reading YAML file: {exc}")

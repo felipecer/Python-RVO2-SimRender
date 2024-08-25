@@ -15,6 +15,7 @@ from simulator.models.messages import (
     ObstaclesProcessedMessage,
     GoalsProcessedMessage
 )
+from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
 
 class RVO2SimulatorWrapper(SimulationSubject):
     def __init__(self, world_config: BaseModel, simulation_id: str):
@@ -32,6 +33,11 @@ class RVO2SimulatorWrapper(SimulationSubject):
         self.agent_goals = {}  # Diccionario para almacenar los objetivos de los agentes
         self.steps_buffer = []  # Buffer para almacenar los datos de cada paso de la simulación
         self.obstacles = []
+        self.dynamics = []  # Lista de dinámicas registradas
+        self.current_step = 0
+    
+    def register_dynamic(self, dynamic):
+        self.dynamics.append(dynamic)
 
     def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):
         vector_to_goal = (
@@ -128,11 +134,32 @@ class RVO2SimulatorWrapper(SimulationSubject):
             self.update_agent_velocities()
             self.sim.doStep()
 
+            # Detectar si algún agente ha alcanzado su meta
+            for agent_id in range(self.sim.getNumAgents()):
+                if self.is_goal_reached(agent_id):
+                    event = GoalReachedEvent(
+                        agent_id=agent_id,
+                        goal_position=self.agent_goals[agent_id],
+                        current_position=self.sim.getAgentPosition(agent_id),
+                        step=step
+                    )
+                    self.handle_event(event)
+
             agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
                                for agent_id in range(self.sim.getNumAgents())]
 
             self.notify_observers(AgentPositionsUpdateMessage(step=step, agent_positions=agent_positions))
             self.store_step(step)
+
+    def handle_event(self, event):
+        for dynamic in self.dynamics:
+            dynamic.apply(event, self)
+
+    def is_goal_reached(self, agent_id: int) -> bool:
+        current_position = self.sim.getAgentPosition(agent_id)
+        goal_position = self.agent_goals[agent_id]
+        distance = math.dist(current_position, goal_position)
+        return distance <= 0.05
 
     def store_step(self, step: int):
         """
