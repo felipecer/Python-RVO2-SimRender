@@ -71,7 +71,7 @@ class OnStepDynamic(SimulationDynamic):
         """Método abstracto que debe ser implementado por dinámicas OnStep."""
         pass
 
-class OneTimeDynamic(SimulationDynamic):
+class OnceDynamic(SimulationDynamic):
     _executed: bool = PrivateAttr(default=False)
 
     def apply(self):
@@ -156,7 +156,7 @@ class LogStepInfoDynamic(OnStepDynamic):
         print(f"Step {self._simulator.current_step}: {self.log_message}")
 
 @register_simulation_dynamic(alias="cleanup_resources")
-class ResourceCleanupDynamic(OneTimeDynamic):
+class ResourceCleanupDynamic(OnceDynamic):
     def execute(self):
         print("Cleaning up resources and shutting down.")
         # Lógica para limpiar recursos
