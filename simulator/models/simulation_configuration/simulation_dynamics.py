@@ -8,10 +8,8 @@ from simulator.models.simulation_configuration.simulation_events import GoalReac
 
 # Enum para los tipos de ejecución de las dinámicas
 class ExecutionTiming(Enum):
-    BEFORE_STEP = "BeforeStep"
-    AFTER_STEP = "AfterStep"
-    ONCE_BEGINNING = "OnceBeginning"
-    ONCE_END = "OnceEnd"
+    BEFORE = "before"
+    AFTER = "after"    
 
 class SimulationDynamic(BaseModel, ABC):
     name: str
@@ -73,6 +71,19 @@ class OnStepDynamic(SimulationDynamic):
         """Método abstracto que debe ser implementado por dinámicas OnStep."""
         pass
 
+class OneTimeDynamic(SimulationDynamic):
+    _executed: bool = PrivateAttr(default=False)
+
+    def apply(self):
+        """Ejecuta la dinámica una sola vez si no ha sido ejecutada aún."""
+        if not self._executed:
+            self.execute()
+            self._executed = True
+
+    @abstractmethod
+    def execute(self):
+        """Método abstracto que debe ser implementado por las dinámicas OneTime."""
+        pass
 # Ejemplo de una dinámica basada en eventos
 @register_simulation_dynamic(alias="goal_respawn")
 class GoalRespawnDynamic(EventBasedDynamic):
@@ -143,3 +154,9 @@ class LogStepInfoDynamic(OnStepDynamic):
 
     def execute(self):
         print(f"Step {self._simulator.current_step}: {self.log_message}")
+
+@register_simulation_dynamic(alias="cleanup_resources")
+class ResourceCleanupDynamic(OneTimeDynamic):
+    def execute(self):
+        print("Cleaning up resources and shutting down.")
+        # Lógica para limpiar recursos

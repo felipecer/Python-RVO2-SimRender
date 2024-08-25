@@ -64,7 +64,7 @@ simulation:
         - [4.0, 4.5]
   dynamics:
     - name: "goal_respawn"
-      when: "BeforeStep"
+      when: "before"
       event_type: "goal_reached"
       seed: 42
       num_iterations: 20
@@ -72,7 +72,9 @@ simulation:
       step_radius: 1.0
       empty_radius: 1.5
     - name: "max_steps"
-      when: "BeforeStep"
+      when: "before"
       max_steps: 1000
     - name: "log_step_info"
-      when: "BeforeStep"
+      when: "before"
+    - name: "cleanup_resources"
+      when: "after"
