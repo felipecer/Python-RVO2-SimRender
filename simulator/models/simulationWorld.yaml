@@ -74,3 +74,5 @@ simulation:
     - name: "max_steps"
       when: "BeforeStep"
       max_steps: 1000
+    - name: "log_step_info"
+      when: "BeforeStep"

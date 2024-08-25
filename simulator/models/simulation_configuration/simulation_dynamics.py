@@ -60,6 +60,19 @@ class EventBasedDynamic(SimulationDynamic):
         """El método apply puede no ser usado directamente en dinámicas basadas en eventos."""
         raise NotImplementedError("EventBasedDynamic uses handle_event instead of apply.")
 
+class OnStepDynamic(SimulationDynamic):
+    every_n_steps: Optional[int] = 1  # Se ejecuta cada n pasos, por defecto en cada paso
+
+    def apply(self):
+        """Aplicar la dinámica dependiendo del step actual."""
+        if self.every_n_steps and self._simulator.current_step % self.every_n_steps == 0:
+            self.execute()
+
+    @abstractmethod
+    def execute(self):
+        """Método abstracto que debe ser implementado por dinámicas OnStep."""
+        pass
+
 # Ejemplo de una dinámica basada en eventos
 @register_simulation_dynamic(alias="goal_respawn")
 class GoalRespawnDynamic(EventBasedDynamic):
@@ -116,10 +129,17 @@ class GoalRespawnDynamic(EventBasedDynamic):
             current_radius += self.step_radius
 
 @register_simulation_dynamic(alias="max_steps")
-class MaxStepsReachedDynamic(SimulationDynamic):
+class MaxStepsReachedDynamic(OnStepDynamic):
     max_steps: int
 
-    def apply(self):
+    def execute(self):
         if self._simulator.current_step >= self.max_steps:
             print(f"Maximum steps of {self.max_steps} reached. Stopping simulation.")
             self._simulator.stop_simulation()
+
+@register_simulation_dynamic(alias="log_step_info")
+class LogStepInfoDynamic(OnStepDynamic):
+    log_message: str = "Step executed"
+
+    def execute(self):
+        print(f"Step {self._simulator.current_step}: {self.log_message}")

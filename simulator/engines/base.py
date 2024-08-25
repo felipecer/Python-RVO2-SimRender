@@ -7,6 +7,8 @@ from typing import List, Dict, Tuple
 class SimulationEngine(ABC):
     def __init__(self):
         self._dynamics: List['SimulationDynamic'] = []
+        self._is_running: bool = True  # Indicador para saber si la simulación está en ejecución
+        self.current_step: int = 0  # Contador de pasos de simulación
 
     def register_dynamic(self, dynamic):
         """Registra una dinámica para que se ejecute durante la simulación."""
@@ -31,6 +33,11 @@ class SimulationEngine(ABC):
     def run_simulation(self, step: int):
         """Ejecuta el ciclo de la simulación por un número de pasos especificado."""
         pass
+
+    def stop_simulation(self):
+        """Detiene la simulación."""
+        self._is_running = False
+        print("Simulation stopped.")
 
     @abstractmethod
     def get_agent_positions(self) -> Dict[int, Tuple[float, float]]:
