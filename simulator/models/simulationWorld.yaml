@@ -71,3 +71,6 @@ simulation:
       max_radius: 5.0
       step_radius: 1.0
       empty_radius: 1.5
+    - name: "max_steps"
+      when: "BeforeStep"
+      max_steps: 1000

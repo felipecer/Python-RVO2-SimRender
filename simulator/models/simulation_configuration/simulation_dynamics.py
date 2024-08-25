@@ -114,3 +114,12 @@ class GoalRespawnDynamic(EventBasedDynamic):
                 inner_radius, outer_radius, num_points)
             self._generated_points.extend(points)
             current_radius += self.step_radius
+
+@register_simulation_dynamic(alias="max_steps")
+class MaxStepsReachedDynamic(SimulationDynamic):
+    max_steps: int
+
+    def apply(self):
+        if self._simulator.current_step >= self.max_steps:
+            print(f"Maximum steps of {self.max_steps} reached. Stopping simulation.")
+            self._simulator.stop_simulation()
