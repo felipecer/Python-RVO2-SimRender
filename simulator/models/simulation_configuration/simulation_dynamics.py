@@ -1,22 +1,22 @@
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, model_validator, PrivateAttr
+from pydantic import BaseModel, Field, model_validator, PrivateAttr
+from enum import Enum
 from typing import Dict, Type, Tuple, Optional
 import numpy as np
 from simulator.models.messages import GoalPositionUpdatedMessage
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
 
+# Enum para los tipos de ejecución de las dinámicas
+class ExecutionTiming(Enum):
+    BEFORE_STEP = "BeforeStep"
+    AFTER_STEP = "AfterStep"
+    ONCE_BEGINNING = "OnceBeginning"
+    ONCE_END = "OnceEnd"
+
 class SimulationDynamic(BaseModel, ABC):
     name: str
+    when: ExecutionTiming
     _simulator: Optional['SimulationEngine'] = PrivateAttr(None)  # Uso de PrivateAttr para evitar la validación
-
-    @model_validator(mode='after')
-    def validate_dynamic(cls, values):
-        if not values.name:
-            values.name = cls.__name__
-        
-        if values.name not in SIMULATION_DYNAMICS_REGISTRY:
-            raise ValueError(f"Dynamic {values.name} is not registered.")        
-        return values
 
     def register_simulator(self, simulator):
         """Registra el simulador con la dinámica."""
@@ -33,7 +33,6 @@ class SimulationDynamic(BaseModel, ABC):
 
     class Config:
         arbitrary_types_allowed = True
-        underscore_attrs_are_private = True  # Ignorar atributos que comienzan con '_'
 
 # Registro global para las dinámicas de simulación
 SIMULATION_DYNAMICS_REGISTRY: Dict[str, Type['SimulationDynamic']] = {}

@@ -64,6 +64,7 @@ simulation:
         - [4.0, 4.5]
   dynamics:
     - name: "goal_respawn"
+      when: "BeforeStep"
       event_type: "goal_reached"
       seed: 42
       num_iterations: 20

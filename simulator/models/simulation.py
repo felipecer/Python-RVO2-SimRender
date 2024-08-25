@@ -20,7 +20,7 @@ class Simulation(BaseModel):
     agent_defaults: AgentDefaults
     agents: List[AgentGroup]
     obstacles: Optional[List[Union[RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape]]] = None
-    dynamics: Optional[List[SimulationDynamic]] = None
+    dynamics: Optional[List] = None
 
     @model_validator(mode='before')
     def validate_dynamics(cls, values):
@@ -30,16 +30,16 @@ class Simulation(BaseModel):
             dynamic_type = dynamic.get('name')  # Cambiado a 'name'
             if dynamic_type is None:
                 raise ValueError("Each dynamic must have a 'name' field.")
-            if dynamic_type in SIMULATION_DYNAMICS_REGISTRY:
-                dynamic_class = SIMULATION_DYNAMICS_REGISTRY[dynamic_type]
-                validated_dynamic = dynamic_class(**dynamic)
-                validated_dynamics.append(validated_dynamic)
-            else:
+            if dynamic_type not in SIMULATION_DYNAMICS_REGISTRY.keys():
+                print(f"Registro actual de dinámicas: {SIMULATION_DYNAMICS_REGISTRY.keys()}")
                 raise ValueError(f"Unknown dynamic type: {dynamic_type}")
+            dynamic_class = SIMULATION_DYNAMICS_REGISTRY[dynamic_type]
+            validated_dynamic = dynamic_class(**dynamic)
+            validated_dynamics.append(validated_dynamic)
         
         values['dynamics'] = validated_dynamics
         return values
-    
+
     @model_validator(mode='before')
     def validate_obstacles(cls, values):
         obstacle_data = values.get('obstacles', [])
@@ -64,11 +64,11 @@ def main():
     with open("./simulator/models/simulationWorld.yaml", 'r') as stream:
         try:
             data = yaml.safe_load(stream)
-            pprint(data, indent=2)  # Pretty print del YAML cargado
+            # pprint(data, indent=2)  # Pretty print del YAML cargado
             
             # Crear la instancia de Simulation usando Pydantic
             simulation = Simulation(**data['simulation'])
-            pprint(simulation.dict(), indent=2)  # Pretty print de la configuración de la simulación
+            pprint(simulation.dict(), indent=4)  # Pretty print de la configuración de la simulación
             
             # Generar posiciones para cada grupo de agentes y sus metas
             for agent_group in simulation.agents:
