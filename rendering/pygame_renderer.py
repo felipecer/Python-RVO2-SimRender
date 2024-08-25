@@ -4,7 +4,15 @@ import pygame
 # from pygame_gui.elements import UIHorizontalSlider
 import sys
 from rendering.interfaces import RendererInterface
-
+from simulator.models.observer import SimulationObserver
+from simulator.models.messages import (
+    AgentPositionsUpdateMessage,
+    SimulationInitializedMessage,
+    ObstaclesProcessedMessage,
+    GoalsProcessedMessage,
+    GoalPositionUpdatedMessage,
+    NewObstacleAddedMessage
+)
 
 class Grid:
     def __init__(self, window_width, window_height, spacing):
@@ -52,8 +60,8 @@ class Grid:
                          (self.window_width, self.window_height // 2))
 
 
-class PyGameRenderer(RendererInterface):
-    def __init__(self, width, height, grid, map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial', cell_size=50):
+class PyGameRenderer(RendererInterface, SimulationObserver):
+    def __init__(self, width, height, map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial', cell_size=50):
         self.font_name = font_name
         self.font_size = font_size
         self.font_color = font_color
@@ -63,8 +71,8 @@ class PyGameRenderer(RendererInterface):
         self.clock = pygame.time.Clock()
         self.agents = agents
         self.simulation_steps = simulation_steps
-        self.grid = grid
-        self.cell_size = cell_size
+        self.cell_size = cell_size        
+        self.grid = Grid(width, height, cell_size)   
 
         # Window settings
         self.window = None
@@ -82,7 +90,7 @@ class PyGameRenderer(RendererInterface):
         #     (self.window_width, self.window_height))
         # self.ui_manager.ui_theme.load_fonts()
         self.delay_slider = None
-        self.delay = 100
+        self.delay = 10
 
     def _pygame_event_manager(self):
         for event in pygame.event.get():
@@ -101,52 +109,6 @@ class PyGameRenderer(RendererInterface):
             (self.window_width, self.window_height))
         pygame.display.set_caption(self.display_caption)
         self._rendering_is_active = True
-
-        # Create a slider
-        # self.delay_slider = UIHorizontalSlider(
-        #     relative_rect=pygame.Rect((10, 10), (200, 30)),
-        #     start_value=0,
-        #     value_range=(0, 1000),
-        #     manager=self.ui_manager
-        # )
-
-    def load_simulation_steps_file(self, file):
-        simulation_steps = {}
-        with open(file, 'r') as f:
-            for line in f:
-                line_split = line.strip().split(',')
-                step = int(line_split[0])
-                agent_id = int(line_split[1])
-                x, y = map(float, line_split[2:])
-                if step not in simulation_steps:
-                    simulation_steps[step] = []
-                simulation_steps[step].append((agent_id, x, y))
-        self.simulation_steps = simulation_steps
-
-    def load_obstacles_file(self, file):
-        obstacles = []
-        with open(file, 'r') as f:
-            for line in f:
-                parts = line.strip().split(',')
-                obstacle_id = int(parts[0])
-                vertices = []
-                for i in range(1, len(parts), 2):
-                    x_str = parts[i].strip("() ")
-                    y_str = parts[i + 1].strip("() ")
-                    x, y = float(x_str), float(y_str)
-                    vertices.append((x, y))
-                obstacles.append(vertices)
-        self.obstacles = obstacles
-
-    def load_goals_file(self, file):
-        goals = {}
-        with open(file, 'r') as f:
-            i = 0
-            for line in f:
-                x, y = map(float, line.strip().split(','))
-                goals[i] = (x, y)
-                i += 1
-        self.goals = goals
 
     def draw_text(self, text, x, y):
         font = pygame.font.Font(pygame.font.match_font(
@@ -182,7 +144,8 @@ class PyGameRenderer(RendererInterface):
                 pygame.draw.circle(self.window, self.agent_color, (x, y), 10)
 
     def draw_goals(self):
-        for goal in self.goals.values():
+        goals = self.goals.values()
+        for goal in goals:
             x, y = self.transform_coordinates(*goal)
             pygame.draw.circle(self.window, self.obstacle_color, (x, y), 10)
 
@@ -229,20 +192,49 @@ class PyGameRenderer(RendererInterface):
     def dispose(self):
         pygame.quit()
 
+    # Métodos de SimulationObserver
+    def update(self, message):
+        """
+        Método que será llamado cuando el `subject` notifique a sus observadores.
+        """
+        if isinstance(message, AgentPositionsUpdateMessage):
+            self.render_step_with_agents(message.agent_positions, message.step)
+        elif isinstance(message, SimulationInitializedMessage):
+            print("Simulación inicializada.")
+        elif isinstance(message, ObstaclesProcessedMessage):
+            self.obstacles_processed(message.obstacles)
+        elif isinstance(message, GoalsProcessedMessage):
+            self.goals_processed(message.goals)
+        elif isinstance(message, GoalPositionUpdatedMessage):
+            self.goal_position_updated(message.goal_id, message.new_position)
+        elif isinstance(message, NewObstacleAddedMessage):
+            self.new_obstacle_added(message.obstacle)
+
+    def obstacles_processed(self, obstacles: list):
+        self.obstacles = obstacles
+        print("Obstáculos procesados y actualizados en el renderizador.")
+
+    def goals_processed(self, goals: dict):
+        self.goals = goals
+        print("Metas procesadas y actualizadas en el renderizador.")
+
+    def goal_position_updated(self, goal_id: int, new_position: tuple):
+        if goal_id in self.goals:
+            self.goals[goal_id] = new_position
+            print(f"Posición de la meta {goal_id} actualizada a {new_position}.")
+
+    def new_obstacle_added(self, obstacle: list):
+        self.obstacles.append(obstacle)
+        print("Nuevo obstáculo agregado al renderizador.")
 
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print("Usage: python renderer.py <obstacles_file> <goals_file> <agents_file>")
-        sys.exit(1)
-
-    obstacles_file = sys.argv[1]
-    goals_file = sys.argv[2]
-    agents_file = sys.argv[3]
+    # Configuración básica para pruebas
     grid = Grid(1000, 1000, 20)
-
     renderer = PyGameRenderer(1000, 1000, grid=grid, cell_size=grid.spacing)
-    renderer.load_obstacles_file(obstacles_file)
-    renderer.load_goals_file(goals_file)
-    renderer.load_simulation_steps_file(agents_file)
     renderer.setup()
-    renderer.game_loop()
+
+    # Bucle simple para mantener la ventana abierta
+    try:
+        renderer.game_loop()
+    except KeyboardInterrupt:
+        renderer.dispose()
