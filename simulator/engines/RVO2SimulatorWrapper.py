@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional, Tuple
 from rendering.text_renderer import TextRenderer
 import rvo2
 from pydantic import BaseModel, ValidationError
@@ -7,6 +7,7 @@ import datetime
 import sys
 import yaml
 from rendering.pygame_renderer import Grid, PyGameRenderer
+from simulator.engines.base import SimulationEngine
 from simulator.models.observer import SimulationSubject
 from simulator.models.simulation import Simulation
 from simulator.models.messages import (
@@ -15,11 +16,13 @@ from simulator.models.messages import (
     ObstaclesProcessedMessage,
     GoalsProcessedMessage
 )
-from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
+from simulator.models.simulation_configuration.simulation_dynamics import SIMULATION_DYNAMICS_REGISTRY
+from simulator.models.simulation_configuration.simulation_events import EVENT_TYPES_REGISTRY, GoalReachedEvent
 
-class RVO2SimulatorWrapper(SimulationSubject):
+class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
     def __init__(self, world_config: BaseModel, simulation_id: str):
-        super().__init__()
+        SimulationEngine.__init__(self)
+        SimulationSubject.__init__(self)
         """
         Inicializa el simulador RVO2 con la configuración del mundo y un renderizador opcional.
 
@@ -33,11 +36,7 @@ class RVO2SimulatorWrapper(SimulationSubject):
         self.agent_goals = {}  # Diccionario para almacenar los objetivos de los agentes
         self.steps_buffer = []  # Buffer para almacenar los datos de cada paso de la simulación
         self.obstacles = []
-        self.dynamics = []  # Lista de dinámicas registradas
         self.current_step = 0
-    
-    def register_dynamic(self, dynamic):
-        self.dynamics.append(dynamic)
 
     def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):
         vector_to_goal = (
@@ -80,7 +79,6 @@ class RVO2SimulatorWrapper(SimulationSubject):
 
             # Generamos las posiciones de las metas para este grupo si existen
             goals = agent_group.goals.pattern.generate_positions() if agent_group.goals else None
-            print(f"Goals: {goals}")
             
             # Iteramos sobre las posiciones generadas de los agentes
             for local_agent_index, position in enumerate(positions):
@@ -152,8 +150,8 @@ class RVO2SimulatorWrapper(SimulationSubject):
             self.store_step(step)
 
     def handle_event(self, event):
-        for dynamic in self.dynamics:
-            dynamic.apply(event, self)
+        event_type = type(event).__name__
+        super().handle_event(event_type, event)
 
     def is_goal_reached(self, agent_id: int) -> bool:
         current_position = self.sim.getAgentPosition(agent_id)
@@ -225,6 +223,53 @@ class RVO2SimulatorWrapper(SimulationSubject):
     def clear_buffer(self):
         self.steps_buffer = []
 
+    def get_agent_positions(self) -> Dict[int, Tuple[float, float]]:
+        """
+        Devuelve las posiciones actuales de todos los agentes en la simulación.
+
+        Returns:
+            Dict[int, Tuple[float, float]]: Un diccionario donde las claves son los IDs de los agentes y los valores son las posiciones (x, y).
+        """
+        agent_positions = {}
+        for agent_id in range(self.sim.getNumAgents()):
+            position = self.sim.getAgentPosition(agent_id)
+            agent_positions[agent_id] = position
+        return agent_positions
+
+    def get_agent_goal(self, agent_id: int) -> Tuple[float, float]:
+        """
+        Devuelve la meta actual de un agente dado su ID.
+
+        Args:
+            agent_id (int): El ID del agente.
+
+        Returns:
+            Tuple[float, float]: La posición de la meta del agente.
+        """
+        return self.agent_goals.get(agent_id)
+
+    def is_goal_reached(self, agent_id: int) -> bool:
+        """
+        Verifica si un agente ha alcanzado su meta.
+
+        Args:
+            agent_id (int): El ID del agente.
+
+        Returns:
+            bool: True si el agente ha alcanzado su meta, False en caso contrario.
+        """
+        current_position = self.sim.getAgentPosition(agent_id)
+        goal_position = self.get_agent_goal(agent_id)
+        if not goal_position:
+            return False
+
+        distance = math.sqrt(
+            (current_position[0] - goal_position[0]) ** 2 +
+            (current_position[1] - goal_position[1]) ** 2
+        )
+        # Considera que se ha alcanzado la meta si la distancia es menor o igual a un umbral
+        return distance <= 0.05
+    
 def main():
     if len(sys.argv) != 2:
         print("Usage: python simulator.py <world_file.yaml>")
@@ -257,15 +302,27 @@ def main():
     )
     renderer.setup()
 
-    text_renderer = TextRenderer()
-    text_renderer.setup()
-
+    # text_renderer = TextRenderer()
+    # text_renderer.setup()
+    
     # Inicializar el simulador y registrar el renderizador como observador
     rvo2_simulator = RVO2SimulatorWrapper(world_config, "test_simulation")
     rvo2_simulator.register_observer(renderer)
-    rvo2_simulator.register_observer(text_renderer)
-    rvo2_simulator.initialize_simulation()
-    rvo2_simulator.run_simulation(5000)
+    # rvo2_simulator.register_observer(text_renderer)
+
+    # Registrar dinámicas desde el archivo YAML
+    for dynamic_config in world_config.dynamics:
+        dynamic_class = SIMULATION_DYNAMICS_REGISTRY.get(dynamic_config.name)
+        if not dynamic_class:
+            print(f"Dynamic '{dynamic_config.name}' is not registered.")
+            continue
+        dynamic_instance = dynamic_class(**dynamic_config.dict())
+        rvo2_simulator.register_dynamic(dynamic_instance)
+
+    # Inicializar y ejecutar la simulación
+    # rvo2_simulator.initialize_simulation()
+
+    rvo2_simulator.run_pipeline(5000)  # Se asume 5000 pasos como ejemplo
     rvo2_simulator.save_simulation_runs()
 
 if __name__ == "__main__":

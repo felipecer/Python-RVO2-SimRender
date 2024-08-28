@@ -21,9 +21,14 @@ def register_event_type(cls=None, *, alias=None):
 class SimulationEvent(BaseModel):
     @model_validator(mode='after')
     def validate_event_type(cls, values):
-        if cls.__name__ not in EVENT_TYPES_REGISTRY:
-            raise ValueError(f"Event type {cls.__name__} is not registered in EVENT_TYPES_REGISTRY.")
-        return values    
+        # Asignar name basado en el nombre de la clase si no está presente
+        if not values.alias:
+            values.alias = cls.__name__
+        
+        if values.alias not in EVENT_TYPES_REGISTRY:
+            raise ValueError(f"Event type {values.name} is not registered in EVENT_TYPES_REGISTRY.")
+        
+        return values 
     class Config:
         arbitrary_types_allowed = True
 
@@ -33,3 +38,4 @@ class GoalReachedEvent(SimulationEvent):
     goal_position: Tuple[float, float]
     current_position: Tuple[float, float]
     step: int
+    alias: str = "goal_reached"

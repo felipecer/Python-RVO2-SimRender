@@ -24,9 +24,6 @@ class DynamicsQueueManager:
                 self.after_step_list.append(dynamic)
 
     def add_once_dynamic(self, dynamic: Callable, timing: ExecutionTiming):
-        if not isinstance(dynamic, OnceDynamic):
-            raise TypeError(f"Expected OnceDynamic, got {type(dynamic).__name__}")
-
         """Agrega dinámicas que se ejecutan una sola vez al inicio o al final."""
         if timing == ExecutionTiming.BEFORE:
             self.initial_tasks.append(dynamic)

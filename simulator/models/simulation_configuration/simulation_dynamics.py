@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Dict, Type, Tuple, Optional
 import numpy as np
 from simulator.models.messages import GoalPositionUpdatedMessage
-from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
+from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent, SimulationEvent
 
 # Enum para los tipos de ejecución de las dinámicas
 class ExecutionTiming(Enum):
@@ -49,14 +49,15 @@ def register_simulation_dynamic(cls=None, *, alias=None):
 class EventBasedDynamic(SimulationDynamic):
     event_type: str  # Define el tipo de evento que manejará esta dinámica
 
-    @abstractmethod
-    def handle_event(self, event):
-        """Método que debe implementarse para manejar un evento específico."""
-        pass
+    def apply(self, event: Optional[SimulationEvent] = None):
+        """Aplica la dinámica en respuesta a un evento."""
+        if isinstance(event, GoalReachedEvent):
+            self.execute(event)
 
-    def apply(self):
-        """El método apply puede no ser usado directamente en dinámicas basadas en eventos."""
-        raise NotImplementedError("EventBasedDynamic uses handle_event instead of apply.")
+    @abstractmethod
+    def execute(self, event: SimulationEvent):
+        """Método abstracto que debe ser implementado para manejar el evento."""
+        pass
 
 class OnStepDynamic(SimulationDynamic):
     every_n_steps: Optional[int] = 1  # Se ejecuta cada n pasos, por defecto en cada paso
@@ -109,6 +110,15 @@ class GoalRespawnDynamic(EventBasedDynamic):
                 goal_id=event.agent_id,
                 new_position=new_goal
             ))
+
+    def execute(self, event: GoalReachedEvent):
+        new_goal = self._generate_new_goal()
+        self._simulator.agent_goals[event.agent_id] = new_goal
+        self._simulator.notify_observers(GoalPositionUpdatedMessage(
+            step=event.step,
+            goal_id=event.agent_id,
+            new_position=new_goal
+        ))
 
     def _generate_new_goal(self) -> Tuple[float, float]:
         if not self._generated_points:

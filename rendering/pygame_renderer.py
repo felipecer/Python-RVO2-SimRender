@@ -212,20 +212,16 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
     def obstacles_processed(self, obstacles: list):
         self.obstacles = obstacles
-        print("Obstáculos procesados y actualizados en el renderizador.")
 
     def goals_processed(self, goals: dict):
         self.goals = goals
-        print("Metas procesadas y actualizadas en el renderizador.")
 
     def goal_position_updated(self, goal_id: int, new_position: tuple):
         if goal_id in self.goals:
             self.goals[goal_id] = new_position
-            print(f"Posición de la meta {goal_id} actualizada a {new_position}.")
 
     def new_obstacle_added(self, obstacle: list):
         self.obstacles.append(obstacle)
-        print("Nuevo obstáculo agregado al renderizador.")
 
 if __name__ == '__main__':
     # Configuración básica para pruebas

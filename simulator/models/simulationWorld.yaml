@@ -75,6 +75,6 @@ simulation:
       when: "before"
       max_steps: 1000
     - name: "log_step_info"
-      when: "before"
-    - name: "cleanup_resources"
       when: "after"
+    - name: "cleanup_resources"
+      when: "before"
