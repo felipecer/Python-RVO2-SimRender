@@ -1,3 +1,4 @@
+import pprint
 from typing import Dict, Optional, Tuple
 from rendering.text_renderer import TextRenderer
 import rvo2
@@ -308,16 +309,11 @@ def main():
     # Inicializar el simulador y registrar el renderizador como observador
     rvo2_simulator = RVO2SimulatorWrapper(world_config, "test_simulation")
     rvo2_simulator.register_observer(renderer)
+    
     # rvo2_simulator.register_observer(text_renderer)
-
     # Registrar dinámicas desde el archivo YAML
     for dynamic_config in world_config.dynamics:
-        dynamic_class = SIMULATION_DYNAMICS_REGISTRY.get(dynamic_config.name)
-        if not dynamic_class:
-            print(f"Dynamic '{dynamic_config.name}' is not registered.")
-            continue
-        dynamic_instance = dynamic_class(**dynamic_config.dict())
-        rvo2_simulator.register_dynamic(dynamic_instance)
+        rvo2_simulator.register_dynamic(dynamic_config)
 
     # Inicializar y ejecutar la simulación
     # rvo2_simulator.initialize_simulation()
