@@ -112,6 +112,7 @@ class GoalRespawnDynamic(EventBasedDynamic):
             ))
 
     def execute(self, event: GoalReachedEvent):
+        print(f"Goal reached by agent {event.agent_id} at step {event.step}. Respawning goal.")
         new_goal = self._generate_new_goal()
         self._simulator.agent_goals[event.agent_id] = new_goal
         self._simulator.notify_observers(GoalPositionUpdatedMessage(
@@ -154,6 +155,7 @@ class MaxStepsReachedDynamic(OnStepDynamic):
     max_steps: int
 
     def execute(self):
+        print("Max steps reached dynamic executed.")
         if self._simulator.current_step >= self.max_steps:
             print(f"Maximum steps of {self.max_steps} reached. Stopping simulation.")
             self._simulator.stop_simulation()

@@ -5,23 +5,25 @@ from simulator.models.simulation_configuration.simulation_dynamics import Execut
 
 class DynamicsQueueManager:
     def __init__(self):
-        self.initial_tasks: List[Callable] = []     # Lista de tareas que se ejecutan una vez al inicio (before + once)
-        self.before_step_list: List[Callable] = []  # Lista de tareas que se ejecutan antes de cada step
-        self.after_step_list: List[Callable] = []   # Lista de tareas que se ejecutan después de cada step
-        self.final_tasks: List[Callable] = []       # Lista de tareas que se ejecutan una vez al final (after + once)
+        self.initial_tasks: List[Callable] = []        # Tareas que se ejecutan una vez al inicio
+        self.cycle_dynamics_before: List[Callable] = []  # Dinámicas que se ejecutan en cada ciclo antes del paso
+        self.cycle_dynamics_after: List[Callable] = []   # Dinámicas que se ejecutan en cada ciclo después del paso
+        self.on_demand_before: List[Callable] = []       # Dinámicas bajo demanda antes del paso (se eliminan tras ejecutarse)
+        self.on_demand_after: List[Callable] = []        # Dinámicas bajo demanda después del paso (se eliminan tras ejecutarse)
+        self.final_tasks: List[Callable] = []          # Tareas que se ejecutan una vez al final
 
     def add_dynamic(self, dynamic: Callable, timing: ExecutionTiming, on_demand: bool = False):
         """Agrega una dinámica a la lista correspondiente."""
         if timing == ExecutionTiming.BEFORE:
             if on_demand:
-                self.before_step_list.insert(0, dynamic)  # On demand se agrega al principio de la lista before
+                self.on_demand_before.append(dynamic)
             else:
-                self.before_step_list.append(dynamic)
+                self.cycle_dynamics_before.append(dynamic)
         elif timing == ExecutionTiming.AFTER:
             if on_demand:
-                self.after_step_list.insert(0, dynamic)  # On demand se agrega al principio de la lista after
+                self.on_demand_after.append(dynamic)
             else:
-                self.after_step_list.append(dynamic)
+                self.cycle_dynamics_after.append(dynamic)
 
     def add_once_dynamic(self, dynamic: Callable, timing: ExecutionTiming):
         """Agrega dinámicas que se ejecutan una sola vez al inicio o al final."""
@@ -36,15 +38,25 @@ class DynamicsQueueManager:
             task()
 
     def run_before_step_dynamics(self):
-        """Ejecuta todas las dinámicas en la lista before_step en el orden adecuado."""
-        while self.before_step_list:
-            dynamic = self.before_step_list.pop(0)
+        """Ejecuta todas las dinámicas que deben correr antes de cada step."""
+        # Ejecuta dinámicas que corren en cada ciclo
+        for dynamic in self.cycle_dynamics_before:
+            dynamic()
+
+        # Ejecuta y elimina dinámicas bajo demanda
+        while self.on_demand_before:
+            dynamic = self.on_demand_before.pop(0)
             dynamic()
 
     def run_after_step_dynamics(self):
-        """Ejecuta todas las dinámicas en la lista after_step en el orden adecuado."""
-        while self.after_step_list:
-            dynamic = self.after_step_list.pop(0)
+        """Ejecuta todas las dinámicas que deben correr después de cada step."""
+        # Ejecuta dinámicas que corren en cada ciclo
+        for dynamic in self.cycle_dynamics_after:
+            dynamic()
+
+        # Ejecuta y elimina dinámicas bajo demanda
+        while self.on_demand_after:
+            dynamic = self.on_demand_after.pop(0)
             dynamic()
 
     def run_final_tasks(self):

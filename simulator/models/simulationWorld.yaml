@@ -73,7 +73,7 @@ simulation:
       empty_radius: 1.5
     - name: "max_steps"
       when: "before"
-      max_steps: 1000
+      max_steps: 10
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"

@@ -1,13 +1,11 @@
-import pprint
-from typing import Dict, Optional, Tuple
-from rendering.text_renderer import TextRenderer
+from typing import Dict, Tuple
 import rvo2
 from pydantic import BaseModel, ValidationError
 import math
 import datetime
 import sys
 import yaml
-from rendering.pygame_renderer import Grid, PyGameRenderer
+from rendering.pygame_renderer import PyGameRenderer
 from simulator.engines.base import SimulationEngine
 from simulator.models.observer import SimulationSubject
 from simulator.models.simulation import Simulation
@@ -17,8 +15,7 @@ from simulator.models.messages import (
     ObstaclesProcessedMessage,
     GoalsProcessedMessage
 )
-from simulator.models.simulation_configuration.simulation_dynamics import SIMULATION_DYNAMICS_REGISTRY
-from simulator.models.simulation_configuration.simulation_events import EVENT_TYPES_REGISTRY, GoalReachedEvent
+from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
 
 class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
     def __init__(self, world_config: BaseModel, simulation_id: str):
@@ -309,7 +306,7 @@ def main():
     # Inicializar el simulador y registrar el renderizador como observador
     rvo2_simulator = RVO2SimulatorWrapper(world_config, "test_simulation")
     rvo2_simulator.register_observer(renderer)
-    
+
     # rvo2_simulator.register_observer(text_renderer)
     # Registrar dinámicas desde el archivo YAML
     for dynamic_config in world_config.dynamics:
