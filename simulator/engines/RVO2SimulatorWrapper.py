@@ -139,7 +139,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                         current_position=self.sim.getAgentPosition(agent_id),
                         step=step
                     )
-                    self.handle_event(event)
+                    self.handle_event(event.alias, event)
 
             agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
                                for agent_id in range(self.sim.getNumAgents())]
@@ -147,15 +147,11 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             self.notify_observers(AgentPositionsUpdateMessage(step=step, agent_positions=agent_positions))
             self.store_step(step)
 
-    def handle_event(self, event):
-        event_type = type(event).__name__
-        super().handle_event(event_type, event)
-
     def is_goal_reached(self, agent_id: int) -> bool:
         current_position = self.sim.getAgentPosition(agent_id)
         goal_position = self.agent_goals[agent_id]
         distance = math.dist(current_position, goal_position)
-        return distance <= 0.05
+        return distance <= 0.10
 
     def store_step(self, step: int):
         """

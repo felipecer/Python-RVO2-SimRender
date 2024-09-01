@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABC
 from typing import Callable, List, Dict, Tuple
 from enum import Enum
-from simulator.models.simulation_configuration.simulation_dynamics import ExecutionTiming, OnceDynamic
+from simulator.models.simulation_configuration.simulation_dynamics import EventBasedDynamic, ExecutionTiming, OnceDynamic
 
 class DynamicsQueueManager:
     def __init__(self):
@@ -81,27 +81,35 @@ class SimulationEngine(ABC):
         """Registra una dinámica para que se ejecute durante la simulación."""
         if self._state != SimulationState.SETUP:
             raise RuntimeError("Cannot register dynamics after setup is complete.")
-        
+
+        # Asocia el simulador con la dinámica
         dynamic.register_simulator(self)
+
+        # Manejo de dinámicas que se ejecutan una vez
         if isinstance(dynamic, OnceDynamic):
             self._dynamics_manager.add_once_dynamic(dynamic.apply, dynamic.when)
+        # Manejo de dinámicas basadas en eventos
+        elif isinstance(dynamic, EventBasedDynamic):
+            # print(f"Registering event handler for event type: {dynamic.event_type}")
+            # Registra el manejador de eventos pero no lo encola todavía
+            self.register_event_handler(dynamic.event_type, dynamic.apply, dynamic.when)
+        # Manejo de dinámicas que se ejecutan en cada ciclo (OnStepDynamic o similares)
         else:
             self._dynamics_manager.add_dynamic(dynamic.apply, dynamic.when)
 
-    def register_event_handler(self, event_type: str, handler: Callable):
+    def register_event_handler(self, event_type: str, handler: Callable, when: ExecutionTiming = ExecutionTiming.BEFORE):   
         """Permite que una dinámica se suscriba a un evento específico."""
         if event_type not in self._event_handlers:
             self._event_handlers[event_type] = []
-        self._event_handlers[event_type].append(handler)
+        self._event_handlers[event_type].append((handler, when))
 
     def handle_event(self, event_type: str, *args, **kwargs):
         """Maneja un evento recibido y encola las acciones correspondientes."""
         handlers = self._event_handlers.get(event_type, [])
-        for handler in handlers:
+        for handler, timing in handlers:
             action = lambda: handler(*args, **kwargs)
-            # Aquí decidimos en qué momento se debe ejecutar la acción
-            # Por defecto, encolamos la acción en la lista "before_step"
-            self._dynamics_manager.add_dynamic(action, ExecutionTiming.BEFORE)
+            self._dynamics_manager.add_dynamic(action, timing, on_demand=True)
+
 
     @abstractmethod
     def initialize_simulation(self):
