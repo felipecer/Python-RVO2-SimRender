@@ -35,6 +35,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         self.steps_buffer = []  # Buffer para almacenar los datos de cada paso de la simulación
         self.obstacles = []
         self.current_step = 0
+        self.agent_initial_positions = []
+        self._manual_velocity_updates = []
 
     def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):
         vector_to_goal = (
@@ -96,7 +98,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 
                 # Configuramos la velocidad preferida del agente
                 self.sim.setAgentPrefVelocity(agent_id, agent_defaults.velocity)
-        
+                self.agent_initial_positions.append(position)
                 # Si hay metas definidas para el grupo de agentes
                 if goals:
                     self.notify_observers(GoalsProcessedMessage(step=-1, goals=self.agent_goals))
@@ -118,6 +120,20 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
         # Notificar a los observadores sobre la inicialización
         self.notify_observers(SimulationInitializedMessage(step=-1))
+
+    def reset(self):
+        """Reinicia la simulación a su estado inicial."""
+        self.current_step = 0
+
+        # Restablecer las posiciones de los agentes a las posiciones iniciales
+        for agent_id, initial_position in enumerate(self.agent_initial_positions):
+            self.sim.setAgentPosition(agent_id, initial_position)
+
+        # Restablecer cualquier otra variable relevante (como metas)
+        # Opcional: Si necesitas reiniciar las metas, puedes hacerlo aquí
+        for agent_id in self.agent_goals:
+            # Si necesitas actualizar las metas puedes hacerlo aquí, si no simplemente reinicializa la simulación
+            self.set_goal(agent_id, self.agent_goals[agent_id])
 
     def run_simulation(self, steps: int):
         """
@@ -186,36 +202,56 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
         print(f"Archivo de simulación guardado como: {filename}")
 
-    def update_agent_velocities(self):
+    def update_agent_velocity(self, agent_id: int, velocity: Tuple[float, float]):
         """
-        Actualiza las velocidades preferidas de los agentes en la simulación.
+        Registra una actualización manual de la velocidad para un agente específico.
         """
-        num_goals = len(self.agent_goals)
-        for agent_id in range(self.sim.getNumAgents()):
-            if agent_id >= num_goals:
-                continue
-            agent_position = self.sim.getAgentPosition(agent_id)            
-            goal_position = self.agent_goals[agent_id]
-            if goal_position:
-                vector_to_goal = (
-                    goal_position[0] - agent_position[0],
-                    goal_position[1] - agent_position[1]
-                )
-                distance = math.sqrt(vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
-                max_speed = self.sim.getAgentMaxSpeed(agent_id)
+        self._manual_velocity_updates.append((agent_id, velocity))
 
-                if distance > 0:
-                    preferred_velocity = (
-                        vector_to_goal[0] / distance * max_speed,
-                        vector_to_goal[1] / distance * max_speed
+        def update_agent_velocities(self):
+            """
+            Actualiza las velocidades preferidas de los agentes en la simulación, considerando actualizaciones manuales.
+            """
+            # Aplicar actualizaciones manuales primero
+            manual_update_ids = set(agent_id for agent_id, _ in self._manual_velocity_updates)
+            for agent_id, velocity in self._manual_velocity_updates:
+                self.sim.setAgentPrefVelocity(agent_id, velocity)
+
+            # Actualizar el resto de los agentes con la lógica por defecto
+            num_goals = len(self.agent_goals)
+            for agent_id in range(self.sim.getNumAgents()):
+                if agent_id >= num_goals or agent_id in manual_update_ids:
+                    continue
+
+                agent_position = self.sim.getAgentPosition(agent_id)
+                goal_position = self.agent_goals[agent_id]
+                if goal_position:
+                    vector_to_goal = (
+                        goal_position[0] - agent_position[0],
+                        goal_position[1] - agent_position[1]
                     )
-                else:
-                    preferred_velocity = (0, 0)
+                    distance = math.sqrt(vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
+                    max_speed = self.sim.getAgentMaxSpeed(agent_id)
 
-                self.sim.setAgentPrefVelocity(agent_id, preferred_velocity)
-    
+                    if distance > 0:
+                        preferred_velocity = (
+                            vector_to_goal[0] / distance * max_speed,
+                            vector_to_goal[1] / distance * max_speed
+                        )
+                    else:
+                        preferred_velocity = (0, 0)
+
+                    self.sim.setAgentPrefVelocity(agent_id, preferred_velocity)
+            
+            # Limpiar la cola después de aplicar las actualizaciones
+            self._manual_velocity_updates.clear()
+
     def clear_buffer(self):
         self.steps_buffer = []
+
+    def get_agent_position(self, agent_id) -> Tuple[float, float]:
+        """Devuelve la posicion actual del agente."""
+        return self.sim.getAgentPosition(agent_id)
 
     def get_agent_positions(self) -> Dict[int, Tuple[float, float]]:
         """
@@ -229,8 +265,12 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             position = self.sim.getAgentPosition(agent_id)
             agent_positions[agent_id] = position
         return agent_positions
+    
+    def set_goal(self, agent_id: int, goal: Tuple[float, float]) -> None:
+        """agrega o actualiza la meta del agente dado su id"""
+        self.agent_goals[agent_id] = goal
 
-    def get_agent_goal(self, agent_id: int) -> Tuple[float, float]:
+    def get_goal(self, agent_id: int) -> Tuple[float, float]:
         """
         Devuelve la meta actual de un agente dado su ID.
 
@@ -253,7 +293,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             bool: True si el agente ha alcanzado su meta, False en caso contrario.
         """
         current_position = self.sim.getAgentPosition(agent_id)
-        goal_position = self.get_agent_goal(agent_id)
+        goal_position = self.get_goal(agent_id)
         if not goal_position:
             return False
 

@@ -95,7 +95,6 @@ class GoalRespawnDynamic(EventBasedDynamic):
 
     def __init__(self, **data):
         super().__init__(**data)
-        # self._generate_points()
 
     def handle_event(self, event):
         if isinstance(event, GoalReachedEvent):

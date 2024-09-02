@@ -137,6 +137,11 @@ class SimulationEngine(ABC):
         pass
 
     @abstractmethod
+    def reset(self):
+        """Reinicia la simulación a su estado inicial."""
+        pass
+
+    @abstractmethod
     def run_simulation(self, step: int):
         """Ejecuta el ciclo de la simulación por un número de pasos especificado."""
         pass
@@ -148,19 +153,45 @@ class SimulationEngine(ABC):
         self._dynamics_manager.run_final_tasks()  # Ejecutar las tareas finales al detener la simulación
 
     @abstractmethod
+    def get_agent_position(self, agent_id) -> Tuple[float, float]:
+        """Devuelve la posicion actual del agente."""
+        pass
+
+    @abstractmethod
     def get_agent_positions(self) -> Dict[int, Tuple[float, float]]:
         """Devuelve las posiciones actuales de los agentes."""
         pass
 
     @abstractmethod
-    def get_agent_goal(self, agent_id: int) -> Tuple[float, float]:
+    def get_goal(self, agent_id: int) -> Tuple[float, float]:
         """Devuelve la meta actual de un agente dado su ID."""
+        pass
+
+    @abstractmethod
+    def set_goal(self, agent_id: int, goal: Tuple[float, float]) -> None:
+        """agrega o actualiza la meta del agente dado su id"""
         pass
 
     @abstractmethod
     def is_goal_reached(self, agent_id: int) -> bool:
         """Verifica si un agente ha alcanzado su meta."""
         pass
+
+    def execute_simulation_step(self, step: int):
+        """
+        Ejecuta un paso de la simulación, incluyendo las dinámicas y la actualización de los agentes.
+        
+        Args:
+            step (int): El número del paso actual en la simulación.
+        """
+        # Ejecutar dinámicas antes del paso
+        self._dynamics_manager.run_before_step_dynamics()
+        
+        # Ejecutar el paso de simulación
+        self.run_simulation(step)
+        
+        # Ejecutar dinámicas después del paso
+        self._dynamics_manager.run_after_step_dynamics()
     
     def run_pipeline(self, steps: int):
         if self._state != SimulationState.SETUP:
@@ -180,14 +211,8 @@ class SimulationEngine(ABC):
             if self._state == SimulationState.STOPPED:
                 break
             
-            # Ejecutar dinámicas antes del paso
-            self._dynamics_manager.run_before_step_dynamics()
-            
-            # Ejecutar el paso de simulación
-            self.run_simulation(step)
-            
-            # Ejecutar dinámicas después del paso
-            self._dynamics_manager.run_after_step_dynamics()
+            # Ejecutar un paso completo de la simulación
+            self.execute_simulation_step(step)
 
             # Verificar si el estado ha cambiado a STOPPED durante las dinámicas
             if self._state == SimulationState.STOPPED:
