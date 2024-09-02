@@ -37,6 +37,7 @@ class RVOSimulationEnv2(gym.Env):
             )
             renderer.setup()
             self.sim.register_observer(renderer)
+            print(f"Observadores registrados: {self.sim._observers}")
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
@@ -51,9 +52,11 @@ class RVOSimulationEnv2(gym.Env):
 
     def step(self, action):
         """Realiza un paso en la simulación con la acción proporcionada."""
+        action = tuple(action)
+        # print(f"Action: {action}")
         self.sim.update_agent_velocity(0, action)
-        self.sim.run_pipeline(1)
-
+        self.sim.update_agent_velocities()
+        self.sim.execute_simulation_step()
         observations = self._get_obs()
         reward = self.calculate_reward(0)
         done = self.is_done(0)
@@ -103,10 +106,14 @@ if __name__ == "__main__":
     i = 0
     while not done:
         action = env.action_space.sample()  # Take random actions
-        print(f"Action: {action}")
+        # print(f"Action: {action}")
         observations, reward, done, truncated, info = env.step(action)
+
+        # Monitorear la posición del agente
+        agent_position = env.sim.get_agent_position(0)
+        # print(f"Step {i}: Agent position: {agent_position}")
         if done or truncated:
             print(f"Episode done: {done}, truncated: {truncated}")
             break
-        print(f"Step {i} reward: {reward}")
+        # print(f"Step {i} reward: {reward}")
         i += 1

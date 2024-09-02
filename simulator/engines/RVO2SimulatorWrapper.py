@@ -208,43 +208,43 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         """
         self._manual_velocity_updates.append((agent_id, velocity))
 
-        def update_agent_velocities(self):
-            """
-            Actualiza las velocidades preferidas de los agentes en la simulación, considerando actualizaciones manuales.
-            """
-            # Aplicar actualizaciones manuales primero
-            manual_update_ids = set(agent_id for agent_id, _ in self._manual_velocity_updates)
-            for agent_id, velocity in self._manual_velocity_updates:
-                self.sim.setAgentPrefVelocity(agent_id, velocity)
+    def update_agent_velocities(self):
+        """
+        Actualiza las velocidades preferidas de los agentes en la simulación, considerando actualizaciones manuales.
+        """
+        # Aplicar actualizaciones manuales primero
+        manual_update_ids = set(agent_id for agent_id, _ in self._manual_velocity_updates)
+        for agent_id, velocity in self._manual_velocity_updates:
+            self.sim.setAgentPrefVelocity(agent_id, velocity)
 
-            # Actualizar el resto de los agentes con la lógica por defecto
-            num_goals = len(self.agent_goals)
-            for agent_id in range(self.sim.getNumAgents()):
-                if agent_id >= num_goals or agent_id in manual_update_ids:
-                    continue
+        # Actualizar el resto de los agentes con la lógica por defecto
+        num_goals = len(self.agent_goals)
+        for agent_id in range(self.sim.getNumAgents()):
+            if agent_id >= num_goals or agent_id in manual_update_ids:
+                continue
 
-                agent_position = self.sim.getAgentPosition(agent_id)
-                goal_position = self.agent_goals[agent_id]
-                if goal_position:
-                    vector_to_goal = (
-                        goal_position[0] - agent_position[0],
-                        goal_position[1] - agent_position[1]
+            agent_position = self.sim.getAgentPosition(agent_id)
+            goal_position = self.agent_goals[agent_id]
+            if goal_position:
+                vector_to_goal = (
+                    goal_position[0] - agent_position[0],
+                    goal_position[1] - agent_position[1]
+                )
+                distance = math.sqrt(vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
+                max_speed = self.sim.getAgentMaxSpeed(agent_id)
+
+                if distance > 0:
+                    preferred_velocity = (
+                        vector_to_goal[0] / distance * max_speed,
+                        vector_to_goal[1] / distance * max_speed
                     )
-                    distance = math.sqrt(vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
-                    max_speed = self.sim.getAgentMaxSpeed(agent_id)
+                else:
+                    preferred_velocity = (0, 0)
 
-                    if distance > 0:
-                        preferred_velocity = (
-                            vector_to_goal[0] / distance * max_speed,
-                            vector_to_goal[1] / distance * max_speed
-                        )
-                    else:
-                        preferred_velocity = (0, 0)
-
-                    self.sim.setAgentPrefVelocity(agent_id, preferred_velocity)
-            
-            # Limpiar la cola después de aplicar las actualizaciones
-            self._manual_velocity_updates.clear()
+                self.sim.setAgentPrefVelocity(agent_id, preferred_velocity)
+        
+        # Limpiar la cola después de aplicar las actualizaciones
+        self._manual_velocity_updates.clear()
 
     def clear_buffer(self):
         self.steps_buffer = []

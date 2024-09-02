@@ -177,7 +177,7 @@ class SimulationEngine(ABC):
         """Verifica si un agente ha alcanzado su meta."""
         pass
 
-    def execute_simulation_step(self, step: int):
+    def execute_simulation_step(self):
         """
         Ejecuta un paso de la simulación, incluyendo las dinámicas y la actualización de los agentes.
         
@@ -188,7 +188,7 @@ class SimulationEngine(ABC):
         self._dynamics_manager.run_before_step_dynamics()
         
         # Ejecutar el paso de simulación
-        self.run_simulation(step)
+        self.run_simulation(1)
         
         # Ejecutar dinámicas después del paso
         self._dynamics_manager.run_after_step_dynamics()
