@@ -2,22 +2,23 @@
 import gymnasium as gym
 from gymnasium import spaces, logger
 import numpy as np
-from simulator.world_loader import WorldLoader
-import rvo2
+import yaml
 from rendering.pygame_renderer import Grid, PyGameRenderer
 from rendering.text_renderer import TextRenderer
-import math
-from rl_environments.utils.spawners import GoalSpawner
+from simulator.engines import RVO2SimulatorWrapper
+from simulator.models.simulation import Simulation
 
 class RVOSimulationEnv2(gym.Env):
     metadata = {'render.modes': ['ansi', 'rgb']}
 
     def __init__(self, config_file=None, render_mode="rgb", seed=None):
         super(RVOSimulationEnv2, self).__init__()
-        self.loader = WorldLoader(config_file)
-        self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
+        # Cargar configuración YAML
+        with open(config_file, 'r') as stream:
+            config_data = yaml.safe_load(stream)
 
-        self._last_goal_reached = -1
+        # Inicializar el simulador con RVO2SimulatorWrapper
+        self.sim = RVO2SimulatorWrapper(Simulation(**config_data['simulation']), "test_simulation")
 
         self._current_initial_position = self.sim.getAgentPosition(0)
         
@@ -27,34 +28,17 @@ class RVOSimulationEnv2(gym.Env):
             self.seed = seed
         self._random_number_generator = np.random.default_rng(self.seed)
 
-        # Inicializar GoalSpawner
-        self.goal_spawner = GoalSpawner(
-            seed=self.seed, empty_radius=0.1, num_iterations=4, step_radius=0.5)
-
         self.num_agents = self.sim.getNumAgents()
         self.action_space = spaces.Box(
             low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
-        self.agent_goals = [self.goal_spawner.get_next_goal()]
-        # print(f"Initial goal: {self.agent_goals[0]}")
         self.initial_distance = self._calc_distance_to_goal(0)
         self.time_limit = 256
         self.current_step = 0
         self.render_mode = render_mode
-        self._render_buffer = []
+        self._render_buffer = []        
 
-        if render_mode == "rgb":
-            obstacles = self.loader.get_obstacles()
-            goals = {
-                0: self.agent_goals[0]
-            }
-            grid = Grid(1000, 1000, 100)
-            self._gui_renderer = PyGameRenderer(
-                1000, 1000, obstacles=obstacles, goals=goals, grid=grid, cell_size=grid.spacing)
-            self._gui_renderer.setup()
-
-        self._text_renderer = TextRenderer()
         self.sim.setAgentPrefVelocity(0, (1, 1))
 
     def _calc_distance_to_goal(self, agent_id):
