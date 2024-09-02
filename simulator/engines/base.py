@@ -1,6 +1,8 @@
 from abc import abstractmethod, ABC
 from typing import Callable, List, Dict, Tuple
 from enum import Enum
+
+import numpy as np
 from simulator.models.simulation_configuration.simulation_dynamics import EventBasedDynamic, ExecutionTiming, OnceDynamic
 
 class DynamicsQueueManager:
@@ -71,11 +73,29 @@ class SimulationState(Enum):
     STOPPED = "stopped"
 
 class SimulationEngine(ABC):
-    def __init__(self):
+    _default_seed = 11
+    def __init__(self, seed: int = None):
         self._dynamics_manager = DynamicsQueueManager()
         self._event_handlers: Dict[str, List[Callable]] = {}
         self._state = SimulationState.SETUP
         self.current_step: int = 0
+        self._seed = seed if seed is not None else self._default_seed  # Usa el seed proporcionado o el default
+        self._random_number_generator = np.random.default_rng(self._seed)  # Inicialización del RNG
+
+    def reset_rng_with_seed(self, seed: int = None):
+        """Reinicia el generador de números aleatorios con un nuevo seed."""
+        if seed is None:
+            seed = self._default_seed  # Usa el seed por defecto si no se proporciona otro
+        self._seed = seed
+        self._random_number_generator = np.random.default_rng(seed)
+
+    def get_seed(self) -> int:
+        """Devuelve el seed actual utilizado por el RNG."""
+        return self._seed
+
+    def get_rng(self):
+        """Devuelve el generador de números aleatorios actual."""
+        return self._random_number_generator
 
     def register_dynamic(self, dynamic):
         """Registra una dinámica para que se ejecute durante la simulación."""

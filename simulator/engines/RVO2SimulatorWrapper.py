@@ -18,8 +18,8 @@ from simulator.models.messages import (
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
 
 class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
-    def __init__(self, world_config: BaseModel, simulation_id: str):
-        SimulationEngine.__init__(self)
+    def __init__(self, world_config: BaseModel, simulation_id: str, seed: int = None):
+        SimulationEngine.__init__(self, seed=seed)
         SimulationSubject.__init__(self)
         """
         Inicializa el simulador RVO2 con la configuración del mundo y un renderizador opcional.
