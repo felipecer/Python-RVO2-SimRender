@@ -1,0 +1,123 @@
+simulation:
+  time_step: 0.005
+  map_settings:
+    x_min: -8.0
+    x_max: 8.0
+    y_min: -5.0
+    y_max: 5.0
+    cell_size: 100
+  agent_defaults:
+    max_speed: 1.0
+    radius: 0.01
+    time_horizon: 5.0
+    time_horizon_obst: 5.0
+    max_neighbors: 10
+    neighbor_dist: 0.35
+    velocity: [0.0, 0.0]
+  agents:
+    - agent_defaults:
+        max_speed: 1.0
+        radius: 0.5
+        time_horizon: 5.0
+        time_horizon_obst: 5.0
+        max_neighbors: 10
+        neighbor_dist: 0.35
+        velocity: [0.0, 0.0]
+      pattern:
+        name: "LineDistributionPattern"
+        count: 5
+        x_value: -1.0  # Primera línea de agentes a la izquierda
+        y_start: -0.5
+        y_end: 0.5
+        std_dev: 0  # Variabilidad en la posición
+      goals:
+        radius: 0.5
+        pattern:
+          name: "ExplicitDistributionPattern"
+          count: 5
+          positions:
+            - [-15.0, -4.0]
+            - [-15.0, -2.0]
+            - [-15.0, 0.0]
+            - [-15.0, 2.0]
+            - [-15.0, 4.0]
+    - agent_defaults:
+        max_speed: 1.0
+        radius: 0.5
+        time_horizon: 5.0
+        time_horizon_obst: 5.0
+        max_neighbors: 10
+        neighbor_dist: 0.35
+        velocity: [0.0, 0.0]
+      pattern:
+        name: "LineDistributionPattern"
+        count: 5
+        x_value: 0.0  # Segunda línea de agentes en el centro
+        y_start: -0.5
+        y_end: 0.5
+        std_dev: 0  # Variabilidad en la posición
+      goals:
+        radius: 0.5
+        pattern:
+          name: "ExplicitDistributionPattern"
+          count: 5
+          positions:
+            - [-15.0, -4.0]
+            - [-15.0, -2.0]
+            - [-15.0, 0.0]
+            - [-15.0, 2.0]
+            - [-15.0, 4.0]
+    - agent_defaults:
+        max_speed: 1.0
+        radius: 0.5
+        time_horizon: 5.0
+        time_horizon_obst: 5.0
+        max_neighbors: 10
+        neighbor_dist: 0.35
+        velocity: [0.0, 0.0]
+      pattern:
+        name: "LineDistributionPattern"
+        count: 5
+        x_value: 1.0  # Tercera línea de agentes a la derecha
+        y_start: -0.5
+        y_end: 0.5
+        std_dev: 0  # Variabilidad en la posición
+      goals:
+        radius: 0.5
+        pattern:
+          name: "ExplicitDistributionPattern"
+          count: 5
+          positions:
+            - [-15.0, -4.0]
+            - [-15.0, -2.0]
+            - [-15.0, 0.0]
+            - [-15.0, 2.0]
+            - [-15.0, 4.0]
+    - agent_defaults:
+        max_speed: 1.5
+        radius: 0.01
+        time_horizon: 5.0
+        time_horizon_obst: 5.0
+        max_neighbors: 15
+        neighbor_dist: 0.35
+        velocity: [0.0, 0.0]
+      pattern:
+        name: "ExplicitDistributionPattern"
+        count: 1
+        positions:
+          - [-3.0, 0.0]  # Nueva posición inicial del agente inteligente dentro del mapa
+      goals:
+        radius: 0.6
+        pattern:
+          name: "ExplicitDistributionPattern"
+          count: 1
+          positions:
+            - [7.5, 0.0]  # Meta para el agente inteligente
+  dynamics:
+    - name: "max_steps"
+      when: "before"
+      max_steps: 5000
+    - name: "log_step_info"
+      when: "after"
+    - name: "cleanup_resources"
+      when: "before"

@@ -159,7 +159,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
             agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
                                for agent_id in range(self.sim.getNumAgents())]
-
+            print(f"Sending AgentPositionsUpdateMessage for step {step}")
             self.notify_observers(AgentPositionsUpdateMessage(step=step, agent_positions=agent_positions))
             self.store_step(step)
 
@@ -214,6 +214,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         """
         # Aplicar actualizaciones manuales primero
         manual_update_ids = set(agent_id for agent_id, _ in self._manual_velocity_updates)
+        # print("Manual updates:", self._manual_velocity_updates)
         for agent_id, velocity in self._manual_velocity_updates:
             self.sim.setAgentPrefVelocity(agent_id, velocity)
 
@@ -244,7 +245,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 self.sim.setAgentPrefVelocity(agent_id, preferred_velocity)
         
         # Limpiar la cola después de aplicar las actualizaciones
-        self._manual_velocity_updates.clear()
+        # self._manual_velocity_updates.clear()
 
     def clear_buffer(self):
         self.steps_buffer = []

@@ -22,6 +22,7 @@ class Grid:
         self.spacing = spacing
 
     def draw(self, window):
+        # return
         color = (180, 203, 211)
         color_axis = (0, 0, 0)
 
@@ -31,7 +32,7 @@ class Grid:
                              (self.window_width // 2 + x, self.window_height))
             pygame.draw.line(window, color, (self.window_width // 2 - x, 0),
                              (self.window_width // 2 - x, self.window_height))
-
+            
             # Draw small vertical axes every 10 cells
             if ((x/self.spacing) % 10) == 0:
                 # pygame.draw.line(window, color_axis, (self.window_width // 2 - x, 0), (self.window_width // 2 - x, self.window_height))

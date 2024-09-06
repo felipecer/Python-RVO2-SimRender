@@ -88,7 +88,7 @@ class SimulationEngine(ABC):
             seed = self._default_seed  # Usa el seed por defecto si no se proporciona otro
         self._seed = seed
         self._random_number_generator = np.random.default_rng(seed)
-
+    
     def get_seed(self) -> int:
         """Devuelve el seed actual utilizado por el RNG."""
         return self._seed
@@ -212,7 +212,7 @@ class SimulationEngine(ABC):
                 break
             
             # Ejecutar un paso completo de la simulación
-            self.execute_simulation_step(step)
+            self.execute_simulation_step()
 
             # Verificar si el estado ha cambiado a STOPPED durante las dinámicas
             if self._state == SimulationState.STOPPED:
