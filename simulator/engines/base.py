@@ -142,6 +142,11 @@ class SimulationEngine(ABC):
         pass
 
     @abstractmethod
+    def step(self):
+        """Ejecuta un paso en la simulación."""
+        pass
+
+    @abstractmethod
     def run_simulation(self, step: int):
         """Ejecuta el ciclo de la simulación por un número de pasos especificado."""
         pass
@@ -188,7 +193,8 @@ class SimulationEngine(ABC):
         self._dynamics_manager.run_before_step_dynamics()
         
         # Ejecutar el paso de simulación
-        self.run_simulation(1)
+        # self.run_simulation(1)
+        self.step()
         
         # Ejecutar dinámicas después del paso
         self._dynamics_manager.run_after_step_dynamics()

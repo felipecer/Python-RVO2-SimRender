@@ -34,7 +34,6 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         self.agent_goals = {}  # Diccionario para almacenar los objetivos de los agentes
         self.steps_buffer = []  # Buffer para almacenar los datos de cada paso de la simulación
         self.obstacles = []
-        self.current_step = 0
         self.agent_initial_positions = []
         self._manual_velocity_updates = []
 
@@ -134,6 +133,33 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         for agent_id in self.agent_goals:
             # Si necesitas actualizar las metas puedes hacerlo aquí, si no simplemente reinicializa la simulación
             self.set_goal(agent_id, self.agent_goals[agent_id])
+
+    def step(self):
+        """
+        Ejecuta la simulación durante un número especificado de pasos.
+
+        Args:
+            steps (int): Número de pasos que la simulación debe ejecutar.
+        """
+        self.update_agent_velocities()
+        self.sim.doStep()
+
+        # Detectar si algún agente ha alcanzado su meta
+        for agent_id in range(self.sim.getNumAgents()):
+            if self.is_goal_reached(agent_id):
+                event = GoalReachedEvent(
+                    agent_id=agent_id,
+                    goal_position=self.agent_goals[agent_id],
+                    current_position=self.sim.getAgentPosition(agent_id),
+                    step=self.current_step
+                )
+                self.handle_event(event.alias, event)
+
+        agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
+                            for agent_id in range(self.sim.getNumAgents())]
+        print(f"Sending AgentPositionsUpdateMessage for step {self.current_step}")
+        self.notify_observers(AgentPositionsUpdateMessage(step=self.current_step, agent_positions=agent_positions))
+        self.store_step(self.current_step)
 
     def run_simulation(self, steps: int):
         """

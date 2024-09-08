@@ -56,6 +56,7 @@ class RVOSimulationEnv2(gym.Env):
         self.sim.update_agent_velocity(0, action)
         self.sim.update_agent_velocities()
         self.sim.execute_simulation_step()
+        self.sim.current_step += 1
         observations = self._get_obs()
         reward = self.calculate_reward(0)
         done = self.is_done(0)
