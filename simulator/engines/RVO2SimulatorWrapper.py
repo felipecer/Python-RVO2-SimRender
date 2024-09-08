@@ -6,7 +6,7 @@ import datetime
 import sys
 import yaml
 from rendering.pygame_renderer import PyGameRenderer
-from simulator.engines.base import SimulationEngine
+from simulator.engines.base import SimulationEngine, SimulationState
 from simulator.models.observer import SimulationSubject
 from simulator.models.simulation import Simulation
 from simulator.models.messages import (
@@ -123,6 +123,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
     def reset(self):
         """Reinicia la simulación a su estado inicial."""
         self.current_step = 0
+        self._state = SimulationState.SETUP
 
         # Restablecer las posiciones de los agentes a las posiciones iniciales
         for agent_id, initial_position in enumerate(self.agent_initial_positions):
@@ -193,7 +194,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         current_position = self.sim.getAgentPosition(agent_id)
         goal_position = self.agent_goals[agent_id]
         distance = math.dist(current_position, goal_position)
-        return distance <= 0.10
+        return distance <= 0.25
 
     def store_step(self, step: int):
         """

@@ -68,6 +68,7 @@ class RVOSimulationEnv2(gym.Env):
         done = self.is_done(0)
         # truncated = self.sim.current_step >= self.sim.world_config.time_limit  # Usar el time_limit del world_config
         truncated = self.sim.get_state() == SimulationState.STOPPED
+        # print(f"Step {self.sim.current_step}: Done: {done}, Truncated: {truncated}")
         info = self._get_info()
 
         if self.render_mode:
@@ -119,7 +120,7 @@ if __name__ == "__main__":
         agent_position = env.sim.get_agent_position(0)
         # print(f"Step {i}: Agent position: {agent_position}")
         if done or truncated:
-            # print(f"Episode done: {done}, truncated: {truncated}")
+            print(f"Episode done: {done}, truncated: {truncated}")
             break
         # print(f"Step {i} reward: {reward}")
         i += 1

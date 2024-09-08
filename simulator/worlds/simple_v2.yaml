@@ -26,7 +26,7 @@ simulation:
           name: "ExplicitDistributionPattern"
           count: 1
           positions:
-            - [-2.0, 2.0]  # Meta del agente
+            - [-0.75, 0.75]  # Meta del agente
   dynamics:
     - name: "goal_respawn"
       when: "before"
@@ -37,4 +37,4 @@ simulation:
       empty_radius: 1.5
     - name: "max_steps"
       when: "before"
-      max_steps: 200
+      max_steps: 256

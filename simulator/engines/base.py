@@ -154,7 +154,6 @@ class SimulationEngine(ABC):
     def stop_simulation(self):
         """Detiene la simulación."""
         self._state = SimulationState.STOPPED
-        print("Simulation stopped.")
         self._dynamics_manager.run_final_tasks()  # Ejecutar las tareas finales al detener la simulación
 
     @abstractmethod
