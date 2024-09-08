@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from pprint import pprint as pp
 import gymnasium as gym
 from gymnasium import spaces, logger
 import numpy as np
@@ -17,8 +16,8 @@ class RVOSimulationEnv2(gym.Env):
         # Cargar configuración YAML
         with open(config_file, 'r') as stream:
             config_data = yaml.safe_load(stream)
-        pp(config_data, indent=4)
-        print(type(config_data))
+        
+        # print(type(config_data))
         # Inicializar el simulador con RVO2SimulatorWrapper, pasando el seed
         self.sim = RVO2SimulatorWrapper(SimulationModel(**config_data['simulation']), "test_simulation", seed=seed)
 
@@ -37,7 +36,7 @@ class RVOSimulationEnv2(gym.Env):
             )
             renderer.setup()
             self.sim.register_observer(renderer)
-            print(f"Observadores registrados: {self.sim._observers}")
+            # print(f"Observadores registrados: {self.sim._observers}")
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
@@ -72,7 +71,7 @@ class RVOSimulationEnv2(gym.Env):
     def reset(self, seed=None, options=None):
         """Resetea el entorno y la simulación."""
         if seed is not None:
-            self.sim.set_seed(seed)  # Actualizar el seed si se proporciona
+            self.sim.reset_rng_with_seed(seed)  # Actualizar el seed si se proporciona
         self.sim.reset()
         return self._get_obs(), self._get_info()
 
@@ -113,7 +112,7 @@ if __name__ == "__main__":
         agent_position = env.sim.get_agent_position(0)
         # print(f"Step {i}: Agent position: {agent_position}")
         if done or truncated:
-            print(f"Episode done: {done}, truncated: {truncated}")
+            # print(f"Episode done: {done}, truncated: {truncated}")
             break
         # print(f"Step {i} reward: {reward}")
         i += 1
