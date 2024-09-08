@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from pprint import pprint
 import gymnasium as gym
 from gymnasium import spaces, logger
 import numpy as np
@@ -17,9 +18,13 @@ class RVOSimulationEnv2(gym.Env):
         with open(config_file, 'r') as stream:
             config_data = yaml.safe_load(stream)
         
-        # print(type(config_data))
+        # pprint(config_data, indent=6)
         # Inicializar el simulador con RVO2SimulatorWrapper, pasando el seed
-        self.sim = RVO2SimulatorWrapper(SimulationModel(**config_data['simulation']), "test_simulation", seed=seed)
+        world_config = SimulationModel(**config_data['simulation'])
+        dynamics = world_config.dynamics
+        self.sim = RVO2SimulatorWrapper(world_config, "test_simulation", seed=seed)
+        for dynamic_config in dynamics:
+            self.sim.register_dynamic(dynamic_config)
 
         # Establecer renderers si se requiere renderización
         self.render_mode = render_mode
@@ -41,6 +46,7 @@ class RVOSimulationEnv2(gym.Env):
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
         self.sim.initialize_simulation()
+        
 
     def _get_obs(self):
         """Obtiene la observación para el agente 0."""

@@ -157,7 +157,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
         agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
                             for agent_id in range(self.sim.getNumAgents())]
-        print(f"Sending AgentPositionsUpdateMessage for step {self.current_step}")
+        # print(f"Sending AgentPositionsUpdateMessage for step {self.current_step}")
         self.notify_observers(AgentPositionsUpdateMessage(step=self.current_step, agent_positions=agent_positions))
         self.store_step(self.current_step)
 
