@@ -42,7 +42,57 @@ class Simulation(BaseModel):
         obstacle_data = values.get('obstacles', [])
         values['obstacles'] = cls.validate_entities(category='shape', entities_data=obstacle_data)
         return values
+    
+    # @model_validator(mode='before')
+    # def validate_agents(cls, values):
+    #     agents_data = values.get('agents', [])
+    #     validated_agents = []
+    #     for agent in agents_data:
+    #         # Validar patrón de distribución de agentes utilizando validate_entities
+    #         pattern_data = agent.get('pattern')
+    #         if pattern_data is None or 'name' not in pattern_data:
+    #             raise ValueError("Each agent pattern must have a 'name' field.")
+            
+    #         # Usar validate_entities para validar los patrones de distribución
+    #         pattern_instance = cls.validate_entities(category='distribution_pattern', entities_data=[pattern_data])[0]
+    #         agent['pattern'] = pattern_instance
+            
+    #         validated_agents.append(agent)
+        
+    #     values['agents'] = validated_agents
+    #     return values
 
+    @model_validator(mode='before')
+    def validate_agents(cls, values):
+        agents_data = values.get('agents', [])
+        validated_agents = []
+        
+        for agent in agents_data:
+            # Validar patrón de distribución de agentes
+            pattern_data = agent.get('pattern')
+            if pattern_data is None or 'name' not in pattern_data:
+                raise ValueError("Each agent pattern must have a 'name' field.")
+            
+            # Instanciar el patrón usando el global_registry
+            pattern_instance = global_registry.instantiate(category='distribution_pattern', **pattern_data)
+            agent['pattern'] = pattern_instance  # Asignamos el patrón correctamente
+
+            # Si hay metas asociadas, validar y crear su patrón también
+            if agent.get('goals'):
+                goal_data = agent['goals']
+                goal_pattern_data = goal_data.get('pattern')
+                if goal_pattern_data is None or 'name' not in goal_pattern_data:
+                    raise ValueError("Each goal pattern must have a 'name' field.")
+                
+                # Instanciar el patrón de la meta usando el registro global
+                goal_pattern_instance = global_registry.instantiate(category='distribution_pattern', **goal_pattern_data)
+                agent['goals']['pattern'] = goal_pattern_instance  # Asignamos la instancia correctamente
+            
+            validated_agents.append(agent)
+        
+        values['agents'] = validated_agents
+        return values
+    
     class Config:
         arbitrary_types_allowed = True
 

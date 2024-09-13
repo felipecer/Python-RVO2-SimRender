@@ -1,9 +1,6 @@
-from typing import Tuple, Optional, Union
+from typing import Any, Tuple, Optional
 from pydantic import BaseModel
-
-from typing import Optional, Union, Tuple
-
-from simulator.models.simulation_configuration.distribution_patterns import DISTRIBUTION_PATTERNS_REGISTRY, CircleDistributionPattern, ExplicitDistributionPattern, LineDistributionPattern
+from typing import Optional, Tuple
 
 class AgentDefaults(BaseModel):
     neighbor_dist: float
@@ -16,17 +13,9 @@ class AgentDefaults(BaseModel):
 
 class GoalGroup(BaseModel):
     radius: float
-    pattern: Union[LineDistributionPattern, CircleDistributionPattern, ExplicitDistributionPattern]
-
-def instantiate_pattern(data):
-    pattern_name = data.pop('name')
-    if pattern_name in DISTRIBUTION_PATTERNS_REGISTRY:
-        pattern_class = DISTRIBUTION_PATTERNS_REGISTRY[pattern_name]
-        return pattern_class(**data)
-    else:
-        raise ValueError(f"Pattern {pattern_name} not found in registry.")
+    pattern: Any
 
 class AgentGroup(BaseModel):
     agent_defaults: Optional[AgentDefaults] = None
-    pattern: Union[LineDistributionPattern, CircleDistributionPattern, ExplicitDistributionPattern]
+    pattern: Any
     goals: Optional[GoalGroup] = None

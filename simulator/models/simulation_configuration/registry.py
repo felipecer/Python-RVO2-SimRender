@@ -48,7 +48,7 @@ global_registry = Registry(categories={
     'dynamic': {},
     'event': {},
     'shape': {},
-    'pattern': {}
+    'distribution_pattern': {}
 })
 
 # Función decoradora que especifica alias y categoría

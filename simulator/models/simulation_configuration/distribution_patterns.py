@@ -1,12 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
-from pydantic import BaseModel, model_validator
-
-DISTRIBUTION_PATTERNS_REGISTRY = {}
-
-def register_distribution_pattern(cls):
-    DISTRIBUTION_PATTERNS_REGISTRY[cls.__name__] = cls
-    return cls
+from pydantic import BaseModel
+from simulator.models.simulation_configuration.registry import register
 
 class SpatialDistributionPattern(BaseModel, ABC):
     count: int    
@@ -17,18 +12,7 @@ class SpatialDistributionPattern(BaseModel, ABC):
     def generate_positions(self) -> List[Tuple[float, float]]:  
         pass
 
-    @model_validator(mode='after')
-    def validate_pattern(cls, values):
-        # Asignar pattern basado en el nombre de la clase si no está presente
-        if not values.name:
-            values.name = cls.__name__ 
-        
-        if values.name not in DISTRIBUTION_PATTERNS_REGISTRY:
-            raise ValueError(f"Pattern {values.name} is not registered.")
-        
-        return values
-
-@register_distribution_pattern
+@register(alias='line', category="distribution_pattern")
 class LineDistributionPattern(SpatialDistributionPattern):
     x_value: float
     y_start: float
@@ -54,7 +38,7 @@ class LineDistributionPattern(SpatialDistributionPattern):
         import random
         return [(x + random.gauss(0, self.std_dev), y) for x, y in positions]
 
-@register_distribution_pattern
+@register(alias='circle', category="distribution_pattern")
 class CircleDistributionPattern(SpatialDistributionPattern):
     center: Tuple[float, float]
     radius: float
@@ -80,7 +64,7 @@ class CircleDistributionPattern(SpatialDistributionPattern):
 class InsufficientPositionsError(Exception):
     pass
 
-@register_distribution_pattern
+@register(alias='explicit', category="distribution_pattern")
 class ExplicitDistributionPattern(SpatialDistributionPattern):
     positions: List[Tuple[float, float]]
 

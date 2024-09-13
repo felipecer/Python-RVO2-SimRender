@@ -24,7 +24,7 @@ simulation:
         neighbor_dist: 15.0
         velocity: [0.0, 0.0]
       pattern:
-        name: "LineDistributionPattern"
+        name: "line"
         count: 3
         x_value: 0.0
         y_start: -4.0
@@ -33,13 +33,13 @@ simulation:
       goals:        
         radius: 0.5
         pattern:
-          name: "CircleDistributionPattern"
+          name: "circle"
           count: 3
           center: [2.0, 2.0]
           radius: 1.5
           std_dev: 0.05
     - pattern:
-        name: "ExplicitDistributionPattern"
+        name: "explicit"
         count: 3
         positions:
           - [2.0, 2.0]
