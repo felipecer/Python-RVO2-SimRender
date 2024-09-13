@@ -3,8 +3,8 @@ from pydantic import BaseModel, ValidationError, model_validator
 import yaml
 from simulator.models.agent import AgentDefaults, AgentGroup
 from pprint import pprint
-from simulator.models.simulation_configuration.shapes import SHAPES_REGISTRY
 from simulator.models.simulation_configuration.simulation_dynamics import SIMULATION_DYNAMICS_REGISTRY
+from simulator.models.simulation_configuration.registry import global_registry
 
 class MapSettings(BaseModel):
     x_min: float
@@ -43,15 +43,14 @@ class Simulation(BaseModel):
     def validate_obstacles(cls, values):
         obstacle_data = values.get('obstacles', [])
         validated_obstacles = []
+        
         for obstacle in obstacle_data:
-            obstacle_type = obstacle.get('name')  # Validamos por nombre
-            if obstacle_type in SHAPES_REGISTRY:
-                obstacle_class = SHAPES_REGISTRY[obstacle_type]
-                validated_obstacle = obstacle_class(**obstacle)
-                validated_obstacles.append(validated_obstacle)
-            else:
-                raise ValueError(f"Unknown obstacle type: {obstacle_type}")
-    
+            obstacle_type = obstacle.get('name')
+            if obstacle_type is None:
+                raise ValueError("Each obstacle must have a 'name' field.")
+            validated_obstacle = global_registry.instantiate(category='shape', **obstacle)
+            validated_obstacles.append(validated_obstacle)
+        
         values['obstacles'] = validated_obstacles
         return values
 
@@ -67,7 +66,6 @@ def main():
             
             # Crear la instancia de Simulation usando Pydantic
             simulation = Simulation(**data['simulation'])
-            pprint(simulation.dict(), indent=4)  # Pretty print de la configuración de la simulación
             
             # Generar posiciones para cada grupo de agentes y sus metas
             for agent_group in simulation.agents:

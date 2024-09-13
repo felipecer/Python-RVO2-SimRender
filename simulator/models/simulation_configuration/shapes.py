@@ -1,19 +1,7 @@
 from typing import Tuple, List, Optional, Union
 from pydantic import BaseModel, model_validator
 from abc import ABC, abstractmethod
-
-SHAPES_REGISTRY = {}
-
-def register_shape(cls=None, *, alias=None):
-    def wrapper(cls):
-        name = alias if alias else cls.__name__
-        SHAPES_REGISTRY[name] = cls
-        return cls
-
-    if cls is None:
-        return wrapper
-    else:
-        return wrapper(cls)
+from simulator.models.simulation_configuration.registry import register
 
 class BaseShape(BaseModel, ABC):
     name: Optional[str] = None
@@ -22,19 +10,8 @@ class BaseShape(BaseModel, ABC):
     def generate_shape(self) -> List[Tuple[float, float]]:
         pass
 
-    @model_validator(mode='after')
-    def validate_shape(cls, values):
-        # Asignar name basado en el nombre de la clase si no está presente
-        if not values.name:
-            values.name = cls.__name__ 
-        
-        if values.name not in SHAPES_REGISTRY:
-            raise ValueError(f"Shape {values.name} is not registered.")
-        
-        return values
-
 # Registro con alias simplificados
-@register_shape(alias="rectangle")
+@register(alias="rectangle", category="shape")
 class Rectangle(BaseShape):
     center: Tuple[float, float]
     width: float
@@ -51,7 +28,7 @@ class Rectangle(BaseShape):
             (cx - w_half, cy + h_half)
         ]
 
-@register_shape(alias="triangle")
+@register(alias="triangle", category="shape")
 class EquilateralTriangle(BaseShape):
     center: Tuple[float, float]
     side_length: float
@@ -66,7 +43,7 @@ class EquilateralTriangle(BaseShape):
             (cx + self.side_length / 2, cy - (1/3) * h)   # Vértice inferior derecho
         ]
 
-@register_shape(alias="circle")
+@register(alias="circle", category="shape")
 class Circle(BaseShape):
     center: Tuple[float, float]
     radius: float
@@ -79,7 +56,7 @@ class Circle(BaseShape):
             for i in range(36)  # Aproximación con 36 puntos
         ]
 
-@register_shape(alias="polygon")
+@register(alias="polygon", category="shape")
 class Polygon(BaseShape):
     vertices: List[Tuple[float, float]]
 

@@ -161,7 +161,8 @@ class LogStepInfoDynamic(OnStepDynamic):
     log_message: str = "Step executed"
 
     def execute(self):
-        print(f"Step {self._simulator.current_step}: {self.log_message}")
+        pass
+        # print(f"Step {self._simulator.current_step}: {self.log_message}")
 
 @register_simulation_dynamic(alias="cleanup_resources")
 class ResourceCleanupDynamic(OnceDynamic):
