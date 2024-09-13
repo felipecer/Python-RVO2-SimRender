@@ -1,9 +1,9 @@
-from typing import List, Union, Optional
+from typing import List, Optional
 from pydantic import BaseModel, ValidationError, model_validator
 import yaml
 from simulator.models.agent import AgentDefaults, AgentGroup
 from pprint import pprint
-from simulator.models.simulation_configuration.shapes import SHAPES_REGISTRY, Circle, EquilateralTriangle, Polygon, Rectangle
+from simulator.models.simulation_configuration.shapes import SHAPES_REGISTRY
 from simulator.models.simulation_configuration.simulation_dynamics import SIMULATION_DYNAMICS_REGISTRY
 
 class MapSettings(BaseModel):
@@ -18,7 +18,7 @@ class Simulation(BaseModel):
     map_settings: Optional[MapSettings] = None
     agent_defaults: AgentDefaults
     agents: List[AgentGroup]
-    obstacles: Optional[List[Union[Rectangle, Circle, EquilateralTriangle, Polygon]]] = None
+    obstacles: Optional[List] = None
     dynamics: Optional[List] = None
 
     @model_validator(mode='before')
@@ -44,7 +44,7 @@ class Simulation(BaseModel):
         obstacle_data = values.get('obstacles', [])
         validated_obstacles = []
         for obstacle in obstacle_data:
-            obstacle_type = obstacle.get('name')
+            obstacle_type = obstacle.get('name')  # Validamos por nombre
             if obstacle_type in SHAPES_REGISTRY:
                 obstacle_class = SHAPES_REGISTRY[obstacle_type]
                 validated_obstacle = obstacle_class(**obstacle)
@@ -54,7 +54,7 @@ class Simulation(BaseModel):
     
         values['obstacles'] = validated_obstacles
         return values
-    
+
     class Config:
         arbitrary_types_allowed = True
 
