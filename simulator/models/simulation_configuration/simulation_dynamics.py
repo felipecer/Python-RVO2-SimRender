@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Dict, List, Type, Tuple, Optional
 import numpy as np
 from simulator.models.messages import GoalPositionUpdatedMessage
+from simulator.models.simulation_configuration.registry import register
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent, SimulationEvent
 
 # Enum para los tipos de ejecución de las dinámicas
@@ -31,20 +32,6 @@ class SimulationDynamic(BaseModel, ABC):
 
     class Config:
         arbitrary_types_allowed = True
-
-# Registro global para las dinámicas de simulación
-SIMULATION_DYNAMICS_REGISTRY: Dict[str, Type['SimulationDynamic']] = {}
-
-def register_simulation_dynamic(cls=None, *, alias=None):
-    def wrapper(cls):
-        name = alias if alias else cls.__name__
-        SIMULATION_DYNAMICS_REGISTRY[name] = cls
-        return cls
-
-    if cls is None:
-        return wrapper
-    else:
-        return wrapper(cls)
 
 class EventBasedDynamic(SimulationDynamic):
     event_type: str  # Define el tipo de evento que manejará esta dinámica
@@ -85,7 +72,8 @@ class OnceDynamic(SimulationDynamic):
     def execute(self):
         """Método abstracto que debe ser implementado por las dinámicas OneTime."""
         pass
-@register_simulation_dynamic(alias="goal_respawn")
+    
+@register(alias="goal_respawn", category="dynamic")
 class GoalRespawnDynamic(EventBasedDynamic):
     num_iterations: int = 20
     max_radius: float = 5.0
@@ -147,7 +135,7 @@ class GoalRespawnDynamic(EventBasedDynamic):
             current_radius += self.step_radius
 
 
-@register_simulation_dynamic(alias="max_steps")
+@register(alias="max_steps", category="dynamic")
 class MaxStepsReachedDynamic(OnStepDynamic):
     max_steps: int
 
@@ -156,7 +144,7 @@ class MaxStepsReachedDynamic(OnStepDynamic):
             # print(f"Maximum steps of {self.max_steps} reached. Stopping simulation.")
             self._simulator.stop_simulation()
 
-@register_simulation_dynamic(alias="log_step_info")
+@register(alias="log_step_info", category="dynamic")
 class LogStepInfoDynamic(OnStepDynamic):
     log_message: str = "Step executed"
 
@@ -164,7 +152,7 @@ class LogStepInfoDynamic(OnStepDynamic):
         pass
         # print(f"Step {self._simulator.current_step}: {self.log_message}")
 
-@register_simulation_dynamic(alias="cleanup_resources")
+@register(alias="cleanup_resources", category="dynamic")
 class ResourceCleanupDynamic(OnceDynamic):
     def execute(self):
         print("Cleaning up resources and shutting down.")

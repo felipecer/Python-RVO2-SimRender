@@ -2,8 +2,6 @@ from typing import List, Optional
 from pydantic import BaseModel, ValidationError, model_validator
 import yaml
 from simulator.models.agent import AgentDefaults, AgentGroup
-from pprint import pprint
-from simulator.models.simulation_configuration.simulation_dynamics import SIMULATION_DYNAMICS_REGISTRY
 from simulator.models.simulation_configuration.registry import global_registry
 
 class MapSettings(BaseModel):
@@ -21,37 +19,28 @@ class Simulation(BaseModel):
     obstacles: Optional[List] = None
     dynamics: Optional[List] = None
 
+    @staticmethod
+    def validate_entities(category: str, entities_data: List[dict]):
+        """Valida e instancia las entidades usando el registro global."""
+        validated_entities = []
+        for entity in entities_data:
+            entity_type = entity.get('name')
+            if entity_type is None:
+                raise ValueError(f"Each {category} must have a 'name' field.")
+            validated_entity = global_registry.instantiate(category=category, **entity)
+            validated_entities.append(validated_entity)
+        return validated_entities
+
     @model_validator(mode='before')
     def validate_dynamics(cls, values):
         dynamic_data = values.get('dynamics', [])
-        validated_dynamics = []
-        for dynamic in dynamic_data:
-            dynamic_type = dynamic.get('name')  # Cambiado a 'name'
-            if dynamic_type is None:
-                raise ValueError("Each dynamic must have a 'name' field.")
-            if dynamic_type not in SIMULATION_DYNAMICS_REGISTRY.keys():
-                print(f"Registro actual de dinámicas: {SIMULATION_DYNAMICS_REGISTRY.keys()}")
-                raise ValueError(f"Unknown dynamic type: {dynamic_type}")
-            dynamic_class = SIMULATION_DYNAMICS_REGISTRY[dynamic_type]
-            validated_dynamic = dynamic_class(**dynamic)
-            validated_dynamics.append(validated_dynamic)
-        
-        values['dynamics'] = validated_dynamics
+        values['dynamics'] = cls.validate_entities(category='dynamic', entities_data=dynamic_data)
         return values
 
     @model_validator(mode='before')
     def validate_obstacles(cls, values):
         obstacle_data = values.get('obstacles', [])
-        validated_obstacles = []
-        
-        for obstacle in obstacle_data:
-            obstacle_type = obstacle.get('name')
-            if obstacle_type is None:
-                raise ValueError("Each obstacle must have a 'name' field.")
-            validated_obstacle = global_registry.instantiate(category='shape', **obstacle)
-            validated_obstacles.append(validated_obstacle)
-        
-        values['obstacles'] = validated_obstacles
+        values['obstacles'] = cls.validate_entities(category='shape', entities_data=obstacle_data)
         return values
 
     class Config:

@@ -338,7 +338,6 @@ def main():
         sys.exit(1)
     
     world_file = sys.argv[1]
-
     try:
         with open(world_file, 'r') as stream:
             data = yaml.safe_load(stream)
