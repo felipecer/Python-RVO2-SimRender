@@ -43,24 +43,22 @@ class Simulation(BaseModel):
         values['obstacles'] = cls.validate_entities(category='shape', entities_data=obstacle_data)
         return values
     
-    # @model_validator(mode='before')
-    # def validate_agents(cls, values):
-    #     agents_data = values.get('agents', [])
-    #     validated_agents = []
-    #     for agent in agents_data:
-    #         # Validar patrón de distribución de agentes utilizando validate_entities
-    #         pattern_data = agent.get('pattern')
-    #         if pattern_data is None or 'name' not in pattern_data:
-    #             raise ValueError("Each agent pattern must have a 'name' field.")
-            
-    #         # Usar validate_entities para validar los patrones de distribución
-    #         pattern_instance = cls.validate_entities(category='distribution_pattern', entities_data=[pattern_data])[0]
-    #         agent['pattern'] = pattern_instance
-            
-    #         validated_agents.append(agent)
+    @model_validator(mode='before')
+    def validate_events(cls, values):
+        events_data = values.get('events', [])
+        validated_events = []
         
-    #     values['agents'] = validated_agents
-    #     return values
+        for event in events_data:
+            event_type = event.get('name')
+            if event_type is None:
+                raise ValueError("Each event must have a 'name' field.")
+            
+            # Instanciar el evento desde el registro global
+            event_instance = global_registry.instantiate(category='event', **event)
+            validated_events.append(event_instance)
+        
+        values['events'] = validated_events
+        return values
 
     @model_validator(mode='before')
     def validate_agents(cls, values):
