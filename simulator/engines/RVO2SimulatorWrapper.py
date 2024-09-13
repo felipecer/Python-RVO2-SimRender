@@ -194,7 +194,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         current_position = self.sim.getAgentPosition(agent_id)
         goal_position = self.agent_goals[agent_id]
         distance = math.dist(current_position, goal_position)
-        return distance <= 0.25
+        return distance <= 0.15
 
     def store_step(self, step: int):
         """

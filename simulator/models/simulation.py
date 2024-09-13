@@ -1,11 +1,10 @@
-from typing import Dict, List, Union, Optional
+from typing import List, Union, Optional
 from pydantic import BaseModel, ValidationError, model_validator
 import yaml
-from simulator.models.agent import AgentDefaults, AgentGroup, DISTRIBUTION_PATTERNS_REGISTRY
+from simulator.models.agent import AgentDefaults, AgentGroup
 from pprint import pprint
-from simulator.models.obstacle import RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape, OBSTACLE_SHAPES_REGISTRY
-from simulator.models.simulation_configuration.simulation_dynamics import SIMULATION_DYNAMICS_REGISTRY, SimulationDynamic
-from simulator.models.simulation_configuration.simulation_events import EVENT_TYPES_REGISTRY, SimulationEvent
+from simulator.models.simulation_configuration.shapes import SHAPES_REGISTRY, Circle, EquilateralTriangle, Polygon, Rectangle
+from simulator.models.simulation_configuration.simulation_dynamics import SIMULATION_DYNAMICS_REGISTRY
 
 class MapSettings(BaseModel):
     x_min: float
@@ -19,7 +18,7 @@ class Simulation(BaseModel):
     map_settings: Optional[MapSettings] = None
     agent_defaults: AgentDefaults
     agents: List[AgentGroup]
-    obstacles: Optional[List[Union[RectangleShape, CircleShape, EquilateralTriangleShape, PolygonShape]]] = None
+    obstacles: Optional[List[Union[Rectangle, Circle, EquilateralTriangle, Polygon]]] = None
     dynamics: Optional[List] = None
 
     @model_validator(mode='before')
@@ -46,8 +45,8 @@ class Simulation(BaseModel):
         validated_obstacles = []
         for obstacle in obstacle_data:
             obstacle_type = obstacle.get('name')
-            if obstacle_type in OBSTACLE_SHAPES_REGISTRY:
-                obstacle_class = OBSTACLE_SHAPES_REGISTRY[obstacle_type]
+            if obstacle_type in SHAPES_REGISTRY:
+                obstacle_class = SHAPES_REGISTRY[obstacle_type]
                 validated_obstacle = obstacle_class(**obstacle)
                 validated_obstacles.append(validated_obstacle)
             else:

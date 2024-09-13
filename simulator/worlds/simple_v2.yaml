@@ -31,10 +31,10 @@ simulation:
     - name: "goal_respawn"
       when: "before"
       event_type: "goal_reached"
-      num_iterations: 20
+      num_iterations: 10000
       max_radius: 5.0
       step_radius: 1.0
       empty_radius: 1.5
     - name: "max_steps"
       when: "before"
-      max_steps: 256
+      max_steps: 100000
