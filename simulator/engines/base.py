@@ -14,7 +14,7 @@ class DynamicsQueueManager:
         self.on_demand_after: List[Callable] = []        # Dinámicas bajo demanda después del paso (se eliminan tras ejecutarse)
         self.final_tasks: List[Callable] = []          # Tareas que se ejecutan una vez al final
 
-    def add_dynamic(self, dynamic: Callable, timing: ExecutionTiming, on_demand: bool = False):
+    def add_dynamic(self, dynamic: Callable, timing: ExecutionTiming, on_demand: bool = False):        
         """Agrega una dinámica a la lista correspondiente."""
         if timing == ExecutionTiming.BEFORE:
             if on_demand:
@@ -44,11 +44,13 @@ class DynamicsQueueManager:
         # Ejecuta dinámicas que corren en cada ciclo
         for dynamic in self.cycle_dynamics_before:
             dynamic()
-
-        # Ejecuta y elimina dinámicas bajo demanda
-        while self.on_demand_before:
-            dynamic = self.on_demand_before.pop(0)
+        
+        # Ejecuta todas las dinámicas bajo demanda, sin eliminarlas todavía
+        for dynamic in self.on_demand_before:
             dynamic()
+
+        # Ahora que todas las dinámicas han sido ejecutadas, vaciamos la lista
+        self.on_demand_before.clear()
 
     def run_after_step_dynamics(self):
         """Ejecuta todas las dinámicas que deben correr después de cada step."""
@@ -110,7 +112,7 @@ class SimulationEngine(ABC):
             self._dynamics_manager.add_once_dynamic(dynamic.apply, dynamic.when)
         # Manejo de dinámicas basadas en eventos
         elif isinstance(dynamic, EventBasedDynamic):
-            # print(f"Registering event handler for event type: {dynamic.event_type}")
+            # print(f"Registering event handler {dynamic.name} for event type: {dynamic.event_type}")
             # Registra el manejador de eventos pero no lo encola todavía
             self.register_event_handler(dynamic.event_type, dynamic.apply, dynamic.when)
         # Manejo de dinámicas que se ejecutan en cada ciclo (OnStepDynamic o similares)
@@ -127,7 +129,12 @@ class SimulationEngine(ABC):
         """Maneja un evento recibido y encola las acciones correspondientes."""
         handlers = self._event_handlers.get(event_type, [])
         for handler, timing in handlers:
-            action = lambda: handler(*args, **kwargs)
+            # Capturamos el handler y los argumentos en una función para que no se sobrescriban
+            def make_action(handler, *args, **kwargs):
+                return lambda: handler(*args, **kwargs)
+
+            # Encolamos la acción con el contexto correcto
+            action = make_action(handler, *args, **kwargs)
             self._dynamics_manager.add_dynamic(action, timing, on_demand=True)
 
 
@@ -189,6 +196,7 @@ class SimulationEngine(ABC):
             step (int): El número del paso actual en la simulación.
         """
         # Ejecutar dinámicas antes del paso
+
         self._dynamics_manager.run_before_step_dynamics()
         
         # Ejecutar el paso de simulación

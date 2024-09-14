@@ -16,18 +16,18 @@ simulation:
     velocity: [0.0, 0.0]
   agents:
     - pattern:
-        name: "ExplicitDistributionPattern"
+        name: "explicit"
         count: 1
         positions:
           - [0.0, 0.0]  # Posición inicial del agente
       goals:
         radius: 0.5
         pattern:
-          name: "ExplicitDistributionPattern"
+          name: "explicit"
           count: 1
           positions:
             - [-0.75, 0.75]  # Meta del agente
-  dynamics:
+  dynamics:    
     - name: "goal_respawn"
       when: "before"
       event_type: "goal_reached"
@@ -35,6 +35,10 @@ simulation:
       max_radius: 5.0
       step_radius: 1.0
       empty_radius: 1.5
+    - name: "update_initial_position_on_goal_reached"
+      when: "before"
+      event_type: "goal_reached"
     - name: "max_steps"
       when: "before"
-      max_steps: 100000
+      max_steps: 256
+    

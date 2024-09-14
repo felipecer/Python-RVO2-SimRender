@@ -37,9 +37,7 @@ class EventBasedDynamic(SimulationDynamic):
     event_type: str  # Define el tipo de evento que manejará esta dinámica
 
     def apply(self, event: Optional[SimulationEvent] = None):
-        """Aplica la dinámica en respuesta a un evento."""
-        if isinstance(event, GoalReachedEvent):
-            self.execute(event)
+        self.execute(event)
 
     @abstractmethod
     def execute(self, event: SimulationEvent):
@@ -84,18 +82,7 @@ class GoalRespawnDynamic(EventBasedDynamic):
     def __init__(self, **data):
         super().__init__(**data)
 
-    def handle_event(self, event):
-        if isinstance(event, GoalReachedEvent):
-            new_goal = self._generate_new_goal()
-            self._simulator.agent_goals[event.agent_id] = new_goal
-            self._simulator.notify_observers(GoalPositionUpdatedMessage(
-                step=event.step,
-                goal_id=event.agent_id,
-                new_position=new_goal
-            ))
-
     def execute(self, event: GoalReachedEvent):
-        # print(f"Goal reached by agent {event.agent_id} at step {event.step}. Respawning goal.")
         new_goal = self._generate_new_goal()
         self._simulator.agent_goals[event.agent_id] = new_goal
         self._simulator.notify_observers(GoalPositionUpdatedMessage(
@@ -157,3 +144,20 @@ class ResourceCleanupDynamic(OnceDynamic):
     def execute(self):
         print("Cleaning up resources and shutting down.")
         # Lógica para limpiar recursos
+
+@register(alias="update_initial_position_on_goal_reached", category="dynamic")
+class UpdateInitialPositionOnGoalReachedDynamic(EventBasedDynamic):
+    """
+    Esta dinámica actualiza la posición inicial del agente cuando alcanza su meta,
+    de modo que la próxima vez que se inicialice el simulador, el agente comience
+    desde esa meta alcanzada.
+    """
+    def __init__(self, **data):
+        super().__init__(**data)
+
+    def execute(self, event: GoalReachedEvent):
+        agent_id = event.agent_id
+        current_position = event.current_position
+        # Actualizamos la posición inicial en el simulador
+        self._simulator.agent_initial_positions[agent_id] = current_position
+        
