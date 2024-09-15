@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from pprint import pprint
 import pygame
 # import pygame_gui
 # from pygame_gui.elements import UIHorizontalSlider
@@ -21,6 +22,7 @@ class Grid:
         self.spacing = spacing
 
     def draw(self, window):
+        # return
         color = (180, 203, 211)
         color_axis = (0, 0, 0)
 
@@ -30,7 +32,7 @@ class Grid:
                              (self.window_width // 2 + x, self.window_height))
             pygame.draw.line(window, color, (self.window_width // 2 - x, 0),
                              (self.window_width // 2 - x, self.window_height))
-
+            
             # Draw small vertical axes every 10 cells
             if ((x/self.spacing) % 10) == 0:
                 # pygame.draw.line(window, color_axis, (self.window_width // 2 - x, 0), (self.window_width // 2 - x, self.window_height))
@@ -212,20 +214,16 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
     def obstacles_processed(self, obstacles: list):
         self.obstacles = obstacles
-        print("Obstáculos procesados y actualizados en el renderizador.")
 
     def goals_processed(self, goals: dict):
         self.goals = goals
-        print("Metas procesadas y actualizadas en el renderizador.")
 
     def goal_position_updated(self, goal_id: int, new_position: tuple):
         if goal_id in self.goals:
             self.goals[goal_id] = new_position
-            print(f"Posición de la meta {goal_id} actualizada a {new_position}.")
 
     def new_obstacle_added(self, obstacle: list):
         self.obstacles.append(obstacle)
-        print("Nuevo obstáculo agregado al renderizador.")
 
 if __name__ == '__main__':
     # Configuración básica para pruebas
