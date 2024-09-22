@@ -79,3 +79,4 @@ simulation:
       when: "before"
     - name: "update_initial_position_on_goal_reached"
       when: "after"
+      event_type: "goal_reached"

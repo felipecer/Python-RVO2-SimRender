@@ -3,8 +3,8 @@ simulation:
   map_settings:
     x_min: -4.0  # Tamaño ajustado para reducir el espacio vacío
     x_max: 4.0
-    y_min: -1.0
-    y_max: 1.0
+    y_min: -3.0
+    y_max: 3.0
     cell_size: 100
   agent_defaults:
     max_speed: 1.0
@@ -24,7 +24,7 @@ simulation:
         neighbor_dist: 0.35
         velocity: [0.0, 0.0]
       pattern:
-        name: "LineDistributionPattern"
+        name: "line"
         count: 5
         x_value: -1.0  # Primera línea de agentes a la izquierda
         y_start: -0.5
@@ -33,7 +33,7 @@ simulation:
       goals:
         radius: 0.5
         pattern:
-          name: "ExplicitDistributionPattern"
+          name: "explicit"
           count: 5
           positions:
             - [-4.5, -0.5]  # Ajustada para estar apenas fuera del mapa
@@ -50,7 +50,7 @@ simulation:
         neighbor_dist: 0.35
         velocity: [0.0, 0.0]
       pattern:
-        name: "LineDistributionPattern"
+        name: "line"
         count: 5
         x_value: 0.0  # Segunda línea de agentes en el centro
         y_start: -0.5
@@ -59,7 +59,7 @@ simulation:
       goals:
         radius: 0.5
         pattern:
-          name: "ExplicitDistributionPattern"
+          name: "explicit"
           count: 5
           positions:
             - [-4.5, -0.5]  # Ajustada para estar apenas fuera del mapa
@@ -76,7 +76,7 @@ simulation:
         neighbor_dist: 0.35
         velocity: [0.0, 0.0]
       pattern:
-        name: "LineDistributionPattern"
+        name: "line"
         count: 5
         x_value: 1.0  # Tercera línea de agentes a la derecha
         y_start: -0.5
@@ -85,7 +85,7 @@ simulation:
       goals:
         radius: 0.5
         pattern:
-          name: "ExplicitDistributionPattern"
+          name: "explicit"
           count: 5
           positions:
             - [-4.5, -0.5]  # Ajustada para estar apenas fuera del mapa
@@ -102,17 +102,17 @@ simulation:
         neighbor_dist: 0.35
         velocity: [0.0, 0.0]
       pattern:
-        name: "ExplicitDistributionPattern"
+        name: "explicit"
         count: 1
         positions:
-          - [-3.0, 0.7]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
+          - [-1.2, 0.7]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
       goals:
         radius: 0.6
         pattern:
-          name: "ExplicitDistributionPattern"
+          name: "explicit"
           count: 1
           positions:
-            - [3.0, -0.6]  # Meta para el agente inteligente, con altura menor que los agentes más al sur
+            - [-1.2, -0.7]  # Meta para el agente inteligente, con altura menor que los agentes más al sur
   dynamics:
     - name: "max_steps"
       when: "before"
