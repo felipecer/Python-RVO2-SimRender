@@ -32,19 +32,18 @@ class AgentGroup(BaseModel):
             raise ValueError("Specify either 'behaviour' or 'agent_defaults', not both.")
         
         if behaviour_name:
-            # Validar y obtener el behaviour del registro
-            behaviour = global_registry.get('behaviour', behaviour_name)
-            print(behaviour)
-            print(type(behaviour))
-            if not behaviour:
+            # Obtener la instancia del behaviour del registro
+            behaviour_instance = global_registry.get('behaviour', behaviour_name)
+            if not behaviour_instance:
                 raise ValueError(f"Behaviour '{behaviour_name}' not found in registry.")
-            # Asignar los defaults desde el behaviour registrado
-            values['agent_defaults'] = behaviour.get_agent_params()
+            # Asignar los defaults desde la instancia del behaviour registrado
+            values['agent_defaults'] = behaviour_instance.get_agent_params()
         
         if not agent_defaults and not behaviour_name:
             raise ValueError("You must specify either 'behaviour' or 'agent_defaults' for the agent group.")
         
         return values
+
 
 # class AgentGroup(BaseModel):
 #     behaviour: str

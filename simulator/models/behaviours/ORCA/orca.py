@@ -41,13 +41,14 @@ def load_behaviours_from_yaml(yaml_file: str):
             for name, params in behaviours.items():
                 print(f"Loading behaviour: {name}")
                 # Instanciar OrcaBehaviour con los parámetros cargados
-                behaviour = OrcaBehaviour(name=name, agent_defaults=AgentDefaults(**params))
+                behaviour_instance = OrcaBehaviour(name=name, agent_defaults=AgentDefaults(**params))
 
-                # Registrar el behaviour en el registro global
-                global_registry.register(cls=behaviour.__class__, alias=name, category='behaviour')
+                # Registrar la instancia del behaviour en el registro global
+                global_registry.register(alias=name, category='behaviour', instance=behaviour_instance)
         
         except yaml.YAMLError as e:
             print(f"Error reading YAML file: {e}")
+
 
 # Cargar y registrar behaviours al iniciar la simulación
 load_behaviours_from_yaml('./simulator/models/behaviours/ORCA/behaviours.yaml')

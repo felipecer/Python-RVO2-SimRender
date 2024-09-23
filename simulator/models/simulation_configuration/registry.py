@@ -9,20 +9,26 @@ class Registry:
             raise ValueError(f"Categoría {category} ya existe.")
         self._registries[category] = {}
 
-    def register(self, cls=None, *, alias=None, category=None):
-        """Registra una clase en el registro global bajo una categoría específica."""
-        if category not in self._registries:
+    # En simulator/models/simulation_configuration/registry.py
+
+    def register(cls=None, *, alias=None, category=None, instance=None):
+        """Registra una clase o instancia en el registro global bajo una categoría específica."""
+        if category not in global_registry._registries:
             raise ValueError(f"Categoría {category} no soportada.")
 
-        def wrapper(cls):
-            name = alias if alias else cls.__name__
-            self._registries[category][name] = cls
-            return cls
+        def wrapper(cls_or_instance):
+            name = alias if alias else cls_or_instance.__class__.__name__
+            global_registry._registries[category][name] = cls_or_instance
+            return cls_or_instance
 
-        if cls is None:
-            return wrapper
-        else:
+        if instance:
+            # Si se proporciona una instancia, registrarla directamente
+            return wrapper(instance)
+        elif cls:
             return wrapper(cls)
+        else:
+            return wrapper
+
 
     def get(self, category: str, name: str):
         """Devuelve la clase registrada bajo el nombre o alias especificado en la categoría dada."""
@@ -52,6 +58,27 @@ global_registry = Registry(categories={
     'behaviour': {}
 })
 
-# Función decoradora que especifica alias y categoría
-def register(cls=None, *, alias=None, category=None):
-    return global_registry.register(cls=cls, alias=alias, category=category)
+def register(cls=None, *, alias=None, category=None, instance=None):    
+    if not category:
+        raise ValueError("Category must be specified for registration.")
+    
+    if instance:
+        # Si se proporciona una instancia, registrarla directamente
+        if alias is None:
+            alias = instance.__class__.__name__
+        global_registry._registries[category][alias] = instance
+        return instance
+    
+    if cls:
+        # Si se proporciona una clase, registrarla como antes
+        if alias is None:
+            alias = cls.__name__
+        
+        def wrapper(cls):
+            global_registry._registries[category][alias] = cls
+            return cls
+        
+        return wrapper(cls)
+    
+    return lambda cls: register(cls=cls, alias=alias, category=category)
+
