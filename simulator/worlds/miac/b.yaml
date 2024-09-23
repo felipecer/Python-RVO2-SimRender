@@ -15,14 +15,7 @@ simulation:
     neighbor_dist: 0.35
     velocity: [0.0, 0.0]
   agents:
-    - agent_defaults:
-        max_speed: 1.0
-        radius: 0.5
-        time_horizon: 5.0
-        time_horizon_obst: 5.0
-        max_neighbors: 10
-        neighbor_dist: 0.35
-        velocity: [0.0, 0.0]
+    - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 5
@@ -41,14 +34,7 @@ simulation:
             - [-4.5, 0.0]
             - [-4.5, 0.25]
             - [-4.5, 0.5]
-    - agent_defaults:
-        max_speed: 1.0
-        radius: 0.5
-        time_horizon: 5.0
-        time_horizon_obst: 5.0
-        max_neighbors: 10
-        neighbor_dist: 0.35
-        velocity: [0.0, 0.0]
+    - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 5
@@ -67,14 +53,7 @@ simulation:
             - [-4.5, 0.0]
             - [-4.5, 0.25]
             - [-4.5, 0.5]
-    - agent_defaults:
-        max_speed: 1.0
-        radius: 0.5
-        time_horizon: 5.0
-        time_horizon_obst: 5.0
-        max_neighbors: 10
-        neighbor_dist: 0.35
-        velocity: [0.0, 0.0]
+    - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 5
