@@ -63,7 +63,7 @@ simulation:
         - [4.5, 4.5]
         - [4.0, 4.5]
   dynamics:
-    - name: "goal_respawn"
+    - name: "annulus_goal_spawner"
       when: "before"
       event_type: "goal_reached"
       num_iterations: 100

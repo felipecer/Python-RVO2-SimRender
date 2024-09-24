@@ -28,7 +28,7 @@ simulation:
           positions:
             - [-0.75, 0.75]  # Meta del agente
   dynamics:    
-    - name: "goal_respawn"
+    - name: "annulus_goal_spawner"
       when: "before"
       event_type: "goal_reached"
       num_iterations: 10000
