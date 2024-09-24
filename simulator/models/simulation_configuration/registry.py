@@ -9,8 +9,6 @@ class Registry:
             raise ValueError(f"Categoría {category} ya existe.")
         self._registries[category] = {}
 
-    # En simulator/models/simulation_configuration/registry.py
-
     def register(cls=None, *, alias=None, category=None, instance=None):
         """Registra una clase o instancia en el registro global bajo una categoría específica."""
         if category not in global_registry._registries:
@@ -28,7 +26,6 @@ class Registry:
             return wrapper(cls)
         else:
             return wrapper
-
 
     def get(self, category: str, name: str):
         """Devuelve la clase registrada bajo el nombre o alias especificado en la categoría dada."""

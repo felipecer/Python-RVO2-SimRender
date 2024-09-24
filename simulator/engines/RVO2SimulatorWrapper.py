@@ -216,18 +216,19 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         """
         Guarda los resultados de la simulación en un archivo.
         """
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"nombre_hardcodeado_{self.simulation_id}_{timestamp}.txt".replace(
-            " ", "_")
+        # timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        # filename = f"nombre_hardcodeado_{self.simulation_id}_{timestamp}.txt".replace(
+        #     " ", "_")
 
-        with open(filename, 'w') as file:
-            for step_data in self.steps_buffer:
-                step = step_data['step']
-                for agent_data in step_data['agents']:
-                    file.write(
-                        f"{step},{agent_data['id']},{agent_data['position'][0]:.2f},{agent_data['position'][1]:.2f}\n")
+        # with open(filename, 'w') as file:
+        #     for step_data in self.steps_buffer:
+        #         step = step_data['step']
+        #         for agent_data in step_data['agents']:
+        #             file.write(
+        #                 f"{step},{agent_data['id']},{agent_data['position'][0]:.2f},{agent_data['position'][1]:.2f}\n")
 
-        print(f"Archivo de simulación guardado como: {filename}")
+        # print(f"Archivo de simulación guardado como: {filename}")
+        pass
 
     def update_agent_velocity(self, agent_id: int, velocity: Tuple[float, float]):
         """

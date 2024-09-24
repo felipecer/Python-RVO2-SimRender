@@ -1,57 +1,57 @@
 orcabehaviours:
   default:
-    max_speed: 1.0
-    radius: 0.5
-    time_horizon: 5.0
-    time_horizon_obst: 5.0
-    max_neighbors: 10
-    neighbor_dist: 15.0
+    max_speed: 2.2
+    radius: 1.2
+    time_horizon: 15
+    time_horizon_obst: 15
+    max_neighbors: 50
+    neighbor_dist: 2
     velocity: [0.0, 0.0]
   non-reactive:
     max_speed: 0.9
     radius: 0.5
     time_horizon: 3.0
     time_horizon_obst: 3.0
-    max_neighbors: 5
-    neighbor_dist: 10.0
+    max_neighbors: 0
+    neighbor_dist: 0
     velocity: [0.0, 0.0]
   shy:
-    max_speed: 0.8
-    radius: 0.4
-    time_horizon: 6.0
-    time_horizon_obst: 6.0
-    max_neighbors: 8
-    neighbor_dist: 10.0
+    max_speed: 1.25
+    radius: 1.1
+    time_horizon: 31
+    time_horizon_obst: 31
+    max_neighbors: 7
+    neighbor_dist: 15
     velocity: [0.0, 0.0]
   tense:
-    max_speed: 1.2
-    radius: 0.45
-    time_horizon: 4.0
-    time_horizon_obst: 4.0
-    max_neighbors: 12
-    neighbor_dist: 14.0
+    max_speed: 1.55
+    radius: 1.6
+    time_horizon: 12
+    time_horizon_obst: 12
+    max_neighbors: 63
+    neighbor_dist: 29
     velocity: [0.0, 0.0]
   assertive:
-    max_speed: 1.1
+    max_speed: 1.55
     radius: 0.5
-    time_horizon: 5.0
-    time_horizon_obst: 5.0
-    max_neighbors: 10
-    neighbor_dist: 12.0
+    time_horizon: 32
+    time_horizon_obst: 32
+    max_neighbors: 23
+    neighbor_dist: 15
     velocity: [0.0, 0.0]
   aggressive:
-    max_speed: 1.5
+    max_speed: 1.55
     radius: 0.6
-    time_horizon: 2.5
-    time_horizon_obst: 2.5
-    max_neighbors: 15
-    neighbor_dist: 18.0
+    time_horizon: 31
+    time_horizon_obst: 31
+    max_neighbors: 20
+    neighbor_dist: 15
     velocity: [0.0, 0.0]
   impulsive:
-    max_speed: 1.3
-    radius: 0.55
-    time_horizon: 3.5
-    time_horizon_obst: 3.5
-    max_neighbors: 12
-    neighbor_dist: 14.0
+    max_speed: 1.55
+    radius: 0.4
+    time_horizon: 90
+    time_horizon_obst: 90
+    max_neighbors: 2
+    neighbor_dist: 30
     velocity: [0.0, 0.0]
