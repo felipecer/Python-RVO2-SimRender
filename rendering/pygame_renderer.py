@@ -17,13 +17,22 @@ from simulator.models.messages import (
 )
 
 from rendering.drawing_utils import draw_text, draw_arrow, draw_detection_radius, draw_distance_to_goal, Grid
+from rendering.color_scheme_parser import ColorScheme
+
+# Importar el parser para cargar esquemas de color
+from rendering.color_scheme_parser import load_color_schemes
 
 
 class PyGameRenderer(RendererInterface, SimulationObserver):
-    def __init__(self, width, height, map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes', font_size=36, font_color=(0, 0, 0), font_name='arial', cell_size=50):
+    def __init__(self, width, height, color_scheme_file='./rendering/color_schemes.yaml', color_scheme_name='orca-behaviors',
+                 map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes',
+                 font_size=36, font_name='arial', cell_size=50):
+        # Cargar el esquema de colores
+        self.color_scheme_config = load_color_schemes(color_scheme_file)
+        self.color_scheme = self.color_scheme_config.schemes[color_scheme_name]
+
         self.font_name = font_name
         self.font_size = font_size
-        self.font_color = font_color
         self.map = map
         self.obstacles = obstacles
         self.goals = goals
@@ -37,17 +46,8 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self.window = None
         self.window_width, self.window_height = width, height
         self.display_caption = display_caption
-        # Colors
-        self.agent_color = (0, 255, 0)  # Verde
-        self.obstacle_color = (255, 0, 0)  # Rojo
-        self.background_color = (195, 215, 224)  # Blanco
         self._rendering_is_active = False
 
-        # UI Manager
-
-        # self.ui_manager = pygame_gui.UIManager(
-        #     (self.window_width, self.window_height))
-        # self.ui_manager.ui_theme.load_fonts()
         self.delay_slider = None
         self.delay = 10
 
@@ -86,13 +86,14 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             vertices_transformed = [
                 self.transform_coordinates(x, y) for x, y in obstacle]
             pygame.draw.polygon(
-                self.window, self.obstacle_color, vertices_transformed, 3)
+                self.window, self.color_scheme.obstacle_color, vertices_transformed, 3)
 
     def draw_agents(self, step):
         if step in self.simulation_steps:
             for agent_id, x, y in self.simulation_steps[step]:
                 x, y = self.transform_coordinates(x, y)
-                pygame.draw.circle(self.window, self.agent_color, (x, y), 10)
+                pygame.draw.circle(
+                    self.window, self.color_scheme.obstacle_color, (x, y), 10)
 
     def draw_goals(self):
         for agent_id, goal in self.goals.items():
@@ -100,7 +101,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             # Usar el mismo radio del agente
             radius = self.agent_radii.get(agent_id, 10)
             # Dibujar el círculo de la meta con el mismo radio que el agente
-            pygame.draw.circle(self.window, (0, 0, 255), (x, y),
+            pygame.draw.circle(self.window, self.color_scheme.goal_color, (x, y),
                                int(radius * self.cell_size))
 
             # Agregar texto dentro del círculo de la meta
@@ -131,7 +132,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self._pygame_event_manager()
         if not self._rendering_is_active:
             return
-        self.window.fill(self.background_color)
+        self.window.fill(self.color_scheme.background_color)
         self.draw_grid()
         self.draw_obstacles()
 
@@ -144,7 +145,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             radius = self.agent_radii.get(agent_id, 10)
 
             x_screen, y_screen = self.transform_coordinates(x, y)
-            pygame.draw.circle(self.window, self.agent_color,
+            pygame.draw.circle(self.window, self.color_scheme.agent_color,
                                (x_screen, y_screen), int(radius * self.cell_size))
 
             # Agregar texto dentro del círculo del agente
@@ -153,17 +154,15 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             # Dibujar el radio de detección del agente (neighbor_dist)
             detection_radius = self.agent_neighbour_dist.get(agent_id, 10)
             draw_detection_radius(self.window,
-                                  (x_screen, y_screen), detection_radius, cell_size=self.cell_size, color=(0, 255, 0), border_width=2
+                                  (x_screen, y_screen), detection_radius, cell_size=self.cell_size, color=self.color_scheme.detection_radius_color, border_width=2
                                   )
 
             # Dibujar la flecha de la velocidad actual (rojo) con ancho mayor
-            velocity_color = (255, 0, 0)  # Rojo para velocidad actual
-            draw_arrow(self.window, (x_screen, y_screen), velocity, velocity_color,
+            draw_arrow(self.window, (x_screen, y_screen), velocity, self.color_scheme.velocity_color,
                        scale=100, width=16)
 
             # Dibujar la flecha de la velocidad preferida (azul) con ancho menor
-            pref_velocity_color = (0, 0, 255)  # Azul para velocidad preferida
-            draw_arrow(self.window, (x_screen, y_screen), pref_velocity, pref_velocity_color,
+            draw_arrow(self.window, (x_screen, y_screen), pref_velocity, self.color_scheme.pref_velocity_color,
                        scale=100, width=6)
 
             # Obtener la posición de la meta
@@ -171,7 +170,8 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
             # Dibujar la línea de distancia a la meta con marcadores perpendiculares
             draw_distance_to_goal(self.window,
-                                  (x_screen, y_screen), (goal_x, goal_y), color=(0, 0, 0), line_width=4
+                                  (x_screen, y_screen), (goal_x,
+                                                         goal_y), color=self.color_scheme.distance_line_color, line_width=4
                                   )
 
         draw_text(self.window, f"step: {step}", self.window_width - 150, 50)
