@@ -6,6 +6,7 @@ import yaml
 from pydantic import BaseModel, ValidationError, Field
 from simulator.models.simulation_configuration.registry import global_registry
 
+
 class Behaviour(BaseModel, ABC):
     name: str
     _agent_params: dict
@@ -13,6 +14,7 @@ class Behaviour(BaseModel, ABC):
     @abstractmethod
     def get_agent_params(self) -> Any:
         pass
+
 
 class Behaviour(BaseModel, ABC):
     name: str
@@ -22,7 +24,8 @@ class Behaviour(BaseModel, ABC):
     def get_agent_params(self) -> Any:
         pass
 
-class OrcaBehaviour(Behaviour):            
+
+class OrcaBehaviour(Behaviour):
     agent_defaults: AgentDefaults
 
     def __init__(self, **data):
@@ -31,7 +34,8 @@ class OrcaBehaviour(Behaviour):
 
     def get_agent_params(self) -> AgentDefaults:
         return self.agent_defaults
-    
+
+
 def load_behaviours_from_yaml(yaml_file: str):
     with open(yaml_file, 'r') as file:
         try:
@@ -39,13 +43,14 @@ def load_behaviours_from_yaml(yaml_file: str):
             behaviours = data.get('orcabehaviours', {})
 
             for name, params in behaviours.items():
-                print(f"Loading behaviour: {name}")
                 # Instanciar OrcaBehaviour con los parámetros cargados
-                behaviour_instance = OrcaBehaviour(name=name, agent_defaults=AgentDefaults(**params))
+                behaviour_instance = OrcaBehaviour(
+                    name=name, agent_defaults=AgentDefaults(**params))
 
                 # Registrar la instancia del behaviour en el registro global
-                global_registry.register(alias=name, category='behaviour', instance=behaviour_instance)
-        
+                global_registry.register(
+                    alias=name, category='behaviour', instance=behaviour_instance)
+
         except yaml.YAMLError as e:
             print(f"Error reading YAML file: {e}")
 

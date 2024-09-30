@@ -6,6 +6,7 @@ import datetime
 import sys
 import yaml
 from rendering.pygame_renderer import PyGameRenderer
+from rendering.text_renderer import TextRenderer
 from simulator.engines.base import SimulationEngine, SimulationState
 from simulator.models.observer import SimulationSubject
 from simulator.models.simulation import Simulation
@@ -16,6 +17,7 @@ from simulator.models.messages import (
     GoalsProcessedMessage
 )
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
+
 
 class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
     def __init__(self, world_config: BaseModel, simulation_id: str, seed: int = None):
@@ -73,16 +75,16 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         global_agent_id = 0
 
         # Iteramos sobre cada grupo de agentes
-        for agent_group in config.agents:            
+        for agent_group in config.agents:
             positions = agent_group.pattern.generate_positions()
 
             # Generamos las posiciones de las metas para este grupo si existen
             goals = agent_group.goals.pattern.generate_positions() if agent_group.goals else None
-            
+
             # Iteramos sobre las posiciones generadas de los agentes
             for local_agent_index, position in enumerate(positions):
                 agent_defaults = agent_group.agent_defaults or config.agent_defaults
-                
+
                 # Agregamos el agente a la simulación de rvo2 y obtenemos su ID global
                 agent_id = self.sim.addAgent(
                     tuple(position),
@@ -94,16 +96,18 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                     agent_defaults.max_speed,
                     agent_defaults.velocity
                 )
-                
+
                 # Configuramos la velocidad preferida del agente
-                self.sim.setAgentPrefVelocity(agent_id, agent_defaults.velocity)
+                self.sim.setAgentPrefVelocity(
+                    agent_id, agent_defaults.velocity)
                 self.agent_initial_positions.append(position)
                 # Si hay metas definidas para el grupo de agentes
                 if goals:
-                    self.notify_observers(GoalsProcessedMessage(step=-1, goals=self.agent_goals))
                     # Asignamos la meta correcta al agente usando el índice local
                     self.agent_goals[agent_id] = goals[local_agent_index]
-                
+                    self.notify_observers(GoalsProcessedMessage(
+                        step=-1, goals=self.agent_goals))
+
                 # Incrementamos el ID global del agente para el siguiente agente
                 global_agent_id += 1
 
@@ -111,14 +115,31 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         if config.obstacles:
             obstacle_shapes = []
             for obstacle_shape in config.obstacles:
-                shape = obstacle_shape.generate_shape()       
+                shape = obstacle_shape.generate_shape()
                 self.sim.addObstacle(shape)
                 obstacle_shapes.append(shape)
             self.sim.processObstacles()
-            self.notify_observers(ObstaclesProcessedMessage(step=-1, obstacles=obstacle_shapes))       
+            self.notify_observers(ObstaclesProcessedMessage(
+                step=-1, obstacles=obstacle_shapes))
 
-        # Notificar a los observadores sobre la inicialización
-        self.notify_observers(SimulationInitializedMessage(step=-1))
+            # Construir la información estática de los agentes para enviarla en el mensaje de inicialización
+        agent_initialization_data = [
+            {
+                "agent_id": agent_id,
+                "radius": self.sim.getAgentRadius(agent_id),
+                "max_speed": self.sim.getAgentMaxSpeed(agent_id),
+                "neighbor_dist": self.sim.getAgentNeighborDist(agent_id),
+                "max_neighbors": self.sim.getAgentMaxNeighbors(agent_id),
+                "time_horizon": self.sim.getAgentTimeHorizon(agent_id),
+                "time_horizon_obst": self.sim.getAgentTimeHorizonObst(agent_id),
+                "goal": self.agent_goals[agent_id]
+            }
+            for agent_id in range(self.sim.getNumAgents())
+        ]
+
+        # Enviar la información de inicialización a los observadores
+        self.notify_observers(SimulationInitializedMessage(
+            step=-1, agent_initialization_data=agent_initialization_data))
 
     def reset(self):
         """Reinicia la simulación a su estado inicial."""
@@ -156,10 +177,22 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 )
                 self.handle_event(event.alias, event)
 
-        agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
-                            for agent_id in range(self.sim.getNumAgents())]
-        # print(f"Sending AgentPositionsUpdateMessage for step {self.current_step}")
-        self.notify_observers(AgentPositionsUpdateMessage(step=self.current_step, agent_positions=agent_positions))
+        # Recolectar más datos de cada agente
+        agent_data = [
+            (
+                agent_id,
+                *self.sim.getAgentPosition(agent_id),  # Posición actual (x, y)
+                self.sim.getAgentVelocity(agent_id),  # Velocidad actual
+                self.sim.getAgentPrefVelocity(agent_id),  # Velocidad preferida
+                math.dist(self.sim.getAgentPosition(agent_id),
+                          self.agent_goals[agent_id])  # Distancia a la meta
+            )
+            for agent_id in range(self.sim.getNumAgents())
+        ]
+        # Enviar el mensaje con los datos adicionales
+        self.notify_observers(AgentPositionsUpdateMessage(
+            step=self.current_step, agent_positions=agent_data))
+
         self.store_step(self.current_step)
 
     def run_simulation(self, steps: int):
@@ -186,8 +219,10 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
             agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id))
                                for agent_id in range(self.sim.getNumAgents())]
-            print(f"Sending AgentPositionsUpdateMessage for step {self.current_step}")
-            self.notify_observers(AgentPositionsUpdateMessage(step=self.current_step, agent_positions=agent_positions))
+            print(
+                f"Sending AgentPositionsUpdateMessage for step {self.current_step}")
+            self.notify_observers(AgentPositionsUpdateMessage(
+                step=self.current_step, agent_positions=agent_positions))
             self.store_step(step)
 
     def is_goal_reached(self, agent_id: int) -> bool:
@@ -241,7 +276,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         Actualiza las velocidades preferidas de los agentes en la simulación, considerando actualizaciones manuales.
         """
         # Aplicar actualizaciones manuales primero
-        manual_update_ids = set(agent_id for agent_id, _ in self._manual_velocity_updates)
+        manual_update_ids = set(agent_id for agent_id,
+                                _ in self._manual_velocity_updates)
         # print("Manual updates:", self._manual_velocity_updates)
         for agent_id, velocity in self._manual_velocity_updates:
             self.sim.setAgentPrefVelocity(agent_id, velocity)
@@ -259,7 +295,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                     goal_position[0] - agent_position[0],
                     goal_position[1] - agent_position[1]
                 )
-                distance = math.sqrt(vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
+                distance = math.sqrt(
+                    vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
                 max_speed = self.sim.getAgentMaxSpeed(agent_id)
 
                 if distance > 0:
@@ -271,7 +308,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                     preferred_velocity = (0, 0)
 
                 self.sim.setAgentPrefVelocity(agent_id, preferred_velocity)
-        
+
         # Limpiar la cola después de aplicar las actualizaciones
         # self._manual_velocity_updates.clear()
 
@@ -294,7 +331,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             position = self.sim.getAgentPosition(agent_id)
             agent_positions[agent_id] = position
         return agent_positions
-    
+
     def set_goal(self, agent_id: int, goal: Tuple[float, float]) -> None:
         """agrega o actualiza la meta del agente dado su id"""
         self.agent_goals[agent_id] = goal
@@ -332,12 +369,13 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         )
         # Considera que se ha alcanzado la meta si la distancia es menor o igual a un umbral
         return distance <= 0.05
-    
+
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python simulator.py <world_file.yaml>")
         sys.exit(1)
-    
+
     world_file = sys.argv[1]
     try:
         with open(world_file, 'r') as stream:
@@ -354,22 +392,24 @@ def main():
         print(f"Validation error: {exc}")
         sys.exit(1)
 
-    window_width = int((world_config.map_settings.x_max - world_config.map_settings.x_min) * world_config.map_settings.cell_size)
-    window_height = int((world_config.map_settings.y_max - world_config.map_settings.y_min) * world_config.map_settings.cell_size)
+    window_width = int((world_config.map_settings.x_max -
+                       world_config.map_settings.x_min) * world_config.map_settings.cell_size)
+    window_height = int((world_config.map_settings.y_max -
+                        world_config.map_settings.y_min) * world_config.map_settings.cell_size)
 
-    renderer = PyGameRenderer(
-        window_width,
-        window_height,
-        obstacles=[], goals={}, cell_size=int(world_config.map_settings.cell_size)
-    )
-    renderer.setup()
+    # renderer = PyGameRenderer(
+    #     window_width,
+    #     window_height,
+    #     obstacles=[], goals={}, cell_size=int(world_config.map_settings.cell_size)
+    # )
+    # renderer.setup()
 
-    # text_renderer = TextRenderer()
-    # text_renderer.setup()
-    
+    text_renderer = TextRenderer()
+    text_renderer.setup()
+
     # Inicializar el simulador y registrar el renderizador como observador
     rvo2_simulator = RVO2SimulatorWrapper(world_config, "test_simulation")
-    rvo2_simulator.register_observer(renderer)
+    rvo2_simulator.register_observer(text_renderer)
 
     # rvo2_simulator.register_observer(text_renderer)
     # Registrar dinámicas desde el archivo YAML
@@ -381,6 +421,7 @@ def main():
 
     rvo2_simulator.run_pipeline(5000)  # Se asume 5000 pasos como ejemplo
     rvo2_simulator.save_simulation_runs()
+
 
 if __name__ == "__main__":
     main()
