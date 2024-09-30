@@ -3,9 +3,24 @@ color_schemes:
     background_color: [195, 215, 224]
     agent_color: [0, 255, 0]
     obstacle_color: [255, 0, 0]
-    velocity_color: [255, 0, 0]  # Corregido para que coincida con el campo
-    pref_velocity_color: [0, 0, 255]  # Corregido para que coincida con el campo
+    velocity_color: [255, 0, 0]
+    pref_velocity_color: [0, 0, 255]
     detection_radius_color: [0, 255, 0]
     goal_color: [0, 0, 255]
     text_color: [0, 0, 0]
-    distance_line_color: [0, 0, 0]   
+    distance_line_color: [0, 0, 0]
+    additional_info:
+      default:
+        agent_color: [0, 255, 124]
+      non-reactive:
+        agent_color: [255, 255, 0]
+      shy:
+        agent_color: [128, 0, 128]
+      aggressive:
+        agent_color: [255, 0, 0]
+      assertive:
+        agent_color: [0, 128, 255]
+      impulsive:
+        agent_color: [255, 128, 0]
+      tense:
+        agent_color: [0, 255, 255]

@@ -128,6 +128,62 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self.draw_goals()
         draw_text(self.window, f"step: {step}", self.window_width - 10, 10)
 
+    def render_step_with_agents2(self, agents, step):
+        self._pygame_event_manager()
+        if not self._rendering_is_active:
+            return
+        self.window.fill(self.color_scheme.background_color)
+        self.draw_grid()
+        self.draw_obstacles()
+
+        for agent_data in agents:
+            agent_id = agent_data[0]
+            x, y = agent_data[1], agent_data[2]
+            velocity = agent_data[3]  # Velocidad actual
+            pref_velocity = agent_data[4]  # Velocidad preferida
+            distance_to_goal = agent_data[5]  # Distancia a la meta
+            radius = self.agent_radii.get(agent_id, 10)
+
+            x_screen, y_screen = self.transform_coordinates(x, y)
+
+            # Obtener el comportamiento del agente
+            behaviour = self.agent_behaviours.get(agent_id, "default")
+            # Obtener el color adecuado para el agente
+            agent_color = self.color_scheme.get_agent_color(behaviour)
+            pygame.draw.circle(self.window, agent_color,
+                               (x_screen, y_screen), int(radius * self.cell_size))
+
+            # Agregar texto dentro del círculo del agente
+            draw_text(self.window, f"A_{agent_id}", x_screen, y_screen)
+
+            # Dibujar el radio de detección del agente (neighbor_dist)
+            detection_radius = self.agent_neighbour_dist.get(agent_id, 10)
+            draw_detection_radius(self.window,
+                                  (x_screen, y_screen), detection_radius, cell_size=self.cell_size, color=self.color_scheme.detection_radius_color, border_width=2
+                                  )
+
+            # Dibujar la flecha de la velocidad actual (rojo) con ancho mayor
+            draw_arrow(self.window, (x_screen, y_screen), velocity, self.color_scheme.velocity_color,
+                       scale=100, width=16)
+
+            # Dibujar la flecha de la velocidad preferida (azul) con ancho menor
+            draw_arrow(self.window, (x_screen, y_screen), pref_velocity, self.color_scheme.pref_velocity_color,
+                       scale=100, width=6)
+
+            # Obtener la posición de la meta
+            goal_x, goal_y = self.transform_coordinates(*self.goals[agent_id])
+
+            # Dibujar la línea de distancia a la meta con marcadores perpendiculares
+            draw_distance_to_goal(self.window,
+                                  (x_screen, y_screen), (goal_x,
+                                                         goal_y), color=self.color_scheme.distance_line_color, line_width=4
+                                  )
+
+        draw_text(self.window, f"step: {step}", self.window_width - 150, 50)
+        self.draw_goals()
+        self.update_display()
+        pygame.time.delay(int(self.delay))
+
     def render_step_with_agents(self, agents, step):
         self._pygame_event_manager()
         if not self._rendering_is_active:
@@ -145,7 +201,12 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             radius = self.agent_radii.get(agent_id, 10)
 
             x_screen, y_screen = self.transform_coordinates(x, y)
-            pygame.draw.circle(self.window, self.color_scheme.agent_color,
+
+            # Obtener el comportamiento del agente
+            behaviour = self.agent_behaviours.get(agent_id, "default")
+            # Obtener el color adecuado para el agente
+            agent_color = self.color_scheme.get_agent_color(behaviour)
+            pygame.draw.circle(self.window, agent_color,
                                (x_screen, y_screen), int(radius * self.cell_size))
 
             # Agregar texto dentro del círculo del agente
@@ -153,9 +214,15 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
             # Dibujar el radio de detección del agente (neighbor_dist)
             detection_radius = self.agent_neighbour_dist.get(agent_id, 10)
-            draw_detection_radius(self.window,
-                                  (x_screen, y_screen), detection_radius, cell_size=self.cell_size, color=self.color_scheme.detection_radius_color, border_width=2
-                                  )
+            # Escalar correctamente el radio de detección
+            # scaled_detection_radius = detection_radius * self.cell_size
+
+            # Verificar si el radio es lo suficientemente grande para ser dibujado
+            if detection_radius > 0:
+                draw_detection_radius(
+                    self.window, (x_screen, y_screen), detection_radius,
+                    color=self.color_scheme.detection_radius_color, border_width=2, cell_size=self.cell_size
+                )
 
             # Dibujar la flecha de la velocidad actual (rojo) con ancho mayor
             draw_arrow(self.window, (x_screen, y_screen), velocity, self.color_scheme.velocity_color,
@@ -197,6 +264,10 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
                                 for agent_data in message.agent_initialization_data}
             self.agent_neighbour_dist = {agent_data["agent_id"]: agent_data["neighbor_dist"]
                                          for agent_data in message.agent_initialization_data}
+            self.agent_behaviours = {
+                agent_data["agent_id"]: agent_data["behaviour"]
+                for agent_data in message.agent_initialization_data
+            }
         elif isinstance(message, AgentPositionsUpdateMessage):
             self.render_step_with_agents(message.agent_positions, message.step)
         elif isinstance(message, ObstaclesProcessedMessage):

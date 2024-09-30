@@ -1,7 +1,7 @@
 orcabehaviours:
   default:
     max_speed: 2.2
-    radius: 1.2
+    radius: 0.25
     time_horizon: 15
     time_horizon_obst: 15
     max_neighbors: 50
@@ -9,7 +9,7 @@ orcabehaviours:
     velocity: [0.0, 0.0]
   non-reactive:
     max_speed: 0.9
-    radius: 0.5
+    radius: 0.25
     time_horizon: 3.0
     time_horizon_obst: 3.0
     max_neighbors: 0
@@ -17,15 +17,15 @@ orcabehaviours:
     velocity: [0.0, 0.0]
   shy:
     max_speed: 1.25
-    radius: 1.1
+    radius: 0.25
     time_horizon: 31
     time_horizon_obst: 31
     max_neighbors: 7
-    neighbor_dist: 15
+    neighbor_dist: 5
     velocity: [0.0, 0.0]
   tense:
     max_speed: 1.55
-    radius: 1.6
+    radius: 0.25
     time_horizon: 12
     time_horizon_obst: 12
     max_neighbors: 63
@@ -33,7 +33,7 @@ orcabehaviours:
     velocity: [0.0, 0.0]
   assertive:
     max_speed: 1.55
-    radius: 0.5
+    radius: 0.25
     time_horizon: 32
     time_horizon_obst: 32
     max_neighbors: 23
@@ -41,7 +41,7 @@ orcabehaviours:
     velocity: [0.0, 0.0]
   aggressive:
     max_speed: 1.55
-    radius: 0.6
+    radius: 0.25
     time_horizon: 31
     time_horizon_obst: 31
     max_neighbors: 20
@@ -49,7 +49,7 @@ orcabehaviours:
     velocity: [0.0, 0.0]
   impulsive:
     max_speed: 1.55
-    radius: 0.4
+    radius: 0.25
     time_horizon: 90
     time_horizon_obst: 90
     max_neighbors: 2

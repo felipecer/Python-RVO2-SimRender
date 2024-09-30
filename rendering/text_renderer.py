@@ -32,10 +32,12 @@ class TextRenderer(SimulationObserver):
             print(f"Simulation Initialized: {message.message}")
             if message.agent_initialization_data:
                 for agent in message.agent_initialization_data:
+                    # Obtener el comportamiento del agente
+                    behaviour = agent.get('behaviour', 'default')
                     print(f"Agent {agent['agent_id']}: Radius={agent['radius']}, MaxSpeed={agent['max_speed']}, "
                           f"NeighborDist={agent['neighbor_dist']}, MaxNeighbors={agent['max_neighbors']}, "
                           f"TimeHorizon={agent['time_horizon']}, TimeHorizonObst={agent['time_horizon_obst']}, "
-                          f"Goal={agent['goal']}")
+                          f"Goal={agent['goal']}, Behaviour={behaviour}")  # Imprimir el comportamiento
 
         elif isinstance(message, ObstaclesProcessedMessage):
             # Imprime el número de obstáculos procesados

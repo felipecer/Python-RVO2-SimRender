@@ -1,8 +1,8 @@
 from typing import Dict, Tuple
 import rvo2
+import argparse
 from pydantic import BaseModel, ValidationError
 import math
-import datetime
 import sys
 import yaml
 from rendering.pygame_renderer import PyGameRenderer
@@ -73,6 +73,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         # Añadir agentes y guardar sus metas
         # Inicialización del contador global de agent_id
         global_agent_id = 0
+        agent_behaviours = {}
 
         # Iteramos sobre cada grupo de agentes
         for agent_group in config.agents:
@@ -108,6 +109,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                     self.notify_observers(GoalsProcessedMessage(
                         step=-1, goals=self.agent_goals))
 
+                # Almacenar el comportamiento del agente en el diccionario
+                agent_behaviours[agent_id] = agent_group.behaviour
                 # Incrementamos el ID global del agente para el siguiente agente
                 global_agent_id += 1
 
@@ -122,7 +125,6 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             self.notify_observers(ObstaclesProcessedMessage(
                 step=-1, obstacles=obstacle_shapes))
 
-            # Construir la información estática de los agentes para enviarla en el mensaje de inicialización
         agent_initialization_data = [
             {
                 "agent_id": agent_id,
@@ -132,7 +134,9 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 "max_neighbors": self.sim.getAgentMaxNeighbors(agent_id),
                 "time_horizon": self.sim.getAgentTimeHorizon(agent_id),
                 "time_horizon_obst": self.sim.getAgentTimeHorizonObst(agent_id),
-                "goal": self.agent_goals[agent_id]
+                "goal": self.agent_goals[agent_id],
+                # Comportamiento del agente
+                "behaviour": agent_behaviours.get(agent_id)
             }
             for agent_id in range(self.sim.getNumAgents())
         ]
@@ -372,11 +376,17 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python simulator.py <world_file.yaml>")
-        sys.exit(1)
+    # Parsear argumentos de la línea de comandos
+    parser = argparse.ArgumentParser(
+        description='Simulador de Navegación de Agentes')
+    parser.add_argument('world_file', type=str,
+                        help='Archivo YAML de configuración del mundo')
+    parser.add_argument('--renderer', type=str, choices=['pygame', 'text'], default='pygame',
+                        help='El tipo de renderer a usar: pygame o text (por defecto: pygame)')
+    args = parser.parse_args()
 
-    world_file = sys.argv[1]
+    # Cargar el archivo YAML
+    world_file = args.world_file
     try:
         with open(world_file, 'r') as stream:
             data = yaml.safe_load(stream)
@@ -392,34 +402,33 @@ def main():
         print(f"Validation error: {exc}")
         sys.exit(1)
 
+    # Configuración de la ventana
     window_width = int((world_config.map_settings.x_max -
                        world_config.map_settings.x_min) * world_config.map_settings.cell_size)
     window_height = int((world_config.map_settings.y_max -
                         world_config.map_settings.y_min) * world_config.map_settings.cell_size)
 
-    renderer = PyGameRenderer(
-        window_width,
-        window_height,
-        obstacles=[], goals={}, cell_size=int(world_config.map_settings.cell_size)
-    )
-    renderer.setup()
-
-    text_renderer = TextRenderer()
-    text_renderer.setup()
+    # Inicializar el renderer según el flag --renderer
+    if args.renderer == 'pygame':
+        renderer = PyGameRenderer(
+            window_width,
+            window_height,
+            obstacles=[], goals={}, cell_size=int(world_config.map_settings.cell_size)
+        )
+        renderer.setup()
+    else:
+        renderer = TextRenderer()
+        renderer.setup()
 
     # Inicializar el simulador y registrar el renderizador como observador
     rvo2_simulator = RVO2SimulatorWrapper(world_config, "test_simulation")
     rvo2_simulator.register_observer(renderer)
-    # rvo2_simulator.register_observer(text_renderer)
 
-    # rvo2_simulator.register_observer(text_renderer)
     # Registrar dinámicas desde el archivo YAML
     for dynamic_config in world_config.dynamics:
         rvo2_simulator.register_dynamic(dynamic_config)
 
-    # Inicializar y ejecutar la simulación
-    # rvo2_simulator.initialize_simulation()
-
+    # Ejecutar la simulación
     rvo2_simulator.run_pipeline(5000)  # Se asume 5000 pasos como ejemplo
     rvo2_simulator.save_simulation_runs()
 
