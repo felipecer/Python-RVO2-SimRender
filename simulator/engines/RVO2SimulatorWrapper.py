@@ -397,19 +397,20 @@ def main():
     window_height = int((world_config.map_settings.y_max -
                         world_config.map_settings.y_min) * world_config.map_settings.cell_size)
 
-    # renderer = PyGameRenderer(
-    #     window_width,
-    #     window_height,
-    #     obstacles=[], goals={}, cell_size=int(world_config.map_settings.cell_size)
-    # )
-    # renderer.setup()
+    renderer = PyGameRenderer(
+        window_width,
+        window_height,
+        obstacles=[], goals={}, cell_size=int(world_config.map_settings.cell_size)
+    )
+    renderer.setup()
 
     text_renderer = TextRenderer()
     text_renderer.setup()
 
     # Inicializar el simulador y registrar el renderizador como observador
     rvo2_simulator = RVO2SimulatorWrapper(world_config, "test_simulation")
-    rvo2_simulator.register_observer(text_renderer)
+    rvo2_simulator.register_observer(renderer)
+    # rvo2_simulator.register_observer(text_renderer)
 
     # rvo2_simulator.register_observer(text_renderer)
     # Registrar dinámicas desde el archivo YAML
