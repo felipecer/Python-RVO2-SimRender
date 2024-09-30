@@ -16,6 +16,14 @@ from simulator.models.messages import (
     NewObstacleAddedMessage
 )
 
+# Función para desaturar un color, reducir la saturación sin cambiar el tono
+
+
+def desaturate_color(color, factor=0.5):
+    """ Reduce la saturación de un color RGB en un factor """
+    gray = sum(color) // 3  # Promedio de los valores RGB para obtener un gris
+    return tuple(int(gray + (c - gray) * factor) for c in color)
+
 
 class Grid:
     def __init__(self, window_width, window_height, spacing):
@@ -24,44 +32,30 @@ class Grid:
         self.spacing = spacing
 
     def draw(self, window):
-        # return
-        color = (180, 203, 211)
-        color_axis = (0, 0, 0)
+        color = (180, 203, 211)  # Color de las líneas de la grilla
+        color_axis = (0, 0, 0)  # Color de los ejes
 
-        # Draw vertical lines
-        for x in range(0, self.window_width // 2, self.spacing):
-            pygame.draw.line(window, color, (self.window_width // 2 + x, 0),
-                             (self.window_width // 2 + x, self.window_height))
-            pygame.draw.line(window, color, (self.window_width // 2 - x, 0),
-                             (self.window_width // 2 - x, self.window_height))
+        # Obtener el centro de la ventana
+        center_x = self.window_width // 2
+        center_y = self.window_height // 2
 
-            # Draw small vertical axes every 10 cells
-            if ((x/self.spacing) % 10) == 0:
-                # pygame.draw.line(window, color_axis, (self.window_width // 2 - x, 0), (self.window_width // 2 - x, self.window_height))
-                pygame.draw.line(window, color_axis, (self.window_width // 2 - x, self.window_height // 2 -
-                                 self.spacing // 2), (self.window_width // 2 - x, self.window_height // 2 + self.spacing // 2))
-                pygame.draw.line(window, color_axis, (self.window_width // 2 + x, self.window_height // 2 -
-                                 self.spacing // 2), (self.window_width // 2 + x, self.window_height // 2 + self.spacing // 2))
+        # Dibujar las líneas verticales de la grilla
+        for x in range(center_x, self.window_width, self.spacing):
+            pygame.draw.line(window, color, (x, 0), (x, self.window_height))
+        for x in range(center_x, 0, -self.spacing):
+            pygame.draw.line(window, color, (x, 0), (x, self.window_height))
 
-        # Draw horizontal lines
-        for y in range(0, self.window_height // 2, self.spacing):
-            pygame.draw.line(window, color, (0, self.window_height // 2 + y),
-                             (self.window_width, self.window_height // 2 + y))
-            pygame.draw.line(window, color, (0, self.window_height // 2 - y),
-                             (self.window_width, self.window_height // 2 - y))
+        # Dibujar las líneas horizontales de la grilla
+        for y in range(center_y, self.window_height, self.spacing):
+            pygame.draw.line(window, color, (0, y), (self.window_width, y))
+        for y in range(center_y, 0, -self.spacing):
+            pygame.draw.line(window, color, (0, y), (self.window_width, y))
 
-            # Draw small horizontal axes every 10 cells
-            if ((y/self.spacing) % 10) == 0:
-                pygame.draw.line(window, color_axis, (self.window_width // 2 - self.spacing // 2, self.window_width //
-                                 2 - y), (self.window_width // 2 + self.spacing // 2, self.window_height // 2 - y))
-                pygame.draw.line(window, color_axis, (self.window_width // 2 - self.spacing // 2, self.window_width //
-                                 2 + y), (self.window_width // 2 + self.spacing // 2, self.window_height // 2 + y))
-
-        # Draw center lines
-        pygame.draw.line(window, color_axis, (self.window_width //
-                         2, 0), (self.window_width // 2, self.window_height))
-        pygame.draw.line(window, color_axis, (0, self.window_height // 2),
-                         (self.window_width, self.window_height // 2))
+        # Dibujar las líneas de los ejes en el centro
+        pygame.draw.line(window, color_axis, (center_x, 0),
+                         (center_x, self.window_height), 2)  # Eje vertical
+        pygame.draw.line(window, color_axis, (0, center_y),
+                         (self.window_width, center_y), 2)   # Eje horizontal
 
 
 class PyGameRenderer(RendererInterface, SimulationObserver):
@@ -180,6 +174,37 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self.draw_goals()
         self.draw_text(f"step: {step}", self.window_width - 10, 10)
 
+    def draw_detection_radius(self, position, radius, color, border_width):
+        """
+        Dibuja un círculo representando el radio de detección de un agente.
+
+        Args:
+            position (tuple): La posición (x, y) del agente.
+            radius (float): El radio de detección (neighbor_dist).
+            color (tuple): El color del borde del círculo.
+            border_width (int): El grosor del borde del círculo.
+        """
+        # Convertir el radio a escala de la ventana
+        scaled_radius = int(radius * self.cell_size)
+
+        # Reducir la saturación del color para el interior
+        interior_color = tuple(min(255, int(c * 1.5))
+                               for c in color)  # Aumenta el brillo
+
+        # Dibujar el círculo relleno con menor saturación
+        surface = pygame.Surface(
+            (scaled_radius * 2, scaled_radius * 2), pygame.SRCALPHA)
+        pygame.draw.circle(surface, (*interior_color, 80),
+                           (scaled_radius, scaled_radius), scaled_radius)
+
+        # Posicionar el círculo relleno en el centro del agente
+        self.window.blit(
+            surface, (position[0] - scaled_radius, position[1] - scaled_radius))
+
+        # Dibujar el borde del círculo
+        pygame.draw.circle(self.window, color, position,
+                           scaled_radius, border_width)
+
     def draw_arrow(self, start_pos, velocity, color, scale=50, width=2):
         """
         Dibuja una flecha desde la posición `start_pos` en la dirección del vector `velocity`.
@@ -219,6 +244,43 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         pygame.draw.line(self.window, color, end_pos, arrow_left, width)
         pygame.draw.line(self.window, color, end_pos, arrow_right, width)
 
+    def draw_distance_to_goal(self, agent_position, goal_position, color=(0, 0, 0), line_width=2, marker_length=10):
+        """
+        Dibuja una línea desde la posición del agente hasta su meta con marcadores de medida en los extremos.
+        """
+        # Dibujar la línea principal
+        pygame.draw.line(self.window, color, agent_position,
+                         goal_position, line_width)
+
+        # Calcular el ángulo de la línea
+        angle = math.atan2(
+            goal_position[1] - agent_position[1], goal_position[0] - agent_position[0])
+
+        # Calcular las posiciones de los marcadores en los extremos
+        # En el extremo del agente
+        agent_marker_start = (
+            agent_position[0] + marker_length * math.cos(angle + math.pi / 2),
+            agent_position[1] + marker_length * math.sin(angle + math.pi / 2)
+        )
+        agent_marker_end = (
+            agent_position[0] + marker_length * math.cos(angle - math.pi / 2),
+            agent_position[1] + marker_length * math.sin(angle - math.pi / 2)
+        )
+        pygame.draw.line(self.window, color, agent_marker_start,
+                         agent_marker_end, line_width)
+
+        # En el extremo de la meta
+        goal_marker_start = (
+            goal_position[0] + marker_length * math.cos(angle + math.pi / 2),
+            goal_position[1] + marker_length * math.sin(angle + math.pi / 2)
+        )
+        goal_marker_end = (
+            goal_position[0] + marker_length * math.cos(angle - math.pi / 2),
+            goal_position[1] + marker_length * math.sin(angle - math.pi / 2)
+        )
+        pygame.draw.line(self.window, color, goal_marker_start,
+                         goal_marker_end, line_width)
+
     def render_step_with_agents(self, agents, step):
         self._pygame_event_manager()
         if not self._rendering_is_active:
@@ -242,17 +304,31 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             # Agregar texto dentro del círculo del agente
             self.draw_text(f"A_{agent_id}", x_screen, y_screen)
 
+            # Dibujar el radio de detección del agente (neighbor_dist)
+            detection_radius = self.agent_neighbour_dist.get(agent_id, 10)
+            self.draw_detection_radius(
+                (x_screen, y_screen), detection_radius, color=(0, 255, 0), border_width=2
+            )
+
             # Dibujar la flecha de la velocidad actual (rojo) con ancho mayor
             velocity_color = (255, 0, 0)  # Rojo para velocidad actual
             self.draw_arrow((x_screen, y_screen), velocity, velocity_color,
-                            scale=100, width=16)  # Ancho 4 para la velocidad actual
+                            scale=100, width=16)
 
             # Dibujar la flecha de la velocidad preferida (azul) con ancho menor
             pref_velocity_color = (0, 0, 255)  # Azul para velocidad preferida
             self.draw_arrow((x_screen, y_screen), pref_velocity, pref_velocity_color,
-                            scale=100, width=6)  # Ancho 2 para la velocidad preferida
+                            scale=100, width=6)
 
-        self.draw_text(f"step: {step}", self.window_width - 10, 10)
+            # Obtener la posición de la meta
+            goal_x, goal_y = self.transform_coordinates(*self.goals[agent_id])
+
+            # Dibujar la línea de distancia a la meta con marcadores perpendiculares
+            self.draw_distance_to_goal(
+                (x_screen, y_screen), (goal_x, goal_y), color=(0, 0, 0), line_width=4
+            )
+
+        self.draw_text(f"step: {step}", self.window_width - 150, 50)
         self.draw_goals()
         self.update_display()
         pygame.time.delay(int(self.delay))
@@ -264,16 +340,17 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
     def dispose(self):
         pygame.quit()
 
-    # Métodos de SimulationObserver
     def update(self, message):
         """
         Método que será llamado cuando el `subject` notifique a sus observadores.
         """
         if isinstance(message, SimulationInitializedMessage):
             print("Simulación inicializada.")
-            # Guardar los radios de los agentes
+            # Guardar los radios de los agentes y neighbourDist
             self.agent_radii = {agent_data["agent_id"]: agent_data["radius"]
                                 for agent_data in message.agent_initialization_data}
+            self.agent_neighbour_dist = {agent_data["agent_id"]: agent_data["neighbor_dist"]
+                                         for agent_data in message.agent_initialization_data}
         elif isinstance(message, AgentPositionsUpdateMessage):
             self.render_step_with_agents(message.agent_positions, message.step)
         elif isinstance(message, ObstaclesProcessedMessage):

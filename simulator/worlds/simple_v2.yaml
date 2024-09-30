@@ -12,7 +12,7 @@ simulation:
     time_horizon: 1.5
     time_horizon_obst: 2.0
     max_neighbors: 5
-    neighbor_dist: 0.1
+    neighbor_dist: 2
     velocity: [0.0, 0.0]
   agents:
     - pattern:
