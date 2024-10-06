@@ -77,5 +77,5 @@ simulation:
       when: "after"
     - name: "cleanup_resources"
       when: "before"
-    - name: "update_initial_position_on_goal_reached"
-      when: "after"
+      # when: "after"
+    # - name: "update_initial_position_on_goal_reached"
