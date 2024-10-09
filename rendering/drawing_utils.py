@@ -11,15 +11,19 @@ def desaturate_color(color, factor=0.5):
 
 
 class Grid:
-    def __init__(self, window_width, window_height, spacing, sim_scale=1.0, font_size=18, font_color=(0, 0, 0), origin_radius=10):
+    def __init__(self, window_width, window_height, spacing, sim_scale=1.0, font_size=18, font_color=(0, 0, 0), origin_radius=10, origin_position=(10, 90)):
         self.window_width = window_width
         self.window_height = window_height
         self.spacing = spacing
+        self.origin_position = (window_width * origin_position[0]/100, window_height * origin_position[1]/100)
         # Escala de la simulación (ej. metros por celda)
         self.sim_scale = sim_scale
         self.font_size = font_size
         self.font_color = font_color
         self.origin_radius = origin_radius  # Radio del punto en el origen
+
+    def get_origin(self):
+        return self.origin_position
 
     def draw_text(self, window, text, x, y):
         """Dibuja texto en la ventana."""
@@ -32,8 +36,7 @@ class Grid:
     def draw_origin(self, window):
         """Dibuja un punto negro en el origen de los ejes."""
         color_origin = (0, 0, 0)  # Negro para el origen
-        center_x = self.window_width // 2
-        center_y = self.window_height // 2
+        center_x, center_y = self.get_origin()
         pygame.draw.circle(window, color_origin,
                            (center_x, center_y), self.origin_radius)
 
@@ -47,27 +50,31 @@ class Grid:
         marker_length_half = 5
 
         # Calcular el centro de la pantalla
-        center_x = self.window_width // 2
-        center_y = self.window_height // 2
+        center_x, center_y = self.get_origin()
 
-        # 1. Dibujar el punto en el origen
-        self.draw_origin(window)
+        # # 1. Dibujar el punto en el origen
+        # self.draw_origin(window)
 
         # 2. Dibujar líneas largas en la grilla cada cell_size
-        for x in range(0, self.window_width // 2, self.spacing):
+        
+        # líneas verticales
+        for x in range(0, self.window_width, self.spacing):
             pygame.draw.line(window, color, (center_x + x, 0),
                              (center_x + x, self.window_height))
             pygame.draw.line(window, color, (center_x - x, 0),
                              (center_x - x, self.window_height))
 
-        for y in range(0, self.window_height // 2, self.spacing):
+        # lineas horizontales
+        for y in range(0, self.window_height, self.spacing):
             pygame.draw.line(window, color, (0, center_y + y),
                              (self.window_width, center_y + y))
             pygame.draw.line(window, color, (0, center_y - y),
                              (self.window_width, center_y - y))
 
         # 3. Dibujar las marcas de los ejes (regletas) con líneas y texto
-        for x in range(0, self.window_width // 2, self.spacing // 2):
+        for x in range(0, self.window_width, self.spacing // 2):
+            # if (x//self.spacing)%5!=0: 
+                # continue
             marker_length = marker_length_half if x % self.spacing != 0 else marker_length_full
 
             # Calcular las coordenadas reales en el mundo simulado para el eje X
@@ -97,7 +104,9 @@ class Grid:
                                      (center_x - x, center_y - marker_length_half),
                                      (center_x - x, center_y + marker_length_half), 1)
 
-        for y in range(0, self.window_height // 2, self.spacing // 2):
+        for y in range(0, self.window_height, self.spacing // 2):
+            if (y//self.spacing)%5!=0: 
+                continue
             marker_length = marker_length_half if y % self.spacing != 0 else marker_length_full
 
             # Calcular las coordenadas reales en el mundo simulado para el eje Y

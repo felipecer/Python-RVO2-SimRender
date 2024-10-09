@@ -26,7 +26,7 @@ from rendering.color_scheme_parser import load_color_schemes
 class PyGameRenderer(RendererInterface, SimulationObserver):
     def __init__(self, width, height, color_scheme_file='./rendering/color_schemes.yaml', color_scheme_name='orca-behaviors',
                  map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes',
-                 font_size=36, font_name='arial', cell_size=50):
+                 font_size=36, font_name='arial', cell_size=50, origin_position= (10, 90)):
         # Cargar el esquema de colores
         self.color_scheme_config = load_color_schemes(color_scheme_file)
         self.color_scheme = self.color_scheme_config.schemes[color_scheme_name]
@@ -47,6 +47,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self.window_width, self.window_height = width, height
         self.display_caption = display_caption
         self._rendering_is_active = False
+        self.origin_position = origin_position
 
         self.delay_slider = None
         self.delay = 10
@@ -71,8 +72,11 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
     def transform_coordinates(self, x, y):
         scale = self.cell_size
-        x_new = self.window_width / 2 + x * scale
-        y_new = self.window_height / 2 - y * scale
+        # x_new = self.window_width / 2 + x * scale
+        # y_new = self.window_height / 2 - y * scale
+        x_new = self.window_width * self.origin_position[0]/100 + x * scale
+        y_new = self.window_height * self.origin_position[1]/100 - y * scale
+
         return int(x_new), int(y_new)
 
     def draw_grid(self):
