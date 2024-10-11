@@ -26,7 +26,7 @@ from rendering.color_scheme_parser import load_color_schemes
 class PyGameRenderer(RendererInterface, SimulationObserver):
     def __init__(self, width, height, color_scheme_file='./rendering/color_schemes.yaml', color_scheme_name='orca-behaviors',
                  map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes',
-                 font_size=36, font_name='arial', cell_size=50, origin_position= (10, 90)):
+                 font_size=36, font_name='arial', cell_size=50, origin_position= (10, 90), world_width=16, world_height=16):
         # Cargar el esquema de colores
         self.color_scheme_config = load_color_schemes(color_scheme_file)
         self.color_scheme = self.color_scheme_config.schemes[color_scheme_name]
@@ -41,6 +41,9 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self.simulation_steps = simulation_steps
         self.cell_size = cell_size
         self.grid = Grid(width, height, cell_size)
+
+        self.world_width = world_width
+        self.world_height = world_height
 
         # Window settings
         self.window = None
@@ -85,12 +88,25 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
     def draw_terrain(self):
         pass
 
+    # def draw_obstacles(self):
+    #     for obstacle in self.obstacles:
+    #         vertices_transformed = [
+    #             self.transform_coordinates(x, y) for x, y in obstacle]
+    #         pygame.draw.polygon(
+    #             self.window, self.color_scheme.obstacle_color, vertices_transformed, 3)
+
     def draw_obstacles(self):
-        for obstacle in self.obstacles:
-            vertices_transformed = [
-                self.transform_coordinates(x, y) for x, y in obstacle]
-            pygame.draw.polygon(
-                self.window, self.color_scheme.obstacle_color, vertices_transformed, 3)
+        for i in range(self.world_height):
+            for j in range(self.world_width):
+                if self.obstacles[i][j]:
+                    scale = self.cell_size
+
+                    rect_x, rect_y = self.transform_coordinates(j , self.world_height - i)
+                    rect_width = scale
+                    rect_height = scale
+                    rect = pygame.Rect(rect_x, rect_y, rect_width, rect_height)
+                    pygame.draw.rect(self.window, (255, 0, 0), rect)
+
 
     def draw_agents(self, step):
         if step in self.simulation_steps:

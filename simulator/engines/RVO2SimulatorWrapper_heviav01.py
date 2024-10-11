@@ -28,12 +28,26 @@ class RVO2SimulatorWrapper(SimulationSubject):
         self.origin = (float(aux[0]), float(aux[1]))
         _ = self.file.readline()
         self.agent_goals = {}
+        aux = self.file.readline().split()
+        self.world_width, self.world_height = (int(aux[0]), int(aux[1]))
+
+        self.obstacles = []
+        
 
     def update(self, message):
         pass
 
     def getNumAgents(self):
         return self.numAgents
+    
+    def register_obstacles(self):
+        for _ in range(self.world_height):
+            fila = list(map(int, self.file.readline().split()))
+            self.obstacles.append(fila)
+        _ = self.file.readline()
+
+        self.notify_observers(ObstaclesProcessedMessage(
+                step=-1, obstacles=self.obstacles))
 
     def step(self):
         """
@@ -50,11 +64,15 @@ class RVO2SimulatorWrapper(SimulationSubject):
         self.notify_observers(AgentPositionsUpdateMessage(step=self.current_step, agent_positions=agent_positions))
 
     def read(self):
-        agentsPos = []
+        # if not stepLine:
+        #     return
+
+        # print(self.file.readline().split())
+
         stepLine = self.file.readline()
-        if not stepLine:
-            return
         step = stepLine.split()[1]
+
+        agentsPos = []
         for ag in range(int(self.numAgents)):
             coord = self.file.readline().split()
             curr_xr = coord[0]
@@ -137,6 +155,7 @@ def main():
     # Inicializar el simulador y registrar el renderizador como observador
     rvo2_simulator = RVO2SimulatorWrapper()
     rvo2_simulator.register_observer(renderer)
+    rvo2_simulator.register_obstacles()
 
     # rvo2_simulator.register_observer(text_renderer)
     # Registrar dinámicas desde el archivo YAML

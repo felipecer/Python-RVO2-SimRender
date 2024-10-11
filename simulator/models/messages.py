@@ -26,7 +26,8 @@ class AgentPositionsUpdateMessage(BaseMessage):
 
 @dataclass
 class ObstaclesProcessedMessage(BaseMessage):
-    obstacles: List[List[Tuple[float, float]]]
+    obstacles: List[List[int]]
+    # obstacles: List[List[Tuple[float, float]]]
 
 
 @dataclass

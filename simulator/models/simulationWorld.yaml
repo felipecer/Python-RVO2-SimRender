@@ -12,7 +12,7 @@ simulation:
     time_horizon: 5.0
     time_horizon_obst: 5.0
     max_neighbors: 10
-    neighbor_dist: 15.0
+    neighbor_dist: 1.0
     velocity: [0.0, 0.0]
   agents:
     - agent_defaults:
@@ -21,7 +21,7 @@ simulation:
         time_horizon: 5.0
         time_horizon_obst: 5.0
         max_neighbors: 10
-        neighbor_dist: 15.0
+        neighbor_dist: 1.0
         velocity: [0.0, 0.0]
       pattern:
         name: "line"
@@ -45,6 +45,14 @@ simulation:
           - [2.0, 2.0]
           - [-2.0, 2.0]
           - [2.0, -2.0]
+      goals:        
+        radius: 0.5
+        pattern:
+          name: "circle"
+          count: 3
+          center: [2.0, 2.0]
+          radius: 1.5
+          std_dev: 0.05
   obstacles:
     - name: "rectangle"
       center: [-2.0, -2.0]
