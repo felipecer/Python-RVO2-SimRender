@@ -31,7 +31,7 @@ simulation:
     - name: "annulus_goal_spawner"
       when: "before"
       event_type: "goal_reached"
-      num_iterations: 1000
+      num_iterations: 256
       max_radius: 5.0
       step_radius: 1.0
       empty_radius: 1.5

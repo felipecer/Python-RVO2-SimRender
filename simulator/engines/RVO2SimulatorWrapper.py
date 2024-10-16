@@ -229,11 +229,11 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 step=self.current_step, agent_positions=agent_positions))
             self.store_step(step)
 
-    def is_goal_reached(self, agent_id: int) -> bool:
-        current_position = self.sim.getAgentPosition(agent_id)
-        goal_position = self.agent_goals[agent_id]
-        distance = math.dist(current_position, goal_position)
-        return distance <= 0.15
+    # def is_goal_reached(self, agent_id: int) -> bool:
+    #     current_position = self.sim.getAgentPosition(agent_id)
+    #     goal_position = self.agent_goals[agent_id]
+    #     distance = math.dist(current_position, goal_position)
+    #     return distance <= 0.25
 
     def store_step(self, step: int):
         """
@@ -372,7 +372,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             (current_position[1] - goal_position[1]) ** 2
         )
         # Considera que se ha alcanzado la meta si la distancia es menor o igual a un umbral
-        return distance <= 0.05
+        return distance <= 0.30
 
 
 def main():

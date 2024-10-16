@@ -82,8 +82,12 @@ class OnceDynamic(SimulationDynamic):
 
 
 class GoalSpawnerDynamic(EventBasedDynamic, ABC):
-    _generated_points: List[Tuple[float, float]
-                            ] = PrivateAttr(default_factory=list)
+    _max_provisioned_points: int = 2000
+    _generated_points: np.ndarray = PrivateAttr(
+        default_factory=lambda: np.zeros((2000, 2)))
+    _generated_count: int = PrivateAttr(
+        default=0)  # Contador de puntos generados
+    _current_index: int = PrivateAttr(default=0)
 
     def execute(self, event: GoalReachedEvent):
         new_goal = self._generate_new_goal()
@@ -95,36 +99,50 @@ class GoalSpawnerDynamic(EventBasedDynamic, ABC):
         ))
 
     def _generate_new_goal(self) -> Tuple[float, float]:
-        if not self._generated_points:
-            self._generate_points()  # Generar los puntos solo si está vacía
-            self._generated_points.reverse()  # Invertimos la lista al generarla
-        return self._generated_points.pop()  # Extraemos desde el final
+        if self._generated_count == 0 or self._current_index >= self._generated_count:
+            self._generate_points()  # Generar los puntos si no hay puntos válidos
+            self._current_index = 0  # Reiniciamos el índice
+
+        # Extraemos el punto actual y actualizamos el índice
+        self._current_index += 1  # Avanzamos el índice para el siguiente punto
+        new_goal = tuple(self._generated_points[self._current_index, :])
+        return new_goal
 
     @abstractmethod
     def _generate_points(self):
-        """Método abstracto para ser implementado por subclases específicas."""
         pass
 
 
 @register(alias="annulus_goal_spawner", category="dynamic")
 class AnnulusGoalSpawnerDynamic(GoalSpawnerDynamic):
-    num_iterations: int = 20
+    density_factor: int = 20
     max_radius: float = 5.0
     step_radius: float = 1.0
     empty_radius: float = 1.5
 
     def _generate_points(self):
+        point_index = 0
         current_radius = self.empty_radius
         while current_radius < self.max_radius:
             inner_radius = current_radius
             outer_radius = current_radius + self.step_radius
             annulus_area = np.pi * (outer_radius**2 - inner_radius**2)
             base_area = np.pi * self.step_radius**2
-            num_points = int(self.num_iterations * (annulus_area / base_area))
+            num_points = int(self.density_factor * (annulus_area / base_area))
+
+            # Generamos los puntos en el anillo
             points = self._generate_points_in_annulus(
                 inner_radius, outer_radius, num_points)
-            self._generated_points.extend(points)
+
+            # Almacenamos los puntos en el array preasignado desde la clase base
+            self._generated_points[point_index:point_index +
+                                   num_points, :] = points
+            point_index += num_points
+
             current_radius += self.step_radius
+        # Ajustamos el tamaño del array a la cantidad de puntos generad
+        self._generated_count = point_index
+        self._generated_points = self._generated_points[:self._generated_count]
 
     def _generate_points_in_annulus(self, inner_radius, outer_radius, num_points):
         rng = self._simulator.get_rng()  # Usar el RNG del SimulationEngine
@@ -137,10 +155,8 @@ class AnnulusGoalSpawnerDynamic(GoalSpawnerDynamic):
         x = r * np.cos(theta)
         y = r * np.sin(theta)
 
-        # Convertir las coordenadas x, y en tuplas de puntos
-        points = list(zip(x, y))
-
-        return points
+        # Devolvemos los puntos como una matriz Nx2
+        return np.column_stack((x, y))
 
 
 @register(alias="max_steps", category="dynamic")
