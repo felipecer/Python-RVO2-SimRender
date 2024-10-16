@@ -5,6 +5,7 @@ from rl_environments.single_agent.simple_v2 import RVOSimulationEnv2
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3 import PPO
 
+
 def train():
     vec_env = make_vec_env(RVOSimulationEnv2, n_envs=32, env_kwargs={
                            "config_file": './simulator/worlds/simple_v2.yaml', "render_mode": None, "seed": 13})
@@ -15,6 +16,7 @@ def train():
     print("Entrenamiento terminado")
     del model
 
+
 def test():
     vec_env = make_vec_env(RVOSimulationEnv2, n_envs=1, env_kwargs={
                            "config_file": './simulator/worlds/simple_v2.yaml', "render_mode": 'rgb', "seed": 7})
@@ -23,14 +25,17 @@ def test():
     while True:
         action, _states = model.predict(obs)
         obs, rewards, dones, info = vec_env.step(action)
-        
+
         if dones:
             vec_env.reset()
         vec_env.render("rgb")
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Entrenar o probar el modelo PPO en RVOSimulationEnv.')
-    parser.add_argument('--mode', choices=['train', 'test'], required=True, help='Modo de operación: train o test')
+    parser = argparse.ArgumentParser(
+        description='Entrenar o probar el modelo PPO en RVOSimulationEnv.')
+    parser.add_argument('--mode', choices=['train', 'test'],
+                        required=True, help='Modo de operación: train o test')
     args = parser.parse_args()
 
     if args.mode == 'train':
