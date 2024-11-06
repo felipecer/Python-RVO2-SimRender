@@ -1,7 +1,10 @@
-from typing import Tuple, List, Optional, Union
-from pydantic import BaseModel, model_validator
 from abc import ABC, abstractmethod
+from typing import Tuple, List, Optional
+
+from pydantic import BaseModel
+
 from simulator.models.simulation_configuration.registry import register
+
 
 class BaseShape(BaseModel, ABC):
     name: Optional[str] = None

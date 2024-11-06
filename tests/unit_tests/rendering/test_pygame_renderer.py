@@ -1,7 +1,8 @@
-import unittest
-from unittest.mock import patch, Mock
-from rendering.pygame_renderer import PyGameRenderer
 import os
+import unittest
+from unittest.mock import patch
+
+from rendering.pygame_renderer import PyGameRenderer
 
 
 class PyGameRendererTestCase(unittest.TestCase):

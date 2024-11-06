@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-import math
-from pprint import pprint
-import pygame
 # import pygame_gui
 # from pygame_gui.elements import UIHorizontalSlider
 import sys
+
+import pygame
+
+# Importar el parser para cargar esquemas de color
+from rendering.color_scheme_parser import load_color_schemes
+from rendering.drawing_utils import draw_text, draw_arrow, draw_detection_radius, draw_distance_to_goal, Grid
 from rendering.interfaces import RendererInterface
-from simulator.models.observer import SimulationObserver
 from simulator.models.messages import (
     AgentPositionsUpdateMessage,
     SimulationInitializedMessage,
@@ -15,12 +17,7 @@ from simulator.models.messages import (
     GoalPositionUpdatedMessage,
     NewObstacleAddedMessage
 )
-
-from rendering.drawing_utils import draw_text, draw_arrow, draw_detection_radius, draw_distance_to_goal, Grid
-from rendering.color_scheme_parser import ColorScheme
-
-# Importar el parser para cargar esquemas de color
-from rendering.color_scheme_parser import load_color_schemes
+from simulator.models.observer import SimulationObserver
 
 
 class PyGameRenderer(RendererInterface, SimulationObserver):
