@@ -1,6 +1,7 @@
+from typing import Any, Dict, Tuple
+
 import yaml
 from pydantic import BaseModel, Field
-from typing import Any, Dict, Tuple, List
 
 
 class ColorScheme(BaseModel):

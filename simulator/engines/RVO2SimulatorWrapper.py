@@ -405,7 +405,7 @@ def main():
     # Configuración de la ventana
     window_width = int((world_config.map_settings.x_max -
                        world_config.map_settings.x_min) * world_config.map_settings.cell_size)
-    window_height = int((world_config.map_settings.y_max -
+    window_height = int((world_config.map_settings.y_max - 
                         world_config.map_settings.y_min) * world_config.map_settings.cell_size)
 
     # Inicializar el renderer según el flag --renderer

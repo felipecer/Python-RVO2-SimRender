@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Any
-from simulator.models.agent import AgentDefaults
-import json
+
 import yaml
-from pydantic import BaseModel, ValidationError, Field
+from pydantic import BaseModel, Field
+
+from simulator.models.agent import AgentDefaults
 from simulator.models.simulation_configuration.registry import global_registry
 
 

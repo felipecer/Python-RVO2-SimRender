@@ -1,14 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List
+
 from simulator.models.messages import (
-    BaseMessage,
-    AgentPositionsUpdateMessage,
-    ObstaclesProcessedMessage,
-    GoalsProcessedMessage,
-    GoalPositionUpdatedMessage,
-    NewObstacleAddedMessage,
-    SimulationInitializedMessage
+    BaseMessage
 )
+
 
 class SimulationObserver(ABC):
     @abstractmethod

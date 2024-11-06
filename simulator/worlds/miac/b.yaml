@@ -1,11 +1,11 @@
 simulation:
   time_step: 0.005
   map_settings:
-    x_min: -20.0  # Tamaño ajustado para reducir el espacio vacío
-    x_max: 20.0
-    y_min: -20.0
-    y_max: 20.0
-    cell_size: 100
+    x_min: -15.0  # Tamaño ajustado para reducir el espacio vacío
+    x_max: 10.0
+    y_min: -8.0
+    y_max: 8.0
+    cell_size: 30
   agent_defaults:
     max_speed: 1.0
     radius: 0.25

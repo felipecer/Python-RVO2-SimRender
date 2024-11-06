@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import argparse
-import gymnasium as gym
-from rl_environments.single_agent.simple_v2 import RVOSimulationEnv2
-from stable_baselines3.common.env_util import make_vec_env
+
 from stable_baselines3 import PPO
+from stable_baselines3.common.env_util import make_vec_env
+
+from rl_environments.single_agent.simple_v2 import RVOSimulationEnv2
 
 
 def train():

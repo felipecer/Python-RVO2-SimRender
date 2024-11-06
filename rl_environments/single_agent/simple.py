@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 import gymnasium as gym
-from gymnasium import spaces, logger
 import numpy as np
+from gymnasium import spaces, logger
+from rl_environments.utils.spawners import GoalSpawner
 from simulator.world_loader import WorldLoader
-import rvo2
+
 from rendering.pygame_renderer import Grid, PyGameRenderer
 from rendering.text_renderer import TextRenderer
-import math
-from rl_environments.utils.spawners import GoalSpawner
 
 
 class RVOSimulationEnv(gym.Env):
@@ -169,7 +168,7 @@ class RVOSimulationEnv(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOSimulationEnv('./simulator/worlds/simple.yaml', render_mode='rgb')
+    env = RVOSimulationEnv('./simulator/worlds/simple_v2.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0

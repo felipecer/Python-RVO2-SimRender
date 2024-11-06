@@ -1,13 +1,14 @@
 #!/usr/bin/env python
-from pprint import pprint
 import gymnasium as gym
-from gymnasium import spaces, logger
 import numpy as np
 import yaml
+from gymnasium import spaces, logger
+
 from rendering.pygame_renderer import PyGameRenderer
 from simulator.engines.RVO2SimulatorWrapper import RVO2SimulatorWrapper
 from simulator.engines.base import SimulationState
 from simulator.models.simulation import Simulation as SimulationModel
+
 
 class RVOSimulationEnv2(gym.Env):
     metadata = {'render.modes': ['ansi', 'rgb']}

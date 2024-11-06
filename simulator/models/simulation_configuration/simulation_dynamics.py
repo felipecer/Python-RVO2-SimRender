@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, Field, model_validator, PrivateAttr
 from enum import Enum
-from typing import Dict, List, Type, Tuple, Optional
+from typing import Tuple, Optional
+
 import numpy as np
+from pydantic import BaseModel, PrivateAttr
+
 from simulator.models.messages import GoalPositionUpdatedMessage
 from simulator.models.simulation_configuration.registry import register
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent, SimulationEvent
+
 
 # Enum para los tipos de ejecución de las dinámicas
 

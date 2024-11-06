@@ -1,7 +1,7 @@
-from abc import ABC, abstractmethod
-from typing import Any, Tuple, Optional
+from typing import Any
+from typing import Tuple
+
 from pydantic import BaseModel
-from typing import Optional, Tuple
 
 
 class AgentDefaults(BaseModel):
