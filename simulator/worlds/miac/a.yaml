@@ -15,6 +15,26 @@ simulation:
     neighbor_dist: 0.35
     velocity: [0.0, 0.0]
   agents:
+    - agent_defaults:
+        max_speed: 1.5
+        radius: 0.25
+        time_horizon: 5.0
+        time_horizon_obst: 5.0
+        max_neighbors: 15
+        neighbor_dist: 2.5
+        velocity: [ 0.0, 0.0 ]
+      pattern:
+        name: "explicit"
+        count: 1
+        positions:
+          - [ -10, 0 ]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
+      goals:
+        radius: 0.4
+        pattern:
+          name: "explicit"
+          count: 1
+          positions:
+            - [ 10, 0 ]  # Meta para el agente inteligente, con altura menor que los agentes más al sur
     - behaviour: "non-reactive"
       pattern:
         name: "line"
@@ -66,26 +86,6 @@ simulation:
           y_start: -3.5
           y_end: 3.5
           std_dev: 0  # Sin desviación en la posición
-    - agent_defaults:
-        max_speed: 1.5
-        radius: 0.25
-        time_horizon: 5.0
-        time_horizon_obst: 5.0
-        max_neighbors: 15
-        neighbor_dist: 2.5
-        velocity: [0.0, 0.0]
-      pattern:
-        name: "explicit"
-        count: 1
-        positions:
-          - [-10, 0]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
-      goals:
-        radius: 0.4
-        pattern:
-          name: "explicit"
-          count: 1
-          positions:
-            - [10, 0]  # Meta para el agente inteligente, con altura menor que los agentes más al sur
   dynamics:
     - name: "max_steps"
       when: "before"
