@@ -27,7 +27,7 @@ simulation:
         name: "explicit"
         count: 1
         positions:
-          - [ -4, 7 ]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
+          - [ -3.5, 4 ]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
       goals:
         radius: 0.4
         pattern:
@@ -42,7 +42,7 @@ simulation:
         x_value: -1.0  # Primera línea de agentes a la izquierda
         y_start: -3.5
         y_end: 3.5
-        std_dev: 0  # Sin desviación en la posición
+        std_dev: 0.8  # Sin desviación en la posición
       goals:
         radius: 0.4
         pattern:
@@ -89,7 +89,7 @@ simulation:
   dynamics:
     - name: "max_steps"
       when: "before"
-      max_steps: 20000
+      max_steps: 256
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"

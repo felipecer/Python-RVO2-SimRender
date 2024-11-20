@@ -51,10 +51,32 @@ class RVOSimulationEnvMIAC(gym.Env):
         self.sim.initialize_simulation()
 
     def _get_obs(self):
-        """Obtiene la observación para el agente 0."""
+        """Obtiene la observación para el agente 0 con padding en los datos de vecinos."""
+        # Obtener posición y objetivo del agente
         pos = self.sim.get_agent_position(0)
         goal = self.sim.get_goal(0)
+
+        # Obtener el máximo número de vecinos permitidos y los datos actuales de vecinos
+        max_neigh = self.sim.get_agent_max_num_neighbors(0)
+        agent_neighbors = self.sim.get_neighbors_data(0)  # Supongamos que devuelve una lista de floats
+
+        # Número esperado de elementos para los datos de vecinos
+        expected_neighbors_data_length = max_neigh * 6
+
+        # Si hay menos datos de vecinos que el esperado, hacer padding con -9999
+        if len(agent_neighbors) < expected_neighbors_data_length:
+            padding_length = expected_neighbors_data_length - len(agent_neighbors)
+            agent_neighbors.extend([-9999] * padding_length)
+        else:
+            # En caso de que haya más datos (puede que no sea necesario), truncamos
+            agent_neighbors = agent_neighbors[:expected_neighbors_data_length]
+
+        # Calcular la observación inicial (diferencia entre posición y objetivo)
         observations = [goal[0] - pos[0], goal[1] - pos[1]]
+
+        # Concatenar las observaciones iniciales con los datos de vecinos (ya con padding)
+        observations.extend(agent_neighbors)
+        # Convertir la observación en un array numpy y retornarla
         return np.array(observations, dtype=np.float32)
 
     def step(self, action):
@@ -102,6 +124,7 @@ class RVOSimulationEnvMIAC(gym.Env):
 
     def is_done(self, agent_id):
         """Determina si el agente ha alcanzado su meta."""
+        print("is done")
         return self.sim.is_goal_reached(agent_id)
 
     def _get_info(self):
@@ -110,7 +133,7 @@ class RVOSimulationEnvMIAC(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOSimulationEnvMIAC('./simulator/worlds/miac/e.yaml', render_mode='rgb')
+    env = RVOSimulationEnvMIAC('./simulator/worlds/miac/b.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0

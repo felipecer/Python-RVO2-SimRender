@@ -319,6 +319,25 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
     def clear_buffer(self):
         self.steps_buffer = []
 
+    def get_agent_max_num_neighbors(self, agent_id):
+        return self.sim.getAgentMaxNeighbors(agent_id)
+
+    def get_neighbors_data(self, agent_id):
+        neighbor_count = self.sim.getAgentNumAgentNeighbors(agent_id)
+        neighbors_data = []
+        for i in range(neighbor_count):
+            neighbor_agent_id = self.sim.getAgentAgentNeighbor(agent_id, i)
+            neighbor_position = self.sim.getAgentPosition(neighbor_agent_id)
+            neighbor_velocity = self.sim.getAgentVelocity(neighbor_agent_id)
+            neighbor_pref_velocity = self.sim.getAgentPrefVelocity(neighbor_agent_id)
+            neighbors_data.append(neighbor_position[0])
+            neighbors_data.append(neighbor_position[1])
+            neighbors_data.append(neighbor_velocity[0])
+            neighbors_data.append(neighbor_velocity[1])
+            neighbors_data.append(neighbor_pref_velocity[0])
+            neighbors_data.append(neighbor_pref_velocity[1])
+        return neighbors_data
+
     def get_agent_position(self, agent_id) -> Tuple[float, float]:
         """Devuelve la posicion actual del agente."""
         return self.sim.getAgentPosition(agent_id)
