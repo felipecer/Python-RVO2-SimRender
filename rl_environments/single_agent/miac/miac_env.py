@@ -79,22 +79,43 @@ class RVOSimulationEnvMIAC(gym.Env):
         # Convertir la observación en un array numpy y retornarla
         return np.array(observations, dtype=np.float32)
 
+        # return observations, reward, done, truncated, info
     def step(self, action):
-        """Realiza un paso en la simulación con la acción proporcionada."""
-        action = tuple(action)
-        # print(f"Action: {action}")
-        self.sim.update_agent_velocity(0, action)
+        """Realiza un paso en la simulación con la acción como desviación."""
+        # Obtener posición y objetivo actuales
+        pos = np.array(self.sim.get_agent_position(0))
+        goal = np.array(self.sim.get_goal(0))
+
+        # Calcular dirección hacia el objetivo
+        direction_to_goal = goal - pos
+        distance_to_goal = np.linalg.norm(direction_to_goal)
+
+        # Normalizar dirección si no estamos en el objetivo
+        if distance_to_goal > 0:
+            direction_to_goal /= distance_to_goal
+
+        # Interpretar la acción como una desviación
+        deviation = np.array(action)
+        velocity = direction_to_goal + deviation
+
+        # Actualizar la velocidad del agente en la simulación
+        self.sim.update_agent_velocity(0, tuple(velocity))
         self.sim.update_agent_velocities()
         self.sim.execute_simulation_step()
         self.sim.current_step += 1
+
+        # Obtener nueva observación
         observations = self._get_obs()
+
+        # Calcular recompensa
         reward = self.calculate_reward(0)
+
+        # Verificar si el episodio ha terminado
         done = self.is_done(0)
-        # truncated = self.sim.current_step >= self.sim.world_config.time_limit  # Usar el time_limit del world_config
         truncated = self.sim.get_state() == SimulationState.STOPPED
-        # print(f"Step {self.sim.current_step}: Done: {done}, Truncated: {truncated}")
         info = self._get_info()
 
+        # Renderizar si es necesario
         if self.render_mode:
             self.render()
 
@@ -124,7 +145,6 @@ class RVOSimulationEnvMIAC(gym.Env):
 
     def is_done(self, agent_id):
         """Determina si el agente ha alcanzado su meta."""
-        print("is done")
         return self.sim.is_goal_reached(agent_id)
 
     def _get_info(self):

@@ -1,5 +1,5 @@
 simulation:
-  time_step: 0.005
+  time_step: 0.05
   map_settings:
     x_min: -15.0  # Tamaño ajustado para reducir el espacio vacío
     x_max: 10.0
@@ -16,7 +16,7 @@ simulation:
     velocity: [0.0, 0.0]
   agents:
     - agent_defaults:
-        max_speed: 1.5
+        max_speed: 1.0
         radius: 0.25
         time_horizon: 5.0
         time_horizon_obst: 5.0
@@ -27,7 +27,7 @@ simulation:
         name: "explicit"
         count: 1
         positions:
-          - [ -3.5, 4 ]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
+          - [ -4, 7 ]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
       goals:
         radius: 0.4
         pattern:
@@ -38,7 +38,7 @@ simulation:
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 5
+        count: 10
         x_value: -1.0  # Primera línea de agentes a la izquierda
         y_start: -3.5
         y_end: 3.5
@@ -47,7 +47,7 @@ simulation:
         radius: 0.4
         pattern:
           name: "line"
-          count: 5
+          count: 10
           x_value: -16.0  # Primera línea de agentes a la izquierda
           y_start: -3.5
           y_end: 3.5
@@ -55,7 +55,7 @@ simulation:
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 5
+        count: 10
         x_value: 2.0  # Primera línea de agentes a la izquierda
         y_start: -3.5
         y_end: 3.5
@@ -64,7 +64,7 @@ simulation:
         radius: 0.4
         pattern:
           name: "line"
-          count: 5
+          count: 10
           x_value: -13.0  # Primera línea de agentes a la izquierda
           y_start: -3.5
           y_end: 3.5
@@ -72,7 +72,7 @@ simulation:
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 5
+        count: 10
         x_value: 5.0  # Primera línea de agentes a la izquierda
         y_start: -3.5
         y_end: 3.5
@@ -81,7 +81,7 @@ simulation:
         radius: 0.4
         pattern:
           name: "line"
-          count: 5
+          count: 10
           x_value: -10.0  # Primera línea de agentes a la izquierda
           y_start: -3.5
           y_end: 3.5
@@ -89,7 +89,7 @@ simulation:
   dynamics:
     - name: "max_steps"
       when: "before"
-      max_steps: 256
+      max_steps: 512
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"
