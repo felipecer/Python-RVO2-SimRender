@@ -38,7 +38,7 @@ simulation:
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 10
+        count: 3
         x_value: -1.0  # Primera línea de agentes a la izquierda
         y_start: -3.5
         y_end: 3.5
@@ -47,7 +47,7 @@ simulation:
         radius: 0.4
         pattern:
           name: "line"
-          count: 10
+          count: 3
           x_value: -16.0  # Primera línea de agentes a la izquierda
           y_start: -3.5
           y_end: 3.5
@@ -55,7 +55,7 @@ simulation:
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 10
+        count: 3
         x_value: 2.0  # Primera línea de agentes a la izquierda
         y_start: -3.5
         y_end: 3.5
@@ -64,7 +64,7 @@ simulation:
         radius: 0.4
         pattern:
           name: "line"
-          count: 10
+          count: 3
           x_value: -13.0  # Primera línea de agentes a la izquierda
           y_start: -3.5
           y_end: 3.5
@@ -72,7 +72,7 @@ simulation:
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 10
+        count: 3
         x_value: 5.0  # Primera línea de agentes a la izquierda
         y_start: -3.5
         y_end: 3.5
@@ -81,7 +81,7 @@ simulation:
         radius: 0.4
         pattern:
           name: "line"
-          count: 10
+          count: 3
           x_value: -10.0  # Primera línea de agentes a la izquierda
           y_start: -3.5
           y_end: 3.5
@@ -89,7 +89,7 @@ simulation:
   dynamics:
     - name: "max_steps"
       when: "before"
-      max_steps: 1024
+      max_steps: 256
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"

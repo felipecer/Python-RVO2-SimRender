@@ -4,14 +4,14 @@ import argparse
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 
-from rl_environments.single_agent.simple_v2 import RVOSimulationEnv2
+from rl_environments.single_agent.miac.miac_env import RVOSimulationEnvMIAC
 
 
 def train():
-    vec_env = make_vec_env(RVOSimulationEnv2, n_envs=64, env_kwargs={
-                           "config_file": './simulator/worlds/miac/a.yaml', "render_mode": None, "seed": 13})
+    vec_env = make_vec_env(RVOSimulationEnvMIAC, n_envs=32, env_kwargs={
+                           "config_file": './simulator/worlds/miac/b_lite.yaml', "render_mode": None, "seed": 13})
     model = PPO("MlpPolicy", vec_env,  n_steps=256, verbose=1, device='cpu',
-                tensorboard_log="./tests/logs/ppo_rvo_miac_a_test/")
+                tensorboard_log="./tests/logs/ppo_rvo_miac_b_test/")
     model.learn(total_timesteps=1000000, progress_bar=True)
     model.save("./tests/logs/saves/ppo_rvo_simple_test4")
     print("Entrenamiento terminado")
@@ -19,9 +19,9 @@ def train():
 
 
 def test():
-    vec_env = make_vec_env(RVOSimulationEnv2, n_envs=1, env_kwargs={
-                           "config_file": './simulator/worlds/miac/a.yaml', "render_mode": 'rgb', "seed": 7})
-    model = PPO.load("./tests/logs/saves/ppo_rvo_miac_a_test")
+    vec_env = make_vec_env(RVOSimulationEnvMIAC, n_envs=1, env_kwargs={
+                           "config_file": './simulator/worlds/miac/b_lite.yaml', "render_mode": 'rgb', "seed": 7})
+    model = PPO.load("./tests/logs/saves/ppo_rvo_miac_b_test")
     obs = vec_env.reset()
     while True:
         action, _states = model.predict(obs)

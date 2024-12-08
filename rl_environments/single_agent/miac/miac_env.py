@@ -47,7 +47,7 @@ class RVOSimulationEnvMIAC(gym.Env):
             # print(f"Observadores registrados: {self.sim._observers}")
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(92,), dtype=np.float32)
         self.sim.initialize_simulation()
 
     def _get_obs(self):
@@ -82,24 +82,25 @@ class RVOSimulationEnvMIAC(gym.Env):
         # return observations, reward, done, truncated, info
     def step(self, action):
         """Realiza un paso en la simulación con la acción como desviación."""
-        # Obtener posición y objetivo actuales
-        pos = np.array(self.sim.get_agent_position(0))
-        goal = np.array(self.sim.get_goal(0))
-
-        # Calcular dirección hacia el objetivo
-        direction_to_goal = goal - pos
-        distance_to_goal = np.linalg.norm(direction_to_goal)
-
-        # Normalizar dirección si no estamos en el objetivo
-        if distance_to_goal > 0:
-            direction_to_goal /= distance_to_goal
-
+        velocity = self.sim.get_velocity_min_euclid_dist(0)
         # Interpretar la acción como una desviación
         deviation = np.array(action)
-        velocity = direction_to_goal + deviation
+        velocity = velocity + deviation
+        # Obtener la magnitud máxima y mínima permitida
+        min_magnitude = self.sim.get_agent_min_speed(0)
+        max_magnitude = self.sim.get_agent_max_speed(0)
 
-        # Actualizar la velocidad del agente en la simulación
-        self.sim.update_agent_velocity(0, tuple(velocity))
+        # Calcular la magnitud actual de la velocidad
+        velocity_magnitude = np.linalg.norm(velocity)
+
+        # Si la magnitud está fuera de los límites, ajustar
+        if velocity_magnitude < min_magnitude:
+            clipped_velocity = (velocity / velocity_magnitude) * min_magnitude
+        elif velocity_magnitude > max_magnitude:
+            clipped_velocity = (velocity / velocity_magnitude) * max_magnitude
+        else:
+            clipped_velocity = velocity  # Mantener sin cambios si está dentro del rango
+        self.sim.update_agent_velocity(0, tuple(clipped_velocity))
         self.sim.update_agent_velocities()
         self.sim.execute_simulation_step()
         self.sim.current_step += 1
@@ -153,7 +154,7 @@ class RVOSimulationEnvMIAC(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOSimulationEnvMIAC('./simulator/worlds/miac/b.yaml', render_mode='rgb')
+    env = RVOSimulationEnvMIAC('./simulator/worlds/miac/b_lite.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0
@@ -161,6 +162,7 @@ if __name__ == "__main__":
         action = env.action_space.sample()  # Take random actions
         # print(f"Action: {action}")
         observations, reward, done, truncated, info = env.step(action)
+        # print(f"Observations: {observations}")
 
         # Monitorear la posición del agente
         agent_position = env.sim.get_agent_position(0)
