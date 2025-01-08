@@ -140,7 +140,7 @@ simulation:
   dynamics:
     - name: "max_steps"
       when: "before"
-      max_steps: 20000
+      max_steps: 256
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"
