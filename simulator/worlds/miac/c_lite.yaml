@@ -1,8 +1,8 @@
 simulation:
   time_step: 0.1
   map_settings:
-    x_min: -18.0  # Tamaño ajustado para reducir el espacio vacío
-    x_max: 18
+    x_min: -8.0  # Tamaño ajustado para reducir el espacio vacío
+    x_max: 8
     y_min: -8.0
     y_max: 8.0
     cell_size: 30
@@ -27,19 +27,19 @@ simulation:
         name: "explicit"
         count: 1
         positions:
-          - [ -4, 7 ]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
+          - [ 0, 4 ]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
       goals:
         radius: 0.4
         pattern:
           name: "explicit"
           count: 1
           positions:
-            - [ -4, -7 ]  # Meta para el agente inteligente, con altura menor que los agentes más al sur
+            - [ 0, -4 ]  # Meta para el agente inteligente, con altura menor que los agentes más al sur
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 3
-        x_value: -16.0  # Primera línea de agentes a la izquierda
+        x_value: -4.0  # Primera línea de agentes a la izquierda
         y_start: -1.1
         y_end: 1.1
         std_dev: 0  # Sin desviación en la posición
@@ -48,7 +48,7 @@ simulation:
         pattern:
           name: "line"
           count: 3
-          x_value: -1.0  # Primera línea de agentes a la izquierda
+          x_value: 10.0  # Primera línea de agentes a la izquierda
           y_start: -1.1
           y_end: 1.1
           std_dev: 0  # Sin desviación en la posición
@@ -56,7 +56,7 @@ simulation:
       pattern:
         name: "line"
         count: 3
-        x_value: -13.0  # Primera línea de agentes a la izquierda
+        x_value: -3.0  # Primera línea de agentes a la izquierda
         y_start: -1.1
         y_end: 1.1
         std_dev: 0  # Sin desviación en la posición
@@ -65,7 +65,7 @@ simulation:
         pattern:
           name: "line"
           count: 3
-          x_value: 2.0  # Primera línea de agentes a la izquierda
+          x_value: 13.0  # Primera línea de agentes a la izquierda
           y_start: -1.1
           y_end: 1.1
           std_dev: 0  # Sin desviación en la posición
@@ -73,7 +73,7 @@ simulation:
       pattern:
         name: "line"
         count: 3
-        x_value: -10.0  # Primera línea de agentes a la izquierda
+        x_value: -2.0  # Primera línea de agentes a la izquierda
         y_start: -1.1
         y_end: 1.1
         std_dev: 0  # Sin desviación en la posición
@@ -82,7 +82,7 @@ simulation:
         pattern:
           name: "line"
           count: 3
-          x_value: 5.0  # Primera línea de agentes a la izquierda
+          x_value: 16.0  # Primera línea de agentes a la izquierda
           y_start: -1.1
           y_end: 1.1
           std_dev: 0  # Sin desviación en la posición
@@ -90,7 +90,7 @@ simulation:
       pattern:
         name: "line"
         count: 3
-        x_value: -1.0  # Primera línea de agentes a la izquierda
+        x_value: 3.0  # Primera línea de agentes a la izquierda
         y_start: -1.1
         y_end: 1.1
         std_dev: 0  # Sin desviación en la posición
@@ -107,7 +107,7 @@ simulation:
       pattern:
         name: "line"
         count: 3
-        x_value: 2.0  # Primera línea de agentes a la izquierda
+        x_value: 4.0  # Primera línea de agentes a la izquierda
         y_start: -1.1
         y_end: 1.1
         std_dev: 0  # Sin desviación en la posición

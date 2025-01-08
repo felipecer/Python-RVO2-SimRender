@@ -23,7 +23,7 @@ from simulator.models.observer import SimulationObserver
 class PyGameRenderer(RendererInterface, SimulationObserver):
     def __init__(self, width, height, color_scheme_file='./rendering/color_schemes.yaml', color_scheme_name='orca-behaviors',
                  map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes',
-                 font_size=36, font_name='arial', cell_size=50):
+                 font_size=8, font_name='arial', cell_size=50):
         # Cargar el esquema de colores
         self.color_scheme_config = load_color_schemes(color_scheme_file)
         self.color_scheme = self.color_scheme_config.schemes[color_scheme_name]

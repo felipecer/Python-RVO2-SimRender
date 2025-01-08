@@ -130,7 +130,7 @@ class Grid:
         self.draw_origin(window)
 
 
-def draw_text(window, text, x, y, font_name='arial', font_size=18, font_color=(0, 0, 0)):
+def draw_text(window, text, x, y, font_name='arial', font_size=8, font_color=(0, 0, 0)):
     font = pygame.font.Font(pygame.font.match_font(font_name), font_size)
     text_surface = font.render(text, True, font_color)
     text_rect = text_surface.get_rect(center=(x, y))
