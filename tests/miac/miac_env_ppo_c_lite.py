@@ -4,11 +4,11 @@ import argparse
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 
-from rl_environments.single_agent.simple_v2 import RVOSimulationEnv2
+from rl_environments.single_agent.miac.miac_env_c_lite import RVOSimulationEnvMIAC
 
 
 def train():
-    vec_env = make_vec_env(RVOSimulationEnv2, n_envs=64, env_kwargs={
+    vec_env = make_vec_env(RVOSimulationEnvMIAC, n_envs=64, env_kwargs={
                            "config_file": './simulator/worlds/miac/c_lite.yaml', "render_mode": None, "seed": 13})
     model = PPO("MlpPolicy", vec_env,  n_steps=1024, verbose=1, device='cpu',
                 tensorboard_log="./tests/logs/ppo_rvo_miac_c_lite_test/")
@@ -19,7 +19,7 @@ def train():
 
 
 def test():
-    vec_env = make_vec_env(RVOSimulationEnv2, n_envs=1, env_kwargs={
+    vec_env = make_vec_env(RVOSimulationEnvMIAC, n_envs=1, env_kwargs={
                            "config_file": './simulator/worlds/miac/c_lite.yaml', "render_mode": 'rgb', "seed": 13})
     model = PPO.load("./tests/logs/saves/ppo_rvo_miac_c_lite_test1")
     obs = vec_env.reset()

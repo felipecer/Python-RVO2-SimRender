@@ -4,7 +4,7 @@ import argparse
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 
-from rl_environments.single_agent.miac.miac_env import RVOSimulationEnvMIAC
+from rl_environments.single_agent.miac.miac_env_b_lite import RVOSimulationEnvMIAC
 
 
 def train():
