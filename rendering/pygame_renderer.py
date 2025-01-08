@@ -160,21 +160,21 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
                                   )
 
             # Dibujar la flecha de la velocidad actual (rojo) con ancho mayor
-            draw_arrow(self.window, (x_screen, y_screen), velocity, self.color_scheme.velocity_color,
-                       scale=100, width=16)
+            # draw_arrow(self.window, (x_screen, y_screen), velocity, self.color_scheme.velocity_color,
+            #            scale=100, width=16)
 
-            # Dibujar la flecha de la velocidad preferida (azul) con ancho menor
-            draw_arrow(self.window, (x_screen, y_screen), pref_velocity, self.color_scheme.pref_velocity_color,
-                       scale=100, width=6)
+            # # Dibujar la flecha de la velocidad preferida (azul) con ancho menor
+            # draw_arrow(self.window, (x_screen, y_screen), pref_velocity, self.color_scheme.pref_velocity_color,
+            #            scale=100, width=6)
 
-            # Obtener la posición de la meta
-            goal_x, goal_y = self.transform_coordinates(*self.goals[agent_id])
+            # # Obtener la posición de la meta
+            # goal_x, goal_y = self.transform_coordinates(*self.goals[agent_id])
 
-            # Dibujar la línea de distancia a la meta con marcadores perpendiculares
-            draw_distance_to_goal(self.window,
-                                  (x_screen, y_screen), (goal_x,
-                                                         goal_y), color=self.color_scheme.distance_line_color, line_width=4
-                                  )
+            # # Dibujar la línea de distancia a la meta con marcadores perpendiculares
+            # draw_distance_to_goal(self.window,
+            #                       (x_screen, y_screen), (goal_x,
+            #                                              goal_y), color=self.color_scheme.distance_line_color, line_width=4
+            #                       )
 
         draw_text(self.window, f"step: {step}", self.window_width - 150, 50)
         self.draw_goals()
@@ -221,22 +221,22 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
                     color=self.color_scheme.detection_radius_color, border_width=2, cell_size=self.cell_size
                 )
 
-            # Dibujar la flecha de la velocidad actual (rojo) con ancho mayor
-            draw_arrow(self.window, (x_screen, y_screen), velocity, self.color_scheme.velocity_color,
-                       scale=100, width=16)
+            # # Dibujar la flecha de la velocidad actual (rojo) con ancho mayor
+            # draw_arrow(self.window, (x_screen, y_screen), velocity, self.color_scheme.velocity_color,
+            #            scale=100, width=16)
 
-            # Dibujar la flecha de la velocidad preferida (azul) con ancho menor
-            draw_arrow(self.window, (x_screen, y_screen), pref_velocity, self.color_scheme.pref_velocity_color,
-                       scale=100, width=6)
+            # # Dibujar la flecha de la velocidad preferida (azul) con ancho menor
+            # draw_arrow(self.window, (x_screen, y_screen), pref_velocity, self.color_scheme.pref_velocity_color,
+            #            scale=100, width=6)
 
-            # Obtener la posición de la meta
-            goal_x, goal_y = self.transform_coordinates(*self.goals[agent_id])
+            # # Obtener la posición de la meta
+            # goal_x, goal_y = self.transform_coordinates(*self.goals[agent_id])
 
-            # Dibujar la línea de distancia a la meta con marcadores perpendiculares
-            draw_distance_to_goal(self.window,
-                                  (x_screen, y_screen), (goal_x,
-                                                         goal_y), color=self.color_scheme.distance_line_color, line_width=4
-                                  )
+            # # Dibujar la línea de distancia a la meta con marcadores perpendiculares
+            # draw_distance_to_goal(self.window,
+            #                       (x_screen, y_screen), (goal_x,
+            #                                              goal_y), color=self.color_scheme.distance_line_color, line_width=4
+            #                       )
 
         draw_text(self.window, f"step: {step}", self.window_width - 150, 50)
         self.draw_goals()
