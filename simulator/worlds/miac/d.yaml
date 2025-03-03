@@ -7,13 +7,13 @@ simulation:
     y_max: 8.0
     cell_size: 30
   agent_defaults:
-    max_speed: 1.0
+    max_speed: 1.5
     radius: 0.25
     time_horizon: 5.0
     time_horizon_obst: 5.0
-    max_neighbors: 10
-    neighbor_dist: 0.35
-    velocity: [0.0, 0.0]
+    max_neighbors: 15
+    neighbor_dist: 2.5
+    velocity: [ 0.0, 0.0 ]
   agents:
     - behaviour: "non-reactive"
       pattern:

@@ -53,6 +53,15 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             )
         else:
             return (0, 0)
+        
+    def set_agent_defaults(self, agent_idx, agent_defaults):
+        self.sim.setAgentNeighborDist(agent_idx, agent_defaults.neighbor_dist)
+        self.sim.setAgentMaxNeighbors(agent_idx, agent_defaults.max_neighbors)
+        self.sim.setAgentTimeHorizon(agent_idx, agent_defaults.time_horizon)
+        self.sim.setAgentTimeHorizonObst(agent_idx, agent_defaults.time_horizon_obst)
+        self.sim.setAgentRadius(agent_idx, agent_defaults.radius)
+        self.sim.setAgentMaxSpeed(agent_idx, agent_defaults.max_speed)
+        self.sim.setAgentVelocity(agent_idx, agent_defaults.velocity)
 
     def initialize_simulation(self):
         """
