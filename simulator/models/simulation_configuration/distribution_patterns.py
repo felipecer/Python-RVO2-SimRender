@@ -42,12 +42,24 @@ class LineDistributionPattern(SpatialDistributionPattern):
 class CircleDistributionPattern(SpatialDistributionPattern):
     center: Tuple[float, float]
     radius: float
+    start_position: str = "right"  # Opciones: "right", "top", "left", "bottom"
 
     def generate_positions(self) -> List[Tuple[float, float]]:
         import math
         positions = []
+        
+        # Determinar el ángulo de inicio basado en la posición elegida
+        start_angles = {
+            "right": 0,          # x = center[0] + radius, y = center[1]
+            "top": math.pi / 2,  # x = center[0], y = center[1] + radius
+            "left": math.pi,      # x = center[0] - radius, y = center[1]
+            "bottom": 3 * math.pi / 2  # x = center[0], y = center[1] - radius
+        }
+        
+        start_angle = start_angles.get(self.start_position, 0)  # Default: "right"
+        
         for i in range(self.count):
-            angle = 2 * math.pi * i / self.count
+            angle = start_angle - 2 * math.pi * i / self.count  # Sentido antihorario
             x = self.center[0] + self.radius * math.cos(angle)
             y = self.center[1] + self.radius * math.sin(angle)
             positions.append((x, y))
@@ -59,7 +71,8 @@ class CircleDistributionPattern(SpatialDistributionPattern):
 
     def apply_variability(self, positions: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
         import random
-        return [(x + random.gauss(0, self.std_dev), y) for x, y in positions]
+        return [(x + random.gauss(0, self.std_dev), y + random.gauss(0, self.std_dev)) for x, y in positions]
+
 
 class InsufficientPositionsError(Exception):
     pass
