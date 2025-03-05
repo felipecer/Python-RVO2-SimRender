@@ -31,6 +31,40 @@ simulation:
           count: 30
           radius: 5 # Primera línea de agentes a la izquierda
           center: [0.0, 0.0]
+          std_dev: 0.25  # Sin desviación en la posición
+    - behaviour: "non-reactive"
+      pattern:
+        start_position: "right"
+        name: "circle"
+        count: 30
+        radius: 7
+        center: [0.0, 0.0]
+        std_dev: 0.25  # Sin desviación en la posición
+      goals:
+        radius: 0.4
+        pattern:
+          start_position: "left"
+          name: "circle"
+          count: 30
+          radius: 7 # Primera línea de agentes a la izquierda
+          center: [0.0, 0.0]
+          std_dev: 0.0  # Sin desviación en la posición
+    - behaviour: "non-reactive"
+      pattern:
+        start_position: "right"
+        name: "circle"
+        count: 30
+        radius: 9
+        center: [0.0, 0.0]
+        std_dev: 0.25  # Sin desviación en la posición
+      goals:
+        radius: 0.4
+        pattern:
+          start_position: "left"
+          name: "circle"
+          count: 30
+          radius: 9 # Primera línea de agentes a la izquierda
+          center: [0.0, 0.0]
           std_dev: 0.0  # Sin desviación en la posición
   dynamics:
     - name: "max_steps"

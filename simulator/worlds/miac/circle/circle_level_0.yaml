@@ -22,7 +22,7 @@ simulation:
         count: 30
         radius: 5
         center: [0.0, 0.0]
-        std_dev: 0.25  # Sin desviación en la posición
+        std_dev: 0.0  # Sin desviación en la posición
       goals:
         radius: 0.4
         pattern:
