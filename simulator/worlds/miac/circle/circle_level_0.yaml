@@ -1,5 +1,5 @@
 simulation:
-  time_step: 0.005
+  time_step: 0.1
   map_settings:
     x_min: -18.0  # Tamaño ajustado para reducir el espacio vacío
     x_max: 18
@@ -17,20 +17,21 @@ simulation:
   agents:
     - behaviour: "non-reactive"
       pattern:
+        start_position: "right"
         name: "circle"
         count: 30
         radius: 5
         center: [0.0, 0.0]
-        std_dev: 0.0  # Sin desviación en la posición
+        std_dev: 0.25  # Sin desviación en la posición
       goals:
         radius: 0.4
         pattern:
-          name: "line"
+          start_position: "left"
+          name: "circle"
           count: 30
-          x_value: 0.0  # Primera línea de agentes a la izquierda
-          y_start: 0.0
-          y_end: 0.0
-          std_dev: 0  # Sin desviación en la posición
+          radius: 5 # Primera línea de agentes a la izquierda
+          center: [0.0, 0.0]
+          std_dev: 0.0  # Sin desviación en la posición
   dynamics:
     - name: "max_steps"
       when: "before"
