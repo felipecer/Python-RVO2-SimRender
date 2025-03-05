@@ -40,25 +40,42 @@ simulation:
         name: "line"
         count: 3
         x_value: -1.0  # Primera línea de agentes a la izquierda
-        y_start: -3.5
-        y_end: 3.5
-        std_dev: 0.8  # Sin desviación en la posición
+        y_start: -1.1
+        y_end: 1.1
+        std_dev: 0.0  # Sin desviación en la posición
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 3
-          x_value: -16.0  # Primera línea de agentes a la izquierda
-          y_start: -3.5
-          y_end: 3.5
+          x_value: -17.0  # Primera línea de agentes a la izquierda
+          y_start: -1.1
+          y_end: 1.1
           std_dev: 0  # Sin desviación en la posición
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 3
-        x_value: 2.0  # Primera línea de agentes a la izquierda
-        y_start: -3.5
-        y_end: 3.5
+        x_value: 0.0  # Primera línea de agentes a la izquierda
+        y_start: -1.1
+        y_end: 1.1
+        std_dev: 0  # Sin desviación en la posición
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 3
+          x_value: -15.0  # Primera línea de agentes a la izquierda
+          y_start: -1.1
+          y_end: 1.1
+          std_dev: 0  # Sin desviación en la posición
+    - behaviour: "non-reactive"
+      pattern:
+        name: "line"
+        count: 3
+        x_value: 1.0  # Primera línea de agentes a la izquierda
+        y_start: -1.1
+        y_end: 1.1
         std_dev: 0  # Sin desviación en la posición
       goals:
         radius: 0.4
@@ -66,25 +83,8 @@ simulation:
           name: "line"
           count: 3
           x_value: -13.0  # Primera línea de agentes a la izquierda
-          y_start: -3.5
-          y_end: 3.5
-          std_dev: 0  # Sin desviación en la posición
-    - behaviour: "non-reactive"
-      pattern:
-        name: "line"
-        count: 3
-        x_value: 5.0  # Primera línea de agentes a la izquierda
-        y_start: -3.5
-        y_end: 3.5
-        std_dev: 0  # Sin desviación en la posición
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 3
-          x_value: -10.0  # Primera línea de agentes a la izquierda
-          y_start: -3.5
-          y_end: 3.5
+          y_start: -1.1
+          y_end: 1.1
           std_dev: 0  # Sin desviación en la posición
   dynamics:
     - name: "max_steps"
