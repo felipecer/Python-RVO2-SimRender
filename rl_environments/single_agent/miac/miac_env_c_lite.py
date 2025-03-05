@@ -154,7 +154,7 @@ class RVOSimulationEnvMIAC(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOSimulationEnvMIAC('./simulator/worlds/miac/c_lite.yaml', render_mode='rgb')
+    env = RVOSimulationEnvMIAC('./simulator/worlds/miac/perp2/perp2_level_1.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0
