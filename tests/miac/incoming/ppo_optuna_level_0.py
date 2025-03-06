@@ -1,9 +1,10 @@
+import uuid
 import optuna
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.evaluation import evaluate_policy
 from rl_environments.single_agent.miac.incoming import RVOMiacIncoming
-from trainer_testers import PPOTrainerTester
+from tests.miac.trainer_testers import PPOTrainerTester
 import os
 
 def objective(trial):
@@ -25,7 +26,7 @@ def objective(trial):
     # Create the PPOTrainerTester instance
     trainer_tester = PPOTrainerTester(
         env_class=RVOMiacIncoming,
-        config_file='./simulator/worlds/miac/a_lite.yaml',
+        config_file='./simulator/worlds/miac/incoming/incoming_level_0.yaml',
         log_dir=log_dir,
         save_path=save_path,
         render_mode=None,
