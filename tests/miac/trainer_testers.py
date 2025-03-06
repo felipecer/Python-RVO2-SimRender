@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+import argparse
+from datetime import datetime
+import uuid
+from stable_baselines3 import PPO
+from stable_baselines3.common.env_util import make_vec_env
+import os
+import csv
+
+def parse_cli_args(script_dir):
+    parser = argparse.ArgumentParser(
+        description='Train or test the PPO model in a simulation environment.')
+    parser.add_argument('--mode', choices=['train', 'test'],
+                        required=True, help='Operation mode: train or test')
+    parser.add_argument('--config_file', required=True,
+                        help='Environment configuration file')
+    parser.add_argument('--total_timesteps', type=int, default=1000000,
+                        help='Total number of timesteps for training (default: 1000000)')
+    parser.add_argument('--n_steps', type=int, default=1024,
+                        help='Number of steps per environment per update (default: 1024)')
+    parser.add_argument('--n_envs', type=int, default=64,
+                        help='Number of parallel environments (default: 64)')
+    parser.add_argument('--render_mode', choices=['rgb', 'ansi', None],
+                        default=None, help='Render mode')
+    parser.add_argument('--seed', type=int, default=13,
+                        help='Seed for the simulation')
+    parser.add_argument('--tag', type=str, default='',
+                        help='Optional tag for the run')
+    parser.add_argument('--save_path', type=str, default=None,
+                        help='Path to the saved model for testing')
+    args = parser.parse_args()
+
+    # Generate a unique ID for the run
+    unique_id = str(uuid.uuid4())
+
+    # Set log_dir and save_path relative to the script directory if not provided
+    args.log_dir = os.path.join(script_dir, 'logs', unique_id)
+    if args.save_path is None:
+        args.save_path = os.path.join(script_dir, 'saves', f'ppo_model_{unique_id}')
+
+    args.render_mode = args.render_mode if args.mode == 'test' else None
+    args.unique_id = unique_id
+    return args
+
+
+class PPOTrainerTester:
+    def __init__(self, env_class, config_file, log_dir, save_path, render_mode=None, seed=13, unique_id=None, tag='', hyperparams=None):
+        self.env_class = env_class
+        self.config_file = config_file
+        self.log_dir = log_dir
+        self.save_path = save_path
+        self.render_mode = render_mode
+        self.seed = seed
+        self.unique_id = unique_id
+        self.tag = tag
+        self.hyperparams = hyperparams if hyperparams is not None else {}
+
+    def create_env(self, n_envs):
+        return make_vec_env(self.env_class, n_envs=n_envs, env_kwargs={
+            "config_file": self.config_file, "render_mode": self.render_mode, "seed": self.seed
+        })
+
+    def log_parameters(self, params):
+        log_file = os.path.join(os.path.dirname(self.log_dir), 'run_log.csv')
+        file_exists = os.path.isfile(log_file)
+        with open(log_file, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            if not file_exists:
+                writer.writerow(['timestamp', 'tag', 'unique_id'] + list(params.keys()))
+            writer.writerow([datetime.now().isoformat(), self.tag, self.unique_id] + list(params.values()))
+
+    def train(self, n_envs=64, total_timesteps=1000000, n_steps=1024):
+        vec_env = self.create_env(n_envs=n_envs)
+        model = PPO("MlpPolicy", vec_env, n_steps=n_steps, verbose=1, device='cpu',
+                    tensorboard_log=self.log_dir, **self.hyperparams)
+        model.learn(total_timesteps=total_timesteps, progress_bar=True)
+        model.save(self.save_path)
+        print("Training completed")
+        del model
+
+        # Log parameters
+        params = {
+            'config_file': self.config_file,
+            'total_timesteps': total_timesteps,
+            'n_steps': n_steps,
+            'n_envs': n_envs,
+            'seed': self.seed,
+            'log_dir': self.log_dir,
+            'save_path': self.save_path
+        }
+        self.log_parameters(params)
+
+    def test(self):
+        vec_env = self.create_env(n_envs=1)
+        model = PPO.load(self.save_path)
+        obs = vec_env.reset()
+        while True:
+            action, _states = model.predict(obs)
+            obs, rewards, dones, info = vec_env.step(action)
+            if dones:
+                vec_env.reset()
+            vec_env.render("rgb")
