@@ -15,19 +15,19 @@ class RVOMiacIncoming(gym.Env):
 
     def __init__(self, config_file=None, render_mode="rgb", seed=None):
         super(RVOMiacIncoming, self).__init__()
-        # Cargar configuración YAML
+        # Load YAML configuration
         with open(config_file, 'r') as stream:
             config_data = yaml.safe_load(stream)
 
         # pprint(config_data, indent=6)
-        # Inicializar el simulador con RVO2SimulatorWrapper, pasando el seed
+        # Initialize the simulator with RVO2SimulatorWrapper, passing the seed
         world_config = SimulationModel(**config_data['simulation'])
         dynamics = world_config.dynamics
         self.sim = RVO2SimulatorWrapper(world_config, "test_simulation", seed=seed)
         for dynamic_config in dynamics:
             self.sim.register_dynamic(dynamic_config)
 
-        # Establecer renderers si se requiere renderización
+        # Set up renderers if rendering is required
         self.render_mode = render_mode
         if render_mode == "rgb":
             window_width = int((
@@ -44,7 +44,7 @@ class RVOMiacIncoming(gym.Env):
             )
             renderer.setup()
             self.sim.register_observer(renderer)
-            # print(f"Observadores registrados: {self.sim._observers}")
+            # print(f"Registered observers: {self.sim._observers}")
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(92,), dtype=np.float32)
