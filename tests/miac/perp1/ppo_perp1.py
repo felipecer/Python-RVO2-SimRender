@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import os
-from rl_environments.single_agent.miac.incoming import RVOMiacIncoming
+from rl_environments.single_agent.miac.perp1 import RVOMiacPerp1
 from tests.miac.trainer_testers import parse_cli_args, PPOTrainerTester
 
 def main(env_class, args):
-    config_file = args.config_file if args.config_file != '' else './simulator/worlds/miac/incoming/incoming_level_0.yaml'
+    config_file = args.config_file if args.config_file != '' else './simulator/worlds/miac/perp1/perp1_level_0.yaml'
     trainer_tester = PPOTrainerTester(
         env_class=env_class,
         config_file=config_file,
@@ -23,4 +23,4 @@ def main(env_class, args):
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     args = parse_cli_args(script_dir)
-    main(RVOMiacIncoming, args)
+    main(RVOMiacPerp1, args)

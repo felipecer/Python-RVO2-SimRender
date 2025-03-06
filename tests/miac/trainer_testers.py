@@ -12,7 +12,7 @@ def parse_cli_args(script_dir):
         description='Train or test the PPO model in a simulation environment.')
     parser.add_argument('--mode', choices=['train', 'test'],
                         required=True, help='Operation mode: train or test')
-    parser.add_argument('--config_file', required=True,
+    parser.add_argument('--config_file', default='',
                         help='Environment configuration file')
     parser.add_argument('--total_timesteps', type=int, default=1000000,
                         help='Total number of timesteps for training (default: 1000000)')
