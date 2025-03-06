@@ -1,7 +1,7 @@
 simulation:
   time_step: 0.1
   map_settings:
-    x_min: -18.0  # Tamaño ajustado para reducir el espacio vacío
+    x_min: -18.0  
     x_max: 18
     y_min: -8.0
     y_max: 8.0
@@ -22,16 +22,16 @@ simulation:
         count: 30
         radius: 5
         center: [0.0, 0.0]
-        std_dev: 0.0  # Sin desviación en la posición
+        std_dev: 0.0 
       goals:
         radius: 0.4
         pattern:
           start_position: "left"
           name: "circle"
           count: 30
-          radius: 5 # Primera línea de agentes a la izquierda
+          radius: 5 
           center: [0.0, 0.0]
-          std_dev: 0.0  # Sin desviación en la posición
+          std_dev: 0.0  
   dynamics:
     - name: "max_steps"
       when: "before"

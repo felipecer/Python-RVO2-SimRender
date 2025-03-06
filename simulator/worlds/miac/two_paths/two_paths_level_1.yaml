@@ -1,7 +1,7 @@
 simulation:
   time_step: 0.1
   map_settings:
-    x_min: -18.0  # Tamaño ajustado para reducir el espacio vacío
+    x_min: -18.0
     x_max: 18
     y_min: -8.0
     y_max: 8.0
@@ -27,150 +27,150 @@ simulation:
         name: "explicit"
         count: 1
         positions:
-          - [ -10, 1.6 ]  # Posición inicial del agente inteligente, más arriba que los agentes no inteligentes
+          - [ -10, 1.6 ]
       goals:
         radius: 0.4
         pattern:
           name: "explicit"
           count: 1
           positions:
-            - [ 10, 0 ]  # Meta para el agente inteligente, con altura menor que los agentes más al sur
+            - [ 10, 0 ]
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 4
-        x_value: 3.8  # Primera línea de agentes a la izquierda
+        x_value: 3.8
         y_start: -0.8
         y_end: -2.4
-        std_dev: 0.4  # Sin desviación en la posición
+        std_dev: 0.4
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 4
-          x_value: -25.0  # Primera línea de agentes a la izquierda
+          x_value: -25.0
           y_start: -0.8
           y_end: -2.4
-          std_dev: 0  # Sin desviación en la posición
+          std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 4
-        x_value: 5.8  # Primera línea de agentes a la izquierda
+        x_value: 5.8
         y_start: -0.8
         y_end: -2.4
-        std_dev: 0.4  # Sin desviación en la posición
+        std_dev: 0.4
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 4
-          x_value: -23.0  # Primera línea de agentes a la izquierda
+          x_value: -23.0
           y_start: -0.8
           y_end: -2.4
-          std_dev: 0  # Sin desviación en la posición
+          std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 4
-        x_value: 7.8  # Primera línea de agentes a la izquierda
+        x_value: 7.8
         y_start: -0.8
         y_end: -2.4
-        std_dev: 0.4  # Sin desviación en la posición
+        std_dev: 0.4
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 4
-          x_value: -21.0  # Primera línea de agentes a la izquierda
+          x_value: -21.0
           y_start: -0.8
           y_end: -2.4
-          std_dev: 0  # Sin desviación en la posición    
+          std_dev: 0    
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 4
-        x_value: 3.0  # Primera línea de agentes a la izquierda
+        x_value: 3.0
         y_start: 0.8
         y_end: 2.4
-        std_dev: 0.4  # Sin desviación en la posición
+        std_dev: 0.4
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 4
-          x_value: -25.0  # Primera línea de agentes a la izquierda
+          x_value: -25.0
           y_start: 0.8
           y_end: 2.4
-          std_dev: 0  # Sin desviación en la posición
+          std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 4
-        x_value: 4.5  # Primera línea de agentes a la izquierda
+        x_value: 4.5
         y_start: 0.8
         y_end: 2.4
-        std_dev: 0.4  # Sin desviación en la posición
+        std_dev: 0.4
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 4
-          x_value: -23.0  # Primera línea de agentes a la izquierda
+          x_value: -23.0
           y_start: 0.8
           y_end: 2.4
-          std_dev: 0  # Sin desviación en la posición
+          std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 4
-        x_value: 6.0  # Primera línea de agentes a la izquierda
+        x_value: 6.0
         y_start: 0.8
         y_end: 2.4
-        std_dev: 0.4  # Sin desviación en la posición
+        std_dev: 0.4
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 4
-          x_value: -21.0  # Primera línea de agentes a la izquierda
+          x_value: -21.0
           y_start: 0.8
           y_end: 2.4
-          std_dev: 0  # Sin desviación en la posición
+          std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 4
-        x_value: 7.5  # Primera línea de agentes a la izquierda
+        x_value: 7.5
         y_start: 0.8
         y_end: 2.4
-        std_dev: 0.4  # Sin desviación en la posición
+        std_dev: 0.4
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 4
-          x_value: -19.0  # Primera línea de agentes a la izquierda
+          x_value: -19.0
           y_start: 0.8
           y_end: 2.4
-          std_dev: 0  # Sin desviación en la posición
+          std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 4
-        x_value: 9.0  # Primera línea de agentes a la izquierda
+        x_value: 9.0
         y_start: 0.8
         y_end: 2.4
-        std_dev: 0.4  # Sin desviación en la posición
+        std_dev: 0.4
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 4
-          x_value: -17.0  # Primera línea de agentes a la izquierda
+          x_value: -17.0
           y_start: 0.8
           y_end: 2.4
-          std_dev: 0  # Sin desviación en la posición
+          std_dev: 0
   obstacles:
     - name: "rectangle"
       center: [ 0, 0 ]

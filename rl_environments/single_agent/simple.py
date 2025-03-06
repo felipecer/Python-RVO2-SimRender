@@ -22,7 +22,7 @@ class RVOSimulationEnv(gym.Env):
             self.seed = seed
         self._random_number_generator = np.random.default_rng(self.seed)
 
-        # Inicializar GoalSpawner
+        # Initialize GoalSpawner
         self.goal_spawner = GoalSpawner(
             seed=self.seed, empty_radius=0.2, num_iterations=4, step_radius=0.5)
 
@@ -104,7 +104,7 @@ class RVOSimulationEnv(gym.Env):
     def reset(self, seed=None, options=None):
         self.world_name, self.sim, self.agent_goals = self.loader.load_simulation()
         self.current_step = 0
-        # Resetear GoalSpawner
+        # Reset GoalSpawner
         self.goal_spawner.reset(seed=seed)
         self.agent_goals = [self.goal_spawner.get_next_goal()]
         self.initial_distance = self._calc_distance_to_goal(0)

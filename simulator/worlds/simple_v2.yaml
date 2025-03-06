@@ -19,14 +19,14 @@ simulation:
         name: "explicit"
         count: 1
         positions:
-          - [0.0, 0.0]  # Posición inicial del agente
+          - [0.0, 0.0]
       goals:
         radius: 0.5
         pattern:
           name: "explicit"
           count: 1
           positions:
-            - [-0.75, 0.75]  # Meta del agente
+            - [-0.75, 0.75]
   dynamics:    
     - name: "annulus_goal_spawner"
       when: "before"
@@ -41,4 +41,3 @@ simulation:
     - name: "max_steps"
       when: "before"
       max_steps: 2560
-    
