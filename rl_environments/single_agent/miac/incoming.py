@@ -31,9 +31,9 @@ class RVOSimulationEnvMIAC(gym.Env):
         self.render_mode = render_mode
         if render_mode == "rgb":
             window_width = int((
-                                           self.sim.world_config.map_settings.x_max - self.sim.world_config.map_settings.x_min) * self.sim.world_config.map_settings.cell_size)
+                self.sim.world_config.map_settings.x_max - self.sim.world_config.map_settings.x_min) * self.sim.world_config.map_settings.cell_size)
             window_height = int((
-                                            self.sim.world_config.map_settings.y_max - self.sim.world_config.map_settings.y_min) * self.sim.world_config.map_settings.cell_size)
+                self.sim.world_config.map_settings.y_max - self.sim.world_config.map_settings.y_min) * self.sim.world_config.map_settings.cell_size)
 
             renderer = PyGameRenderer(
                 window_width,
