@@ -10,11 +10,11 @@ from simulator.engines.base import SimulationState
 from simulator.models.simulation import Simulation as SimulationModel
 
 
-class RVOSimulationEnvMIAC(gym.Env):
+class RVOMiacTwoPaths(gym.Env):
     metadata = {'render.modes': ['ansi', 'rgb']}
 
     def __init__(self, config_file=None, render_mode="rgb", seed=None):
-        super(RVOSimulationEnvMIAC, self).__init__()
+        super(RVOMiacTwoPaths, self).__init__()
         # Cargar configuración YAML
         with open(config_file, 'r') as stream:
             config_data = yaml.safe_load(stream)
@@ -154,7 +154,7 @@ class RVOSimulationEnvMIAC(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOSimulationEnvMIAC('./simulator/worlds/miac/two_paths/two_paths_level_1.yaml', render_mode='rgb')
+    env = RVOMiacTwoPaths('./simulator/worlds/miac/two_paths/two_paths_level_1.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0

@@ -10,11 +10,11 @@ from simulator.engines.base import SimulationState
 from simulator.models.simulation import Simulation as SimulationModel
 
 
-class RVOSimulationEnvMIAC(gym.Env):
+class RVOMiacCircle(gym.Env):
     metadata = {'render.modes': ['ansi', 'rgb']}
 
     def __init__(self, config_file=None, render_mode="rgb", seed=None):
-        super(RVOSimulationEnvMIAC, self).__init__()
+        super(RVOMiacCircle, self).__init__()
         # Cargar configuración YAML
         with open(config_file, 'r') as stream:
             config_data = yaml.safe_load(stream)
@@ -157,7 +157,7 @@ class RVOSimulationEnvMIAC(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOSimulationEnvMIAC('./simulator/worlds/miac/circle/circle_level_1.yaml', render_mode='rgb')
+    env = RVOMiacCircle('./simulator/worlds/miac/circle/circle_level_1.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0
