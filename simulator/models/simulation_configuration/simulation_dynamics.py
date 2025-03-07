@@ -10,9 +10,7 @@ from simulator.models.simulation_configuration.registry import register
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent, SimulationEvent
 
 
-# Enum para los tipos de ejecución de las dinámicas
-
-
+# Enum for the types of execution timings
 class ExecutionTiming(Enum):
     BEFORE = "before"
     AFTER = "after"
@@ -22,11 +20,11 @@ class SimulationDynamic(BaseModel, ABC):
     name: str
     when: ExecutionTiming
     _simulator: Optional['SimulationEngine'] = PrivateAttr(
-        None)  # Uso de PrivateAttr para evitar la validación
+        None)  # Use of PrivateAttr to avoid validation
 
     def register_simulator(self, simulator):
-        """Registra el simulador con la dinámica."""
-        # Importación diferida para evitar el ciclo
+        """Registers the simulator with the dynamic."""
+        # Deferred import to avoid cycle
         from simulator.engines.base import SimulationEngine
         if not isinstance(simulator, SimulationEngine):
             raise ValueError(
@@ -35,7 +33,7 @@ class SimulationDynamic(BaseModel, ABC):
 
     @abstractmethod
     def apply(self):
-        """Método que debe ser implementado por cada dinámica."""
+        """Method that must be implemented by each dynamic."""
         pass
 
     class Config:
@@ -43,29 +41,29 @@ class SimulationDynamic(BaseModel, ABC):
 
 
 class EventBasedDynamic(SimulationDynamic):
-    event_type: str  # Define el tipo de evento que manejará esta dinámica
+    event_type: str  # Defines the type of event that this dynamic will handle
 
     def apply(self, event: Optional[SimulationEvent] = None):
         self.execute(event)
 
     @abstractmethod
     def execute(self, event: SimulationEvent):
-        """Método abstracto que debe ser implementado para manejar el evento."""
+        """Abstract method that must be implemented to handle the event."""
         pass
 
 
 class OnStepDynamic(SimulationDynamic):
-    # Se ejecuta cada n pasos, por defecto en cada paso
+    # Executes every n steps, by default every step
     every_n_steps: Optional[int] = 1
 
     def apply(self):
-        """Aplicar la dinámica dependiendo del step actual."""
+        """Apply the dynamic depending on the current step."""
         if self.every_n_steps and self._simulator.current_step % self.every_n_steps == 0:
             self.execute()
 
     @abstractmethod
     def execute(self):
-        """Método abstracto que debe ser implementado por dinámicas OnStep."""
+        """Abstract method that must be implemented by OnStep dynamics."""
         pass
 
 
@@ -73,14 +71,14 @@ class OnceDynamic(SimulationDynamic):
     _executed: bool = PrivateAttr(default=False)
 
     def apply(self):
-        """Ejecuta la dinámica una sola vez si no ha sido ejecutada aún."""
+        """Executes the dynamic only once if it has not been executed yet."""
         if not self._executed:
             self.execute()
             self._executed = True
 
     @abstractmethod
     def execute(self):
-        """Método abstracto que debe ser implementado por las dinámicas OneTime."""
+        """Abstract method that must be implemented by OneTime dynamics."""
         pass
 
 
@@ -89,7 +87,7 @@ class GoalSpawnerDynamic(EventBasedDynamic, ABC):
     _generated_points: np.ndarray = PrivateAttr(
         default_factory=lambda: np.zeros((2000, 2)))
     _generated_count: int = PrivateAttr(
-        default=0)  # Contador de puntos generados
+        default=0)  # Counter of generated points
     _current_index: int = PrivateAttr(default=0)
 
     def execute(self, event: GoalReachedEvent):
@@ -103,11 +101,11 @@ class GoalSpawnerDynamic(EventBasedDynamic, ABC):
 
     def _generate_new_goal(self) -> Tuple[float, float]:
         if self._generated_count == 0 or self._current_index >= self._generated_count:
-            self._generate_points()  # Generar los puntos si no hay puntos válidos
-            self._current_index = 0  # Reiniciamos el índice
+            self._generate_points()  # Generate points if there are no valid points
+            self._current_index = 0  # Reset the index
 
-        # Extraemos el punto actual y actualizamos el índice
-        self._current_index += 1  # Avanzamos el índice para el siguiente punto
+        # Extract the current point and update the index
+        self._current_index += 1  # Advance the index for the next point
         new_goal = tuple(self._generated_points[self._current_index, :])
         return new_goal
 
@@ -133,32 +131,32 @@ class AnnulusGoalSpawnerDynamic(GoalSpawnerDynamic):
             base_area = np.pi * self.step_radius**2
             num_points = int(self.density_factor * (annulus_area / base_area))
 
-            # Generamos los puntos en el anillo
+            # Generate points in the annulus
             points = self._generate_points_in_annulus(
                 inner_radius, outer_radius, num_points)
 
-            # Almacenamos los puntos en el array preasignado desde la clase base
+            # Store the points in the preallocated array from the base class
             self._generated_points[point_index:point_index +
                                    num_points, :] = points
             point_index += num_points
 
             current_radius += self.step_radius
-        # Ajustamos el tamaño del array a la cantidad de puntos generad
+        # Adjust the size of the array to the number of generated points
         self._generated_count = point_index
         self._generated_points = self._generated_points[:self._generated_count]
 
     def _generate_points_in_annulus(self, inner_radius, outer_radius, num_points):
-        rng = self._simulator.get_rng()  # Usar el RNG del SimulationEngine
+        rng = self._simulator.get_rng()  # Use the RNG from the SimulationEngine
 
-        # Generar todos los radios y ángulos en una sola llamada
+        # Generate all radii and angles in a single call
         r = np.sqrt(rng.uniform(inner_radius**2, outer_radius**2, num_points))
         theta = rng.uniform(0, 2 * np.pi, num_points)
 
-        # Convertir a coordenadas cartesianas en una sola operación vectorizada
+        # Convert to Cartesian coordinates in a single vectorized operation
         x = r * np.cos(theta)
         y = r * np.sin(theta)
 
-        # Devolvemos los puntos como una matriz Nx2
+        # Return the points as an Nx2 matrix
         return np.column_stack((x, y))
 
 
@@ -185,15 +183,15 @@ class LogStepInfoDynamic(OnStepDynamic):
 class ResourceCleanupDynamic(OnceDynamic):
     def execute(self):
         print("Cleaning up resources and shutting down.")
-        # Lógica para limpiar recursos
+        # Logic to clean up resources
 
 
 @register(alias="update_initial_position_on_goal_reached", category="dynamic")
 class UpdateInitialPositionOnGoalReachedDynamic(EventBasedDynamic):
     """
-    Esta dinámica actualiza la posición inicial del agente cuando alcanza su meta,
-    de modo que la próxima vez que se inicialice el simulador, el agente comience
-    desde esa meta alcanzada.
+    This dynamic updates the agent's initial position when it reaches its goal,
+    so that the next time the simulator is initialized, the agent starts
+    from that reached goal.
     """
 
     def __init__(self, **data):
@@ -202,5 +200,5 @@ class UpdateInitialPositionOnGoalReachedDynamic(EventBasedDynamic):
     def execute(self, event: GoalReachedEvent):
         agent_id = event.agent_id
         current_position = event.current_position
-        # Actualizamos la posición inicial en el simulador
+        # Update the initial position in the simulator
         self._simulator.agent_initial_positions[agent_id] = current_position

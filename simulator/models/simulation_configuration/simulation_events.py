@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from typing import Tuple
 from simulator.models.simulation_configuration.registry import register
 
-# Clase base para eventos de simulación
 class SimulationEvent(BaseModel):
     class Config:
         arbitrary_types_allowed = True

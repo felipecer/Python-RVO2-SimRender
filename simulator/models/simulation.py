@@ -25,7 +25,7 @@ class Simulation(BaseModel):
 
     @staticmethod
     def validate_entities(category: str, entities_data: List[dict]):
-        """Valida e instancia las entidades usando el registro global."""
+        """Validate and instantiate entities using the global registry."""
         validated_entities = []
         for entity in entities_data:
             entity_type = entity.get('name')
@@ -60,7 +60,7 @@ class Simulation(BaseModel):
             if event_type is None:
                 raise ValueError("Each event must have a 'name' field.")
 
-            # Instanciar el evento desde el registro global
+            # Instantiate the event from the global registry
             event_instance = global_registry.instantiate(
                 category='event', **event)
             validated_events.append(event_instance)
@@ -74,19 +74,19 @@ class Simulation(BaseModel):
         validated_agents = []
 
         for agent in agents_data:
-            # Validar patrón de distribución de agentes
+            # Validate agent distribution pattern
             pattern_data = agent.get('pattern')
             if pattern_data is None or 'name' not in pattern_data:
                 raise ValueError(
                     "Each agent pattern must have a 'name' field.")
 
-            # Instanciar el patrón usando el global_registry
+            # Instantiate the pattern using the global_registry
             pattern_instance = global_registry.instantiate(
                 category='distribution_pattern', **pattern_data)
-            # Asignamos el patrón correctamente
+            # Assign the pattern correctly
             agent['pattern'] = pattern_instance
 
-            # Si hay metas asociadas, validar y crear su patrón también
+            # If there are associated goals, validate and create their pattern as well
             if agent.get('goals'):
                 goal_data = agent['goals']
                 goal_pattern_data = goal_data.get('pattern')
@@ -94,10 +94,10 @@ class Simulation(BaseModel):
                     raise ValueError(
                         "Each goal pattern must have a 'name' field.")
 
-                # Instanciar el patrón de la meta usando el registro global
+                # Instantiate the goal pattern using the global registry
                 goal_pattern_instance = global_registry.instantiate(
                     category='distribution_pattern', **goal_pattern_data)
-                # Asignamos la instancia correctamente
+                # Assign the instance correctly
                 agent['goals']['pattern'] = goal_pattern_instance
 
             validated_agents.append(agent)
@@ -110,49 +110,49 @@ class Simulation(BaseModel):
 
 
 def main():
-    # Parsear los argumentos de la línea de comandos
+    # Parse command line arguments
     parser = argparse.ArgumentParser(
-        description="Simulador de Navegación de Agentes")
+        description="Agent Navigation Simulator")
     parser.add_argument('world_file', type=str,
-                        help='Archivo YAML de configuración del mundo')
+                        help='YAML configuration file for the world')
     args = parser.parse_args()
 
-    # Leer datos desde el archivo YAML proporcionado
+    # Read data from the provided YAML file
     with open(args.world_file, 'r') as stream:
         try:
             data = yaml.safe_load(stream)
-            print("Datos YAML cargados:")
-            print(data['simulation'])  # Imprimir el contenido cargado del YAML
+            print("YAML data loaded:")
+            print(data['simulation'])  # Print the loaded YAML content
 
-            # Crear la instancia de Simulation usando Pydantic
-            print("Creando la instancia de Simulation...")
+            # Create the Simulation instance using Pydantic
+            print("Creating the Simulation instance...")
             simulation = Simulation(**data['simulation'])
-            print("Instancia de Simulation creada con éxito.")
+            print("Simulation instance created successfully.")
 
-            # Generar posiciones para cada grupo de agentes y sus metas
+            # Generate positions for each agent group and their goals
             for agent_group in simulation.agents:
                 print(
-                    f"Procesando agente con comportamiento: {agent_group.behaviour}")
+                    f"Processing agent with behavior: {agent_group.behaviour}")
                 positions = agent_group.pattern.generate_positions()
                 print(
-                    f"Posiciones generadas para el patrón {agent_group.pattern.__class__.__name__}:")
+                    f"Positions generated for the pattern {agent_group.pattern.__class__.__name__}:")
                 print(positions)
 
                 if agent_group.goals:
                     goal_positions = agent_group.goals.pattern.generate_positions()
                     print(
-                        f"Posiciones de meta generadas para el patrón {agent_group.goals.pattern.__class__.__name__}:")
+                        f"Goal positions generated for the pattern {agent_group.goals.pattern.__class__.__name__}:")
                     print(goal_positions)
 
-            # Generar formas para cada obstáculo
+            # Generate shapes for each obstacle
             if simulation.obstacles:
                 for obstacle in simulation.obstacles:
                     shape = obstacle.generate_shape()
                     print(
-                        f"Forma generada para el obstáculo {obstacle.__class__.__name__}:")
+                        f"Shape generated for the obstacle {obstacle.__class__.__name__}:")
                     print(shape)
 
-            # Verificar las dinámicas y sus tipos
+            # Verify dynamics and their types
             if simulation.dynamics:
                 for dynamic in simulation.dynamics:
                     print(f"Dynamic '{dynamic.name}' parsed and registered.")

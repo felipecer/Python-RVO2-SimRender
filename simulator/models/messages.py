@@ -6,7 +6,7 @@ from typing import Optional
 @dataclass
 class BaseMessage:
     """
-    Clase base para todos los mensajes enviados a través del patrón Observer.
+    Base class for all messages sent through the Observer pattern.
     """
     step: int
 
@@ -19,7 +19,7 @@ class SimulationInitializedMessage(BaseMessage):
 
 @dataclass
 class AgentPositionsUpdateMessage(BaseMessage):
-    # Además de la posición, también incluimos la velocidad, velocidad preferida, y la distancia a la meta
+    # In addition to the position, we also include the velocity, preferred velocity, and the distance to the goal
     agent_positions: List[Tuple[int, float, float,
                                 Tuple[float, float], Tuple[float, float], float]]
 

@@ -27,14 +27,14 @@ class LineDistributionPattern(SpatialDistributionPattern):
             y = self.y_start + i * y_step
             positions.append((self.x_value, y))
         
-        # Aplica la variabilidad en x si std_dev es mayor a 0
+        # Apply variability in x if std_dev is greater than 0
         if self.std_dev > 0:
             positions = self.apply_variability(positions)
         
         return positions
     
     def apply_variability(self, positions: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
-        # Aplica ruido en la dirección x
+        # Apply noise in the x direction
         import random
         return [(x + random.gauss(0, self.std_dev), y) for x, y in positions]
 
@@ -42,13 +42,13 @@ class LineDistributionPattern(SpatialDistributionPattern):
 class CircleDistributionPattern(SpatialDistributionPattern):
     center: Tuple[float, float]
     radius: float
-    start_position: str = "right"  # Opciones: "right", "top", "left", "bottom"
+    start_position: str = "right"  # Options: "right", "top", "left", "bottom"
 
     def generate_positions(self) -> List[Tuple[float, float]]:
         import math
         positions = []
         
-        # Determinar el ángulo de inicio basado en la posición elegida
+        # Determine the starting angle based on the chosen position
         start_angles = {
             "right": 0,          # x = center[0] + radius, y = center[1]
             "top": math.pi / 2,  # x = center[0], y = center[1] + radius
@@ -59,7 +59,7 @@ class CircleDistributionPattern(SpatialDistributionPattern):
         start_angle = start_angles.get(self.start_position, 0)  # Default: "right"
         
         for i in range(self.count):
-            angle = start_angle - 2 * math.pi * i / self.count  # Sentido antihorario
+            angle = start_angle - 2 * math.pi * i / self.count  # Counterclockwise
             x = self.center[0] + self.radius * math.cos(angle)
             y = self.center[1] + self.radius * math.sin(angle)
             positions.append((x, y))
