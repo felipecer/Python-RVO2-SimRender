@@ -66,8 +66,8 @@ class PPOTrainerTester:
         with open(log_file, mode='a', newline='') as file:
             writer = csv.writer(file)
             if not file_exists:
-                writer.writerow(['timestamp', 'tag', 'unique_id'] + list(params.keys()))
-            writer.writerow([datetime.now().isoformat(), self.tag, self.unique_id] + list(params.values()))
+                writer.writerow(['timestamp', 'tag', 'unique_id', 'config_file', 'total_timesteps', 'n_steps', 'n_envs', 'seed', 'log_dir', 'save_path', 'hyperparameters', 'mean_reward'])
+            writer.writerow([datetime.now().isoformat(), self.tag, self.unique_id, params['config_file'], params['total_timesteps'], params['n_steps'], params['n_envs'], params['seed'], params['log_dir'], params['save_path'], str(params['hyperparameters']), params['mean_reward']])
 
     def train(self, n_envs=64, total_timesteps=1000000, n_steps=1024):
         vec_env = self.create_env(n_envs=n_envs)
@@ -86,7 +86,9 @@ class PPOTrainerTester:
             'n_envs': n_envs,
             'seed': self.seed,
             'log_dir': self.log_dir,
-            'save_path': self.save_path
+            'save_path': self.save_path,
+            'hyperparameters': self.hyperparams,
+            'mean_reward': -999999999
         }
         self.log_parameters(params)
 

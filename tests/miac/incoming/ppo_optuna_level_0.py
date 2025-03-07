@@ -1,3 +1,4 @@
+from datetime import datetime
 import uuid
 import optuna
 from stable_baselines3 import PPO
@@ -36,7 +37,7 @@ def objective(trial):
     )
 
     # Train the model
-    trainer_tester.train(n_envs=8, total_timesteps=100000)
+    trainer_tester.train(n_envs=4, total_timesteps=20000)
 
     # Evaluate the model
     vec_env = trainer_tester.create_env(n_envs=1)
@@ -45,11 +46,17 @@ def objective(trial):
 
     # Log parameters
     params = {
-        'learning_rate': hyperparams['learning_rate'],
-        'gamma': hyperparams['gamma'],
-        'clip_range': hyperparams['clip_range'],
-        'gae_lambda': hyperparams['gae_lambda'],
-        'ent_coef': hyperparams['ent_coef'],
+        'timestamp': datetime.now().isoformat(),
+        'tag': 'optuna',
+        'unique_id': unique_id,
+        'config_file': './simulator/worlds/miac/incoming/incoming_level_0.yaml',
+        'total_timesteps': 20000,
+        'n_steps': 1024,
+        'n_envs': 4,
+        'seed': 13,
+        'log_dir': log_dir,
+        'save_path': save_path,
+        'hyperparameters': hyperparams,
         'mean_reward': mean_reward
     }
     trainer_tester.log_parameters(params)
@@ -58,6 +65,6 @@ def objective(trial):
 
 if __name__ == "__main__":
     study = optuna.create_study(direction='maximize')
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=10)
 
     print("Best hyperparameters: ", study.best_params)
