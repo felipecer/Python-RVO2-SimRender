@@ -10,10 +10,10 @@ orcabehaviours:
   non-reactive:
     max_speed: 0.9
     radius: 0.25
-    time_horizon: 3.0
-    time_horizon_obst: 3.0
-    max_neighbors: 0
-    neighbor_dist: 0
+    time_horizon: 15
+    time_horizon_obst: 15
+    max_neighbors: 50
+    neighbor_dist: 0.4
     velocity: [0.0, 0.0]
   shy:
     max_speed: 1.25

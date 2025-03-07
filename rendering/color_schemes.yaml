@@ -2,7 +2,7 @@ color_schemes:
   orca-behaviors:
     background_color: [195, 215, 224]
     agent_color: [0, 255, 0]
-    obstacle_color: [255, 0, 0]
+    obstacle_color: [128, 128, 128]
     velocity_color: [255, 0, 0]
     pref_velocity_color: [0, 0, 255]
     detection_radius_color: [0, 255, 0]

@@ -53,6 +53,15 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             )
         else:
             return (0, 0)
+        
+    def set_agent_defaults(self, agent_idx, agent_defaults):
+        self.sim.setAgentNeighborDist(agent_idx, agent_defaults.neighbor_dist)
+        self.sim.setAgentMaxNeighbors(agent_idx, agent_defaults.max_neighbors)
+        self.sim.setAgentTimeHorizon(agent_idx, agent_defaults.time_horizon)
+        self.sim.setAgentTimeHorizonObst(agent_idx, agent_defaults.time_horizon_obst)
+        self.sim.setAgentRadius(agent_idx, agent_defaults.radius)
+        self.sim.setAgentMaxSpeed(agent_idx, agent_defaults.max_speed)
+        self.sim.setAgentVelocity(agent_idx, agent_defaults.velocity)
 
     def initialize_simulation(self):
         """
@@ -275,6 +284,43 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         """
         self._manual_velocity_updates.append((agent_id, velocity))
 
+    def get_agent_min_speed(self, agent_id: int) -> float:
+        """
+        Devuelve la velocidad mínima del agente con el ID especificado.
+        """
+        return 0.0
+
+    def get_agent_max_speed(self, agent_id: int) -> float:
+        """
+        Devuelve la velocidad máxima del agente con el ID especificado.
+        """
+        return self.sim.getAgentMaxSpeed(agent_id)
+
+    def get_velocity_min_euclid_dist(self, agent_id: int) -> Tuple[float, float]:
+        """
+        Devuelve la velocidad que minimiza la distancia euclidiana al objetivo. Clipeado a la máxima velocidad del agente.
+        """
+        agent_position = self.sim.getAgentPosition(agent_id)
+        goal_position = self.agent_goals[agent_id]
+        max_speed = self.sim.getAgentMaxSpeed(agent_id)
+
+        vector_to_goal = (
+            goal_position[0] - agent_position[0],
+            goal_position[1] - agent_position[1]
+        )
+        distance = math.sqrt(
+            vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
+
+        if distance > 0:
+            preferred_velocity = (
+                vector_to_goal[0] / distance * max_speed,
+                vector_to_goal[1] / distance * max_speed
+            )
+        else:
+            preferred_velocity = (0, 0)
+
+        return preferred_velocity
+
     def update_agent_velocities(self):
         """
         Actualiza las velocidades preferidas de los agentes en la simulación, considerando actualizaciones manuales.
@@ -318,6 +364,25 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
     def clear_buffer(self):
         self.steps_buffer = []
+
+    def get_agent_max_num_neighbors(self, agent_id):
+        return self.sim.getAgentMaxNeighbors(agent_id)
+
+    def get_neighbors_data(self, agent_id):
+        neighbor_count = self.sim.getAgentNumAgentNeighbors(agent_id)
+        neighbors_data = []
+        for i in range(neighbor_count):
+            neighbor_agent_id = self.sim.getAgentAgentNeighbor(agent_id, i)
+            neighbor_position = self.sim.getAgentPosition(neighbor_agent_id)
+            neighbor_velocity = self.sim.getAgentVelocity(neighbor_agent_id)
+            neighbor_pref_velocity = self.sim.getAgentPrefVelocity(neighbor_agent_id)
+            neighbors_data.append(neighbor_position[0])
+            neighbors_data.append(neighbor_position[1])
+            neighbors_data.append(neighbor_velocity[0])
+            neighbors_data.append(neighbor_velocity[1])
+            neighbors_data.append(neighbor_pref_velocity[0])
+            neighbors_data.append(neighbor_pref_velocity[1])
+        return neighbors_data
 
     def get_agent_position(self, agent_id) -> Tuple[float, float]:
         """Devuelve la posicion actual del agente."""
@@ -372,7 +437,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             (current_position[1] - goal_position[1]) ** 2
         )
         # Considera que se ha alcanzado la meta si la distancia es menor o igual a un umbral
-        return distance <= 0.30
+        return distance <= 0.50
 
 
 def main():

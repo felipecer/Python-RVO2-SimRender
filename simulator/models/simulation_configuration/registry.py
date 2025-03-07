@@ -1,18 +1,18 @@
 class Registry:
     def __init__(self, categories=None):
-        """Inicializa el registro con categorías predefinidas o personalizadas."""
+        """Initialize the registry with predefined or custom categories."""
         self._registries = categories or {}
 
     def add_category(self, category: str):
-        """Agrega una nueva categoría al registro."""
+        """Add a new category to the registry."""
         if category in self._registries:
-            raise ValueError(f"Categoría {category} ya existe.")
+            raise ValueError(f"Category {category} already exists.")
         self._registries[category] = {}
 
     def register(cls=None, *, alias=None, category=None, instance=None):
-        """Registra una clase o instancia en el registro global bajo una categoría específica."""
+        """Register a class or instance in the global registry under a specific category."""
         if category not in global_registry._registries:
-            raise ValueError(f"Categoría {category} no soportada.")
+            raise ValueError(f"Category {category} not supported.")
 
         def wrapper(cls_or_instance):
             name = alias if alias else cls_or_instance.__class__.__name__
@@ -20,7 +20,7 @@ class Registry:
             return cls_or_instance
 
         if instance:
-            # Si se proporciona una instancia, registrarla directamente
+            # If an instance is provided, register it directly
             return wrapper(instance)
         elif cls:
             return wrapper(cls)
@@ -28,25 +28,25 @@ class Registry:
             return wrapper
 
     def get(self, category: str, name: str):
-        """Devuelve la clase registrada bajo el nombre o alias especificado en la categoría dada."""
+        """Return the class registered under the specified name or alias in the given category."""
         if category not in self._registries:
-            raise ValueError(f"Categoría {category} no soportada.")
+            raise ValueError(f"Category {category} not supported.")
         if name not in self._registries[category]:
-            raise ValueError(f"No se encontró el registro en la categoría {category} con el nombre: {name}")
+            raise ValueError(f"Registry not found in category {category} with name: {name}")
         return self._registries[category][name]
 
     def instantiate(self, category: str, **kwargs):
         name = kwargs.get('name', None)
         if name is None:
-            raise ValueError("El campo 'name' es requerido para instanciar la clase.")
+            raise ValueError("The 'name' field is required to instantiate the class.")
         
-        # Obtener la clase del registro usando la categoría y el nombre
+        # Get the class from the registry using the category and name
         cls = self.get(category, name)
         
-        # Instanciar la clase con los kwargs, incluyendo 'name'
+        # Instantiate the class with the kwargs, including 'name'
         return cls(**kwargs)
 
-# Instancia global del registro con categorías predefinidas
+# Global instance of the registry with predefined categories
 global_registry = Registry(categories={
     'dynamic': {},
     'event': {},
@@ -60,14 +60,14 @@ def register(cls=None, *, alias=None, category=None, instance=None):
         raise ValueError("Category must be specified for registration.")
     
     if instance:
-        # Si se proporciona una instancia, registrarla directamente
+        # If an instance is provided, register it directly
         if alias is None:
             alias = instance.__class__.__name__
         global_registry._registries[category][alias] = instance
         return instance
     
     if cls:
-        # Si se proporciona una clase, registrarla como antes
+        # If a class is provided, register it as before
         if alias is None:
             alias = cls.__name__
         
@@ -78,4 +78,3 @@ def register(cls=None, *, alias=None, category=None, instance=None):
         return wrapper(cls)
     
     return lambda cls: register(cls=cls, alias=alias, category=category)
-
