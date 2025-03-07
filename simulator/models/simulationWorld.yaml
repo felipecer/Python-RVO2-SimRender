@@ -1,7 +1,7 @@
 simulation:
   time_step: 0.25
   map_settings:
-    x_min: -5.0
+    x_min: -18
     x_max: 5.0
     y_min: -5.0
     y_max: 5.0
