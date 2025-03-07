@@ -38,138 +38,189 @@ simulation:
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 4
+        count: 6
         x_value: 3.8
         y_start: -0.8
-        y_end: -2.4
-        std_dev: 0.25
+        y_end: -3.4
+        std_dev: 0.5
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 4
+          count: 6
           x_value: -25.0
           y_start: -0.8
-          y_end: -2.4
+          y_end: -3.4
           std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 4
+        count: 6
         x_value: 5.8
         y_start: -0.8
-        y_end: -2.4
-        std_dev: 0.25
+        y_end: -3.4
+        std_dev: 0.5
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 4
+          count: 6
           x_value: -23.0
           y_start: -0.8
-          y_end: -2.4
+          y_end: -3.4
           std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 4
+        count: 6
         x_value: 7.8
         y_start: -0.8
-        y_end: -2.4
-        std_dev: 0.25
+        y_end: -3.4
+        std_dev: 0.5
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 4
+          count: 6
           x_value: -21.0
           y_start: -0.8
-          y_end: -2.4
+          y_end: -3.4
           std_dev: 0    
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 4
+        count: 6
+        x_value: 9.8
+        y_start: -0.8
+        y_end: -3.4
+        std_dev: 0.5
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 6
+          x_value: -23.0
+          y_start: -0.8
+          y_end: -3.4
+          std_dev: 0   
+    - behaviour: "non-reactive"
+      pattern:
+        name: "line"
+        count: 6
+        x_value: 11.8
+        y_start: -0.8
+        y_end: -3.4
+        std_dev: 0.5
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 6
+          x_value: -25.0
+          y_start: -0.8
+          y_end: -3.4
+          std_dev: 0   
+    - behaviour: "non-reactive"
+      pattern:
+        name: "line"
+        count: 6
+        x_value: 13.8
+        y_start: -0.8
+        y_end: -3.4
+        std_dev: 0.5
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 6
+          x_value: -27.0
+          y_start: -0.8
+          y_end: -3.4
+          std_dev: 0   
+    - behaviour: "non-reactive"
+      pattern:
+        name: "line"
+        count: 6
         x_value: 3.0
         y_start: 0.8
-        y_end: 2.4
-        std_dev: 0.25
+        y_end: 3.4
+        std_dev: 0.5
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 4
+          count: 6
           x_value: -25.0
           y_start: 0.8
-          y_end: 2.4
+          y_end: 3.4
           std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 4
+        count: 6
         x_value: 4.5
         y_start: 0.8
-        y_end: 2.4
-        std_dev: 0.25
+        y_end: 3.4
+        std_dev: 0.5
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 4
+          count: 6
           x_value: -23.0
           y_start: 0.8
-          y_end: 2.4
+          y_end: 3.4
           std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 4
+        count: 6
         x_value: 6.0
         y_start: 0.8
-        y_end: 2.4
-        std_dev: 0.25
+        y_end: 3.4
+        std_dev: 0.5
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 4
+          count: 6
           x_value: -21.0
           y_start: 0.8
-          y_end: 2.4
+          y_end: 3.4
           std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 4
+        count: 6
         x_value: 7.5
         y_start: 0.8
-        y_end: 2.4
-        std_dev: 0.25
+        y_end: 3.4
+        std_dev: 0.5
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 4
+          count: 6
           x_value: -19.0
           y_start: 0.8
-          y_end: 2.4
+          y_end: 3.4
           std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
-        count: 4
+        count: 6
         x_value: 9.0
         y_start: 0.8
-        y_end: 2.4
-        std_dev: 0.25
+        y_end: 3.4
+        std_dev: 0.5
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 4
+          count: 6
           x_value: -17.0
           y_start: 0.8
-          y_end: 2.4
+          y_end: 3.4
           std_dev: 0
   obstacles:
     - name: "rectangle"
@@ -177,11 +228,11 @@ simulation:
       width: 15.0
       height: 0.5
     - name: "rectangle"
-      center: [ 0, 3.0 ]
+      center: [ 0, 4.0 ]
       width: 25.0
       height: 0.5
     - name: "rectangle"
-      center: [ 0, -3.0 ]
+      center: [ 0, -4.0 ]
       width: 25.0
       height: 0.5
   dynamics:

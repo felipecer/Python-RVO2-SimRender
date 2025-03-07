@@ -158,7 +158,7 @@ class RVOMiacTwoPaths(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOMiacTwoPaths('./simulator/worlds/miac/two_paths/two_paths_level_1.yaml', render_mode='rgb')
+    env = RVOMiacTwoPaths('./simulator/worlds/miac/two_paths/two_paths_level_2.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0
