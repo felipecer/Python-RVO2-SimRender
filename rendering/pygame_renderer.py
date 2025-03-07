@@ -155,9 +155,9 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
             # Draw the agent's detection radius (neighbor_dist)
             detection_radius = self.agent_neighbour_dist.get(agent_id, 10)
-            draw_detection_radius(self.window,
-                                  (x_screen, y_screen), detection_radius, cell_size=self.cell_size, color=self.color_scheme.detection_radius_color, border_width=2
-                                  )
+            # draw_detection_radius(self.window,
+            #                       (x_screen, y_screen), detection_radius, cell_size=self.cell_size, color=self.color_scheme.detection_radius_color, border_width=2
+            #                       )
 
             # Draw the current velocity arrow (red) with greater width
             # draw_arrow(self.window, (x_screen, y_screen), velocity, self.color_scheme.velocity_color,
@@ -215,11 +215,11 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             # scaled_detection_radius = detection_radius * self.cell_size
 
             # Check if the radius is large enough to be drawn
-            if detection_radius > 0:
-                draw_detection_radius(
-                    self.window, (x_screen, y_screen), detection_radius,
-                    color=self.color_scheme.detection_radius_color, border_width=2, cell_size=self.cell_size
-                )
+            # if detection_radius > 0:
+            #     draw_detection_radius(
+            #         self.window, (x_screen, y_screen), detection_radius,
+            #         color=self.color_scheme.detection_radius_color, border_width=2, cell_size=self.cell_size
+            #     )
 
             # Draw the current velocity arrow (red) with greater width
             # draw_arrow(self.window, (x_screen, y_screen), velocity, self.color_scheme.velocity_color,
