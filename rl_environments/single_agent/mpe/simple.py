@@ -10,11 +10,11 @@ from simulator.engines.base import SimulationState
 from simulator.models.simulation import Simulation as SimulationModel
 
 
-class RVOSimulationEnv2(gym.Env):
+class RVOSimulationEnv(gym.Env):
     metadata = {'render.modes': ['ansi', 'rgb']}
 
     def __init__(self, config_file=None, render_mode="rgb", seed=None):
-        super(RVOSimulationEnv2, self).__init__()
+        super(RVOSimulationEnv, self).__init__()
         # Load YAML configuration
         with open(config_file, 'r') as stream:
             config_data = yaml.safe_load(stream)
@@ -108,7 +108,7 @@ class RVOSimulationEnv2(gym.Env):
         return {}
 
 if __name__ == "__main__":
-    env = RVOSimulationEnv2('./simulator/worlds/simple_v2.yaml', render_mode='rgb')
+    env = RVOSimulationEnv('./simulator/worlds/simple_v2.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0
