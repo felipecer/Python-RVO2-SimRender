@@ -1,45 +1,26 @@
 #!/usr/bin/env python
-import argparse
-
-from stable_baselines3 import PPO
-from stable_baselines3.common.env_util import make_vec_env
-
+import os
 from rl_environments.single_agent.mpe.simple import RVOSimulationEnv2
+from tests.trainer_testers import parse_cli_args, PPOTrainerTester
 
-
-def train():
-    vec_env = make_vec_env(RVOSimulationEnv2, n_envs=64, env_kwargs={
-                           "config_file": './simulator/worlds/simple_v2.yaml', "render_mode": None, "seed": 13})
-    model = PPO("MlpPolicy", vec_env,  n_steps=256, verbose=1, device='cpu',
-                tensorboard_log="./tests/logs/ppo_rvo_simple_test4/")
-    model.learn(total_timesteps=200000, progress_bar=True)
-    model.save("./tests/logs/saves/ppo_rvo_simple_test4")
-    print("Entrenamiento terminado")
-    del model
-
-
-def test():
-    vec_env = make_vec_env(RVOSimulationEnv2, n_envs=1, env_kwargs={
-                           "config_file": './simulator/worlds/simple_v2.yaml', "render_mode": 'rgb', "seed": 7})
-    model = PPO.load("./tests/logs/saves/ppo_rvo_simple_test4")
-    obs = vec_env.reset()
-    while True:
-        action, _states = model.predict(obs)
-        obs, rewards, dones, info = vec_env.step(action)
-
-        if dones:
-            vec_env.reset()
-        vec_env.render("rgb")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='Entrenar o probar el modelo PPO en RVOSimulationEnv.')
-    parser.add_argument('--mode', choices=['train', 'test'],
-                        required=True, help='Modo de operación: train o test')
-    args = parser.parse_args()
+def main(env_class, args):
+    config_file = args.config_file if args.config_file != '' else './simulator/worlds/mpe/simple.yaml'
+    trainer_tester = PPOTrainerTester(
+        env_class=env_class,
+        config_file=config_file,
+        log_dir=args.log_dir,
+        save_path=args.save_path,
+        render_mode=args.render_mode,
+        seed=args.seed,
+        unique_id=args.unique_id
+    )
 
     if args.mode == 'train':
-        train()
+        trainer_tester.train(n_envs=args.n_envs, total_timesteps=args.total_timesteps, n_steps=args.n_steps)
     elif args.mode == 'test':
-        test()
+        trainer_tester.test()
+
+if __name__ == "__main__":
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    args = parse_cli_args(script_dir)
+    main(RVOSimulationEnv2, args)
