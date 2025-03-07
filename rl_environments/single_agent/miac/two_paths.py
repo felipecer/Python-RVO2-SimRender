@@ -5,6 +5,7 @@ import yaml
 from gymnasium import spaces, logger
 
 from rendering.pygame_renderer import PyGameRenderer
+from rendering.text_renderer import TextRenderer
 from simulator.engines.RVO2SimulatorWrapper import RVO2SimulatorWrapper
 from simulator.engines.base import SimulationState
 from simulator.models.simulation import Simulation as SimulationModel
@@ -44,7 +45,10 @@ class RVOMiacTwoPaths(gym.Env):
             )
             renderer.setup()
             self.sim.register_observer(renderer)
-            # print(f"Registered observers: {self.sim._observers}")
+        elif render_mode == 'ansi':
+            renderer= TextRenderer()
+            renderer.setup()
+            self.sim.register_observer(renderer)
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(92,), dtype=np.float32)
