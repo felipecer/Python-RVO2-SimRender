@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 from rl_environments.single_agent.miac.circle import RVOMiacCircle
-from tests.miac.trainer_testers import parse_cli_args, PPOTrainerTester
+from tests.trainer_testers import parse_cli_args, PPOTrainerTester
 
 def main(env_class, args):
     config_file = args.config_file if args.config_file != '' else './simulator/worlds/miac/circle/circle_level_1.yaml'

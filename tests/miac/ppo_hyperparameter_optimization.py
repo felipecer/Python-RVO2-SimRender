@@ -4,7 +4,7 @@ import optuna
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.evaluation import evaluate_policy
-from tests.miac.trainer_testers import PPOTrainerTester
+from tests.trainer_testers import PPOTrainerTester
 import os
 import argparse
 import importlib

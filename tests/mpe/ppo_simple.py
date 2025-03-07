@@ -4,7 +4,7 @@ import argparse
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 
-from rl_environments.single_agent.simple_v2 import RVOSimulationEnv2
+from rl_environments.single_agent.mpe.simple import RVOSimulationEnv2
 
 
 def train():
