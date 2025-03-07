@@ -1,5 +1,5 @@
 import importlib
-from tests.miac.ppo_hyperparameter_optimization import parse_args, objective
+from tests.helpers.ppo_hyperparameter_optimization import parse_args, objective
 import optuna
 import os
 

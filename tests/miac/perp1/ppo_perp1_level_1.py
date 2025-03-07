@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 from rl_environments.single_agent.miac.perp1 import RVOMiacPerp1
-from tests.trainer_testers import parse_cli_args, PPOTrainerTester
+from tests.helpers.trainer_testers import parse_cli_args, PPOTrainerTester
 
 def main(env_class, args):
     config_file = args.config_file if args.config_file != '' else './simulator/worlds/miac/perp1/perp1_level_1.yaml'
