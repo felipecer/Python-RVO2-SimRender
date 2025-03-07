@@ -35,7 +35,7 @@ simulation:
           count: 1
           positions:
             - [ 10, 0 ]
-    - behaviour: "non-reactive"
+    - behaviour: "shy"
       pattern:
         name: "line"
         count: 6
@@ -69,7 +69,7 @@ simulation:
           y_start: -0.8
           y_end: -3.4
           std_dev: 0
-    - behaviour: "non-reactive"
+    - behaviour: "tense"
       pattern:
         name: "line"
         count: 6
@@ -86,7 +86,7 @@ simulation:
           y_start: -0.8
           y_end: -3.4
           std_dev: 0    
-    - behaviour: "non-reactive"
+    - behaviour: "aggressive"
       pattern:
         name: "line"
         count: 6
@@ -103,7 +103,7 @@ simulation:
           y_start: -0.8
           y_end: -3.4
           std_dev: 0   
-    - behaviour: "non-reactive"
+    - behaviour: "shy"
       pattern:
         name: "line"
         count: 6
@@ -120,7 +120,7 @@ simulation:
           y_start: -0.8
           y_end: -3.4
           std_dev: 0   
-    - behaviour: "non-reactive"
+    - behaviour: "assertive"
       pattern:
         name: "line"
         count: 6
@@ -137,7 +137,7 @@ simulation:
           y_start: -0.8
           y_end: -3.4
           std_dev: 0   
-    - behaviour: "non-reactive"
+    - behaviour: "assertive"
       pattern:
         name: "line"
         count: 6
@@ -154,7 +154,7 @@ simulation:
           y_start: 0.8
           y_end: 3.4
           std_dev: 0
-    - behaviour: "non-reactive"
+    - behaviour: "tense"
       pattern:
         name: "line"
         count: 6
@@ -171,7 +171,7 @@ simulation:
           y_start: 0.8
           y_end: 3.4
           std_dev: 0
-    - behaviour: "non-reactive"
+    - behaviour: "aggressive"
       pattern:
         name: "line"
         count: 6
@@ -188,7 +188,7 @@ simulation:
           y_start: 0.8
           y_end: 3.4
           std_dev: 0
-    - behaviour: "non-reactive"
+    - behaviour: "shy"
       pattern:
         name: "line"
         count: 6
