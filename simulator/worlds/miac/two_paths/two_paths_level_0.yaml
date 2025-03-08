@@ -1,5 +1,5 @@
 simulation:
-  time_step: 0.1
+  time_step: 0.2
   map_settings:
     x_min: -18.0
     x_max: 18
@@ -27,14 +27,14 @@ simulation:
         name: "explicit"
         count: 1
         positions:
-          - [ -10, -1.6 ]
+          - [ -7, -1.6 ]
       goals:
         radius: 0.4
         pattern:
           name: "explicit"
           count: 1
           positions:
-            - [ 10, -1.6 ]
+            - [ 7, -1.6 ]
     - behaviour: "non-reactive"
       pattern:
         name: "line"
@@ -123,20 +123,20 @@ simulation:
   obstacles:
     - name: "rectangle"
       center: [ 0, 0 ]
-      width: 15.0
+      width: 7.5
       height: 0.5
     - name: "rectangle"
       center: [ 0, 3.0 ]
-      width: 25.0
+      width: 12.5
       height: 0.5
     - name: "rectangle"
       center: [ 0, -3.0 ]
-      width: 25.0
+      width: 12.5
       height: 0.5
   dynamics:
     - name: "max_steps"
       when: "before"
-      max_steps: 256
+      max_steps: 128
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"
