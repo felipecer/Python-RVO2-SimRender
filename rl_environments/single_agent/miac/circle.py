@@ -158,7 +158,7 @@ class RVOMiacCircle(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOMiacCircle('./simulator/worlds/miac/circle/circle_level_3.yaml', render_mode='rgb')
+    env = RVOMiacCircle('./simulator/worlds/miac/circle/circle_level_1.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0
