@@ -158,7 +158,7 @@ class RVOMiacPerp1(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOMiacPerp1('./simulator/worlds/miac/perp1/perp1_level_3.yaml', render_mode='rgb')
+    env = RVOMiacPerp1('./simulator/worlds/miac/perp1/perp1_level_1.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0
