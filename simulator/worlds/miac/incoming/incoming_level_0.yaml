@@ -40,56 +40,56 @@ simulation:
         name: "line"
         count: 3
         x_value: -1.0  
-        y_start: -1.1
-        y_end: 1.1
-        std_dev: 0.0  
+        y_start: -1.3
+        y_end: 1.3
+        std_dev: 0.25  
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 3
           x_value: -23.0  
-          y_start: -1.1
-          y_end: 1.1
-          std_dev: 0.0  
+          y_start: -1.3
+          y_end: 1.3
+          std_dev: 0
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 3
         x_value: 0.0  
-        y_start: -1.1
-        y_end: 1.1
-        std_dev: 0.0 
+        y_start: -1.3
+        y_end: 1.3
+        std_dev: 0.25 
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 3
           x_value: -21.0  
-          y_start: -1.1
-          y_end: 1.1
+          y_start: -1.3
+          y_end: 1.3
           std_dev: 0  
     - behaviour: "non-reactive"
       pattern:
         name: "line"
         count: 3
         x_value: 1.0  
-        y_start: -1.1
-        y_end: 1.1
-        std_dev: 0.0  
+        y_start: -1.3
+        y_end: 1.3
+        std_dev: 0.25  
       goals:
         radius: 0.4
         pattern:
           name: "line"
           count: 3
           x_value: -19.0  
-          y_start: -1.1
-          y_end: 1.1
+          y_start: -1.3
+          y_end: 1.3
           std_dev: 0  
   dynamics:
     - name: "max_steps"
       when: "before"
-      max_steps: 256
+      max_steps: 128
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"
