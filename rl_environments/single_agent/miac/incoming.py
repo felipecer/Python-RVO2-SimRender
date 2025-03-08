@@ -158,7 +158,7 @@ class RVOMiacIncoming(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RVOMiacIncoming('./simulator/worlds/miac/incoming/incoming_level_1.yaml', render_mode='rgb')
+    env = RVOMiacIncoming('./simulator/worlds/miac/incoming/incoming_level_3.yaml', render_mode='rgb')
     observations = env.reset()
     done = False
     i = 0

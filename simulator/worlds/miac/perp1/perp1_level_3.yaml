@@ -12,11 +12,11 @@ simulation:
     time_horizon: 5.0
     time_horizon_obst: 5.0
     max_neighbors: 10
-    neighbor_dist: 0.35
+    neighbor_dist: 10
     velocity: [0.0, 0.0]
   agents:
     - agent_defaults:
-        max_speed: 1.5
+        max_speed: 1.0
         radius: 0.25
         time_horizon: 5.0
         time_horizon_obst: 5.0
@@ -27,19 +27,36 @@ simulation:
         name: "explicit"
         count: 1
         positions:
-          - [ -5, 0 ]
+          - [ -4, 4 ]
       goals:
         radius: 0.4
         pattern:
           name: "explicit"
           count: 1
           positions:
-            - [ 9, 0 ]
-    - behaviour: "aggressive"
+            - [ -4, -6 ]
+    - behaviour: "tense"
       pattern:
         name: "line"
         count: 14
         x_value: -1.0
+        y_start: -3.3
+        y_end: 3.3
+        std_dev: 0.75
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 14
+          x_value: -35.0
+          y_start: -3.3
+          y_end: 3.3
+          std_dev: 0
+    - behaviour: "aggressive"
+      pattern:
+        name: "line"
+        count: 14
+        x_value: 0.0
         y_start: -3.3
         y_end: 3.3
         std_dev: 0.75
@@ -56,23 +73,6 @@ simulation:
       pattern:
         name: "line"
         count: 14
-        x_value: 0.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.75
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 14
-          x_value: -31.0
-          y_start: -3.3
-          y_end: 3.3
-          std_dev: 0
-    - behaviour: "tense"
-      pattern:
-        name: "line"
-        count: 14
         x_value: 1.0
         y_start: -3.3
         y_end: 3.3
@@ -82,7 +82,7 @@ simulation:
         pattern:
           name: "line"
           count: 14
-          x_value: -29.0
+          x_value: -31.0
           y_start: -3.3
           y_end: 3.3
           std_dev: 0
@@ -99,11 +99,11 @@ simulation:
         pattern:
           name: "line"
           count: 14
-          x_value: -27.0
+          x_value: -29.0
           y_start: -3.3
           y_end: 3.3
           std_dev: 0
-    - behaviour: "shy"
+    - behaviour: "assertive"
       pattern:
         name: "line"
         count: 14
@@ -116,7 +116,7 @@ simulation:
         pattern:
           name: "line"
           count: 14
-          x_value: -25.0
+          x_value: -27.0
           y_start: -3.3
           y_end: 3.3
           std_dev: 0
@@ -133,11 +133,11 @@ simulation:
         pattern:
           name: "line"
           count: 14
-          x_value: -23.0
+          x_value: -25.0
           y_start: -3.3
           y_end: 3.3
           std_dev: 0
-    - behaviour: "aggressive"
+    - behaviour: "shy"
       pattern:
         name: "line"
         count: 14
@@ -150,15 +150,32 @@ simulation:
         pattern:
           name: "line"
           count: 14
-          x_value: -21.0
+          x_value: -23.0
           y_start: -3.3
           y_end: 3.3
           std_dev: 0
-    - behaviour: "assertive"
+    - behaviour: "aggressive"
       pattern:
         name: "line"
         count: 14
         x_value: 6.0
+        y_start: -3.3
+        y_end: 3.3
+        std_dev: 0.75
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 14
+          x_value: -21.0
+          y_start: -3.3
+          y_end: 3.3
+          std_dev: 0
+    - behaviour: "aggressive"
+      pattern:
+        name: "line"
+        count: 14
+        x_value: 7.0
         y_start: -3.3
         y_end: 3.3
         std_dev: 0.75
