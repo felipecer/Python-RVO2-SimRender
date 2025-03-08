@@ -1,5 +1,5 @@
 simulation:
-  time_step: 0.1
+  time_step: 0.2
   map_settings:
     x_min: -18.0
     x_max: 18
@@ -22,7 +22,7 @@ simulation:
         count: 30
         radius: 5
         center: [0.0, 0.0]
-        std_dev: 0.0
+        std_dev: 0.5
       goals:
         radius: 0.4
         pattern:
@@ -31,7 +31,7 @@ simulation:
           count: 30
           radius: 5
           center: [0.0, 0.0]
-          std_dev: 0.5
+          std_dev: 0.0
     - behaviour: "tense"
       pattern:
         start_position: "right"
@@ -86,7 +86,7 @@ simulation:
   dynamics:
     - name: "max_steps"
       when: "before"
-      max_steps: 20000
+      max_steps: 256
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"
