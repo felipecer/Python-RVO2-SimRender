@@ -74,3 +74,8 @@ simulation:
       when: "after"
     - name: "cleanup_resources"
       when: "before"
+    - name: "stop_on_exit_area"
+      when: "before"
+      boundary_x: 18
+      boundary_y: 18
+      agent_id: 0
