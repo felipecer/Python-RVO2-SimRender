@@ -22,7 +22,7 @@ class RVOBaseEnv(gym.Env):
 
     metadata = {'render.modes': ['ansi', 'rgb']}
 
-    def __init__(self, config_file=None, render_mode="rgb", seed=None, step_mode='naive'):
+    def __init__(self, config_file=None, render_mode="rgb", seed=None, step_mode='min_dist'):
         """
         :param config_file: path to YAML config (optional)
         :param render_mode: 'rgb', 'ansi', or None
@@ -35,6 +35,10 @@ class RVOBaseEnv(gym.Env):
         self.seed_val = seed
         self.step_mode = step_mode  # either 'naive' or 'min_dist'
         self.sim = None
+        # Initialize default spaces (child classes may override these)
+        # Example: assume 2D action, 92D observation
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(92,), dtype=np.float32)
 
         # Load config if provided
         if config_file:
@@ -44,10 +48,7 @@ class RVOBaseEnv(gym.Env):
         if hasattr(self, 'world_config'):
             self._init_simulator()
 
-        # Initialize default spaces (child classes may override these)
-        # Example: assume 2D action, 92D observation
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(92,), dtype=np.float32)
+        
 
     def _load_config(self, config_file):
         """Load YAML configuration and store it in self.world_config."""
@@ -150,7 +151,7 @@ class RVOBaseEnv(gym.Env):
         if seed is not None:
             self.sim.reset_rng_with_seed(seed)
         self.sim.reset()
-        return None, {}
+        return self._get_obs(), self._get_info()
 
     def render(self):
         """Delegates rendering to the simulator's observers (if any)."""

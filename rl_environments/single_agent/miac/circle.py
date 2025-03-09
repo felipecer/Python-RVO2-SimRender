@@ -11,6 +11,7 @@ class RVOMiacCircle(RVOBaseEnv):
 
     def __init__(self, config_file=None, render_mode="rgb", seed=None, step_mode='min_dist'):
         super().__init__(config_file=config_file, render_mode=render_mode, seed=seed, step_mode=step_mode)
+        self.sim.set_agent_defaults(0, self.world_config.agent_defaults)
 
     def _get_obs(self):
         """
