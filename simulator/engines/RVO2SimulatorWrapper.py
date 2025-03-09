@@ -5,6 +5,7 @@ from pydantic import BaseModel, ValidationError
 import math
 import sys
 import yaml
+import numpy as np
 from rendering.pygame_renderer import PyGameRenderer
 from rendering.text_renderer import TextRenderer
 from simulator.engines.base import SimulationEngine, SimulationState
@@ -149,6 +150,100 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
         # Send initialization information to observers
         self.notify_observers(SimulationInitializedMessage(step=-1, agent_initialization_data=agent_initialization_data))
+        self._setup_obstacle_vertex_array()
+
+    def _setup_obstacle_vertex_array(self):
+        simulator = self.sim
+        """
+        Precomputes all obstacle segments and stores them in a NumPy array for efficient queries.
+        
+        Parameters:
+        - simulator: Instance of RVOSimulator (Python bindings).
+
+        Returns:
+        - NumPy array of shape (N, 2, 2) where N is the number of segments.
+        Each segment is stored as [[Ax, Ay], [Bx, By]].
+        """
+        num_obstacles = simulator.getNumObstacleVertices()
+        static_segments = np.zeros((num_obstacles, 2, 2), dtype=np.float32)  # Shape (N, 2, 2)
+
+        for i in range(num_obstacles):
+            A = np.array(simulator.getObstacleVertex(i), dtype=np.float32)  # First vertex
+            B = np.array(simulator.getObstacleVertex(simulator.getNextObstacleVertexNo(i)), dtype=np.float32)  # Next vertex
+            static_segments[i] = [A, B]  # Store segment
+
+        self._obstacle_segment_np_array = static_segments
+
+    def get_obstacle_vertex_array(self):
+        return self._obstacle_segment_np_array
+    
+    def compute_360_ray_intersections(self, agent_id):
+        """
+        Computes the intersections of 360 rays with the relevant static segments.
+        
+        Parameters:        
+        - agent_id: ID of the agent.        
+
+        Returns:
+        - List of 360 intersection points [(x, y), ...] (one per ray).
+        """
+        simulator = self.sim
+        static_segments = self.get_obstacle_vertex_array()
+        # Get the agent's position
+        agent_position = np.array(simulator.getAgentPosition(agent_id), dtype=np.float32)  # (x, y)
+
+        # Get the obstacle neighbors of the agent (only relevant ones)
+        num_neighbors = simulator.getAgentNumObstacleNeighbors(agent_id)
+
+        if num_neighbors == 0:
+            return [None] * 360  # No obstacles → No intersections
+
+        # Retrieve only the relevant segments using NumPy indexing
+        obstacle_indices = np.array([simulator.getAgentObstacleNeighbor(agent_id, i) for i in range(num_neighbors)])
+        relevant_segments = static_segments[obstacle_indices]  # Shape (num_neighbors, 2, 2)
+
+        # Generate 360 ray directions
+        angles = np.radians(np.arange(360), dtype=np.float32)  # Convert degrees to radians
+        directions = np.column_stack((np.cos(angles), np.sin(angles))).astype(np.float32)  # Shape (360, 2)
+
+        # Convert relevant segments into arrays for vectorized computation
+        A = relevant_segments[:, 0, :]  # (num_neighbors, 2)
+        B = relevant_segments[:, 1, :]  # (num_neighbors, 2)
+        segment_dirs = B - A  # (num_neighbors, 2)
+
+        # Expand dimensions for parallel computation (360 rays × num_neighbors segments)
+        ray_origins = agent_position[np.newaxis, :]  # (1, 2) → (360, 2)
+        A = A[np.newaxis, :, :]  # (1, num_neighbors, 2)
+        segment_dirs = segment_dirs[np.newaxis, :, :]  # (1, num_neighbors, 2)
+
+        # Solve the intersection equation O + tD = A + u(B-A)
+        A_minus_O = A - ray_origins[:, np.newaxis, :]  # (360, num_neighbors, 2)
+
+        # Matrix of coefficients for linear system (360, num_neighbors, 2, 2)
+        coeffs = np.stack((segment_dirs, -directions[:, np.newaxis, :]), axis=2)
+
+        # Solve for (u, t) using np.linalg.solve
+        try:
+            solutions = np.linalg.solve(coeffs, A_minus_O)  # (360, num_neighbors, 2)
+            u_vals, t_vals = solutions[..., 0], solutions[..., 1]  # Separate u and t
+        except np.linalg.LinAlgError:
+            return [None] * 360  # Avoid errors from parallel segments
+
+        # Filter valid intersections
+        valid_mask = (0 <= u_vals) & (u_vals <= 1) & (t_vals >= 0)  # (360, num_neighbors)
+
+        # Find the closest intersection for each ray
+        t_vals[~valid_mask] = np.inf  # Discard invalid values
+        min_t_vals = np.min(t_vals, axis=1)  # Minimum t per ray (360,)
+
+        # Compute intersection points
+        intersections = np.where(
+            min_t_vals[:, np.newaxis] == np.inf,  # No intersection
+            None,
+            agent_position + directions * min_t_vals[:, np.newaxis]  # Closest intersection point
+        )
+
+        return intersections.tolist()  # Convert to list for compatibility
 
     def reset(self):
         """Resets the simulation to its initial state."""
