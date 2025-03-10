@@ -40,6 +40,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         self.obstacles = []
         self.agent_initial_positions = []
         self._manual_velocity_updates = []
+        self.intersect_list = None
 
     def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):
         vector_to_goal = (
@@ -179,125 +180,72 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
     def get_obstacle_vertex_array(self):
         return self._obstacle_segment_np_array
-    
+        
 
+    def vector_360_ray_intersections(self, agent_id):
+        """
+        A simple, non-vectorized approach to raycasting in 360 degrees,
+        testing all static_segments, ignoring neighbor indices.
+        No max detection radius – all distances are valid.
 
-    def compute_360_ray_intersections(self, agent_id):
+        Returns a list of 360 intersection points [x, y] or [None, None].
         """
-        Calculates the intersections of 360 rays with the neighboring obstacles of an agent
-        and filters by:
-        1) Segments within [0,1] for u
-        2) t >= 0
-        3) Maximum distance of 15 units
-        Returns: A list of 360 points (x, y) or None (if there is no intersection).
-        """
+
         simulator = self.sim
-        static_segments = self.get_obstacle_vertex_array()
+        static_segments = self.get_obstacle_vertex_array()  # shape (N, 2, 2) for all obstacles
         agent_position = np.array(simulator.getAgentPosition(agent_id), dtype=np.float32)
-
-        num_neighbors = simulator.getAgentNumObstacleNeighbors(agent_id)
-        if num_neighbors == 0:
-            return [[None, None] for _ in range(360)]  # No intersections if there are no obstacles
-
-        # 1) Get the indices of neighboring obstacles and extract segments
-        obstacle_indices = np.array([
-            simulator.getAgentObstacleNeighbor(agent_id, i)
-            for i in range(num_neighbors)
-        ])
-        relevant_segments = static_segments[obstacle_indices]  # (num_neighbors, 2, 2)
-
-        # 2) Generate 360 ray directions
+        # Generate 360 directions
         angles = np.radians(np.arange(360), dtype=np.float32)
-        directions = np.column_stack((np.cos(angles), np.sin(angles))).astype(np.float32)  # (360, 2)
+        directions = np.column_stack((np.cos(angles), np.sin(angles))).astype(np.float32)
+        final_result = []
+        for i in range(360):
+            direction = directions[i]
+            # track smallest valid t across all segments
+            best_t = float('inf')
+            best_point = [None, None]
 
-        # 3) Prepare segment data
-        A = relevant_segments[:, 0, :]  # (num_neighbors, 2)
-        B = relevant_segments[:, 1, :]  # (num_neighbors, 2)
-        segment_dirs = B - A            # (num_neighbors, 2)
+                        # For each obstacle segment in ALL segments
+            for seg in static_segments:
+                A = seg[0].astype(np.float32)
+                B = seg[1].astype(np.float32)
+                seg_dir = A - B  # direction of the segment
+                
+                # Build the system to solve for [t, u]:
+                #   A + u * seg_dir = O + t * direction
+                # => (A - O) = [direction, seg_dir] * [t, u]^T
+                M = np.array([
+                    [direction[0], seg_dir[0]],
+                    [direction[1], seg_dir[1]]
+                ], dtype=np.float32)
 
-        # 4) Expand to (360, num_neighbors)
-        #    Replicate A and segment_dirs for each of the 360 rays
-        A = np.tile(A, (360, 1, 1))                # (360, num_neighbors, 2)
-        segment_dirs = np.tile(segment_dirs, (360, 1, 1))  # (360, num_neighbors, 2)
+                rhs = A - agent_position  # (2,)
 
-        # 5) Build A_minus_O and expanded directions
-        ray_origins = agent_position[np.newaxis, :]  # (1, 2) → broadcast to (360, 2)
-        A_minus_O = A - ray_origins[:, np.newaxis, :]      # (360, num_neighbors, 2)
-        expanded_directions = np.tile(
-            directions[:, np.newaxis, :],
-            (1, segment_dirs.shape[1], 1)
-        )  # (360, num_neighbors, 2)
+                det = np.linalg.det(M)
+                if abs(det) < 1e-6:
+                    # Parallel or nearly parallel
+                    continue
 
-        # 6) Build the linear system: (-D, seg_dirs) * [u, t]^T = (A - O)
-        coeffs = np.stack((-expanded_directions, segment_dirs), axis=2)  # (360, num_neighbors, 2, 2)
+                # Solve
+                try:
+                    sol = np.linalg.solve(M, rhs)  # returns [t, u]
+                    t, u = sol[0], sol[1]
+                except np.linalg.LinAlgError:
+                    continue  # numerical fail
 
-        # 7) Determinant and filtering of singular systems
-        det_coeffs = np.linalg.det(coeffs)  # (360, num_neighbors)
-        valid_mask = np.abs(det_coeffs) > 1e-6  # Non-degenerate systems
+                # Must be in front of the ray (t >= 0) and on the segment (0 <= u <= 1)
+                if t >= 0 and 0 <= u <= 1:
+                    # No maximum radius filter – any t is valid
+                    if t < best_t:
+                        best_t = t
+                        # Intersection = O + t * direction
+                        x = agent_position[0] + direction[0] * t
+                        y = agent_position[1] + direction[1] * t                        
+                        best_point = [float(x), float(y)]
 
-        if not np.any(valid_mask):
-            return [[None, None] for _ in range(360)]  # All are singular
-
-        # 8) Select valid coeffs and A_minus_O
-        safe_coeffs = coeffs[valid_mask].reshape(-1, 2, 2)
-        valid_mask_expanded = np.broadcast_to(valid_mask[:, :, np.newaxis], A_minus_O.shape)
-        safe_A_minus_O = A_minus_O[valid_mask_expanded].reshape(-1, 2)
-
-        # 9) Solve the system for (u, t)
-        try:
-            solutions = np.linalg.solve(safe_coeffs, safe_A_minus_O)  # (n_valid, 2)
-        except np.linalg.LinAlgError:
-            return [[None, None] for _ in range(360)]
-
-        u_vals, t_vals = solutions[..., 0], solutions[..., 1]
-
-        # Filter by u and t before grouping by ray
-        # Only u in [0,1] and t >= 0
-        valid_mask_u = (u_vals >= 0) & (u_vals <= 1)
-        valid_mask_t = (t_vals >= 0)
-        global_valid_mask = valid_mask_u & valid_mask_t  # (n_valid, )
-
-        # 10) Reconvert the global mask to the ray space
-        #     valid_mask is (360, num_neighbors). Where it is True, we have a (u,t).
-        #     We want to disable those where global_valid_mask is False.
-        valid_indices = np.flatnonzero(valid_mask)      # linear indices where valid_mask is True
-        invalid_indices = valid_indices[~global_valid_mask]  # linear indices where global_valid_mask is False
-        # Mark in valid_mask: valid_mask[i] = False at invalid_indices
-        valid_mask_flat = valid_mask.ravel()
-        valid_mask_flat[invalid_indices] = False
-        valid_mask = valid_mask_flat.reshape(valid_mask.shape)  # return to shape (360, num_neighbors)
-
-        # 11) Remake t_vals in the original space (360×num_neighbors) with np.inf in invalid spots
-        t_vals_original = np.full_like(det_coeffs, np.inf, dtype=np.float32)  # (360, num_neighbors)
-        t_vals_original[valid_mask] = t_vals[global_valid_mask]
-
-        # 12) Group by ray and take the minimum
-        num_valid_per_ray = valid_mask.sum(axis=1)  # how many True per ray
-        # Convert t_vals to 1D for splitting
-        t_vals_1d = t_vals_original.ravel()
-
-        split_indices = np.cumsum(num_valid_per_ray[:-1])
-        split_indices = split_indices[split_indices < t_vals_1d.size]
-
-        split_t_vals = np.split(t_vals_1d, split_indices) if len(split_indices) > 0 else [t_vals_1d]
-        min_t_vals = np.array([np.min(t) if len(t) > 0 else np.inf for t in split_t_vals])
-
-        # 13) Filter distances greater than 15
-        max_detection_radius = 15.0
-        min_t_vals_filtered = np.where(min_t_vals > max_detection_radius, np.inf, min_t_vals)
-
-        # 14) Build final intersections
-        #     If min_t_vals_filtered is inf, put None
-        intersections = np.where(
-            min_t_vals_filtered[:, np.newaxis] == np.inf,
-            None,
-            agent_position + directions * min_t_vals_filtered[:, np.newaxis]
-        )
-
-        intersect_list = intersections.tolist()
-        self.notify_observers(RayCastingUpdateMessage(step=self.current_step, intersections=intersect_list))
-        return intersect_list
-
+            final_result.append(best_point)
+                
+        self.intersect_list = final_result
+        return final_result
 
 
     def reset(self):
@@ -347,9 +295,11 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             )
             for agent_id in range(self.sim.getNumAgents())
         ]
+        
         # Send the message with additional data
         self.notify_observers(AgentPositionsUpdateMessage(step=self.current_step, agent_positions=agent_data))
-
+        if self.intersect_list != None:
+            self.notify_observers(RayCastingUpdateMessage(step=self.current_step, intersections=self.intersect_list))
         self.store_step(self.current_step)
 
     def run_simulation(self, steps: int):

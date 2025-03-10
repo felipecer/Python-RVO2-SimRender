@@ -111,7 +111,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             for intersection in self.raycasting_intersections:
                 if intersection[0] != None and intersection[1] != None:
                     x, y = self.transform_coordinates(*intersection)
-                    pygame.draw.circle(self.window, (128, 0, 128), (x, y), 5)
+                    pygame.draw.circle(self.window, (255, 105, 180), (x, y), 2)
 
     def game_loop(self):
         step = 0
@@ -133,6 +133,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self.draw_agents(step)
         self.draw_goals()
         draw_text(self.window, f"step: {step}", self.window_width - 10, 10)
+        
 
     def render_step_with_agents2(self, agents, step):
         self._pygame_event_manager()
@@ -248,7 +249,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             #                                              goal_y), color=self.color_scheme.distance_line_color, line_width=4
             #                       )
 
-        draw_text(self.window, f"step: {step}", self.window_width - 150, 50)
+        draw_text(self.window, f"agent 0 position: {agents[0][1]}, {agents[0][2]}", self.window_width - 150, 50)
         self.draw_goals()
         self.draw_intersections()
         self.update_display()
