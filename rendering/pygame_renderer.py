@@ -282,7 +282,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
     def goals_processed(self, goals: dict):
         # Ensure that the goals are processed correctly
         self.goals = goals
-        print(f"Processed {len(goals)} goals.")
+        # print(f"Processed {len(goals)} goals.")
 
     def goal_position_updated(self, goal_id: int, new_position: tuple):
         if goal_id in self.goals:

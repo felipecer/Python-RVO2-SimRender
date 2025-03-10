@@ -27,7 +27,13 @@ class RVOMiacTwoPaths(RVOBaseEnv):
         goal = self.sim.get_goal(0)
         max_neigh = self.sim.get_agent_max_num_neighbors(0)
         neighbor_data = self.sim.get_neighbors_data(0)  # Should return a list of floats
-
+        ray_casting = self.sim.compute_360_ray_intersections(0)
+        self.ray_casting = ray_casting
+        
+        flattened = [coord
+             for row in ray_casting
+             for coord in row]
+               
         # Each neighbor might provide 6 values (distance, direction, etc.)
         expected_length = max_neigh * 6
         if len(neighbor_data) < expected_length:
@@ -37,6 +43,7 @@ class RVOMiacTwoPaths(RVOBaseEnv):
 
         # Observations begin with goal offset, then neighbor info
         observations = [goal[0] - pos[0], goal[1] - pos[1]]
+        observations.extend(flattened)
         observations.extend(neighbor_data)
 
         return np.array(observations, dtype=np.float32)
@@ -60,7 +67,7 @@ class RVOMiacTwoPaths(RVOBaseEnv):
 
 if __name__ == "__main__":
     env = RVOMiacTwoPaths(
-        config_file='./simulator/worlds/miac/two_paths/two_paths_level_2.yaml',
+        config_file='./simulator/worlds/miac/two_paths/two_paths_level_3.yaml',
         render_mode='rgb',
         seed=42,
         step_mode='min_dist'

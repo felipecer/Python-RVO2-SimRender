@@ -19,7 +19,7 @@ simulation:
         max_speed: 1.5
         radius: 0.25
         time_horizon: 5.0
-        time_horizon_obst: 5.0
+        time_horizon_obst: 100000
         max_neighbors: 15
         neighbor_dist: 10
         velocity: [ 0.0, 0.0 ]
