@@ -10,7 +10,7 @@ import csv
 
 from rl_environments.single_agent.miac.circle import RVOMiacCircle
 
-def run_baseline_orca_circle_level0(num_runs=10, render_mode=None, seed=42, tag='baseline_orca'):
+def run_baseline_orca_circle_level2(num_runs=10, render_mode=None, seed=42, tag='baseline_orca'):
     """Run baseline ORCA algorithm on circle_level_2 with action=[0,0]"""
     
     config_file = './simulator/worlds/miac/circle/circle_level_2.yaml'
@@ -129,4 +129,4 @@ def run_baseline_orca_circle_level0(num_runs=10, render_mode=None, seed=42, tag=
 
 if __name__ == "__main__":
     # Run without visualization by default
-    df = run_baseline_orca_circle_level0(num_runs=1000, render_mode=None, seed=42, tag='baseline_orca_circle2')
+    df = run_baseline_orca_circle_level2(num_runs=1000, render_mode=None, seed=42, tag='baseline_orca_circle2')

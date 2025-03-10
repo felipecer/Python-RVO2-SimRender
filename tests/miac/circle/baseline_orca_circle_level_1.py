@@ -10,7 +10,7 @@ import csv
 
 from rl_environments.single_agent.miac.circle import RVOMiacCircle
 
-def run_baseline_orca_circle_level0(num_runs=10, render_mode=None, seed=42, tag='baseline_orca'):
+def run_baseline_orca_circle_level1(num_runs=10, render_mode=None, seed=42, tag='baseline_orca'):
     """Run baseline ORCA algorithm on circle_level_1 with action=[0,0]"""
     
     config_file = './simulator/worlds/miac/circle/circle_level_1.yaml'
@@ -97,7 +97,7 @@ def run_baseline_orca_circle_level0(num_runs=10, render_mode=None, seed=42, tag=
     print(f"Average duration: {df['duration'].mean():.2f} seconds")
     
     # Save detailed results to saves folder
-    results_file = os.path.join(save_dir, f'circle_level0_baseline_orca_{unique_id}.csv')
+    results_file = os.path.join(save_dir, f'circle_level1_baseline_orca_{unique_id}.csv')
     df.to_csv(results_file, index=False)
     print(f"\nDetailed results saved to: {results_file}")
     
@@ -129,4 +129,4 @@ def run_baseline_orca_circle_level0(num_runs=10, render_mode=None, seed=42, tag=
 
 if __name__ == "__main__":
     # Run without visualization by default
-    df = run_baseline_orca_circle_level0(num_runs=1000, render_mode=None, seed=42, tag='baseline_orca_circle1')
+    df = run_baseline_orca_circle_level1(num_runs=1000, render_mode=None, seed=42, tag='baseline_orca_circle1')
