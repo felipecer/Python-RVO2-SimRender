@@ -11,6 +11,7 @@ from rendering.drawing_utils import draw_text, draw_arrow, draw_detection_radius
 from rendering.interfaces import RendererInterface
 from simulator.models.messages import (
     AgentPositionsUpdateMessage,
+    RayCastingUpdateMessage,
     SimulationInitializedMessage,
     ObstaclesProcessedMessage,
     GoalsProcessedMessage,
@@ -38,6 +39,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self.simulation_steps = simulation_steps
         self.cell_size = cell_size
         self.grid = Grid(width, height, cell_size)
+        self.raycasting_intersections = None
 
         # Window settings
         self.window = None
@@ -104,6 +106,13 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             # Add text inside the goal circle
             draw_text(self.window, f"G_{agent_id}", x, y)
 
+    def draw_intersections(self):
+        if self.raycasting_intersections:
+            for intersection in self.raycasting_intersections:
+                if intersection[0] != None and intersection[1] != None:
+                    x, y = self.transform_coordinates(*intersection)
+                    pygame.draw.circle(self.window, (128, 0, 128), (x, y), 5)
+
     def game_loop(self):
         step = 0
         while True:
@@ -152,7 +161,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
             # Add text inside the agent circle
             draw_text(self.window, f"A_{agent_id}", x_screen, y_screen)
-
+            
             # Draw the agent's detection radius (neighbor_dist)
             detection_radius = self.agent_neighbour_dist.get(agent_id, 10)
             # draw_detection_radius(self.window,
@@ -177,6 +186,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             #                       )
 
         draw_text(self.window, f"step: {step}", self.window_width - 150, 50)
+        self.draw_intersections()
         self.draw_goals()
         self.update_display()
         pygame.time.delay(int(self.delay))
@@ -240,6 +250,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
         draw_text(self.window, f"step: {step}", self.window_width - 150, 50)
         self.draw_goals()
+        self.draw_intersections()
         self.update_display()
         pygame.time.delay(int(self.delay))
 
@@ -275,6 +286,11 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             self.goal_position_updated(message.goal_id, message.new_position)
         elif isinstance(message, NewObstacleAddedMessage):
             self.new_obstacle_added(message.obstacle)
+        elif isinstance(message, RayCastingUpdateMessage):
+            self.raycasting_updated(message.intersections)
+        
+    def raycasting_updated(self, intersections):
+        self.raycasting_intersections = intersections
 
     def obstacles_processed(self, obstacles: list):
         self.obstacles = obstacles

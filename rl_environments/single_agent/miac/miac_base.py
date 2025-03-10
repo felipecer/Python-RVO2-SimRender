@@ -132,6 +132,7 @@ class RVOBaseEnv(gym.Env):
 
         # 5. Collect results
         obs = self._get_obs()
+        
         reward = self.calculate_reward(0)
         done = self.is_done(0)
         truncated = self.sim.get_state() == SimulationState.STOPPED

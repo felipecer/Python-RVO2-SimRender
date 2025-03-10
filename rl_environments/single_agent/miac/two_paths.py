@@ -29,6 +29,7 @@ class RVOMiacTwoPaths(RVOBaseEnv):
         neighbor_data = self.sim.get_neighbors_data(0)  # Should return a list of floats
         ray_casting = self.sim.compute_360_ray_intersections(0)
         self.ray_casting = ray_casting
+        print(self.ray_casting)
         
         flattened = [coord
              for row in ray_casting
