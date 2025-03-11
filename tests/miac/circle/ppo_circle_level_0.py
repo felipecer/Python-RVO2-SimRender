@@ -14,9 +14,10 @@ def main(env_class, args):
         seed=args.seed,
         unique_id=args.unique_id
     )
-
+    device = args.device
+    progress_bar = args.progress_bar
     if args.mode == 'train':
-        trainer_tester.train(total_timesteps=args.total_timesteps)
+        trainer_tester.train(total_timesteps=args.total_timesteps, device=device, progress_bar=progress_bar)
     elif args.mode == 'test':
         trainer_tester.test()
 

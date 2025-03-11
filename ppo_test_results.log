@@ -1,0 +1,31 @@
+PPO Test Results - Started at 2025-03-11 20:52:50
+=========================================================
+Found 20 total PPO test files to process
+=========================================================
+Format: TIMESTAMP | FILE | DURATION (HH:MM:SS) | Exit Status
+=========================================================
+----- Batch 1 of 4 -----
+2025-03-11 20:52:53 | ./tests/miac/two_paths/ppo_two_paths_level_3.py | 00:00:03 | Exit: 1
+2025-03-11 20:52:53 | ./tests/miac/two_paths/ppo_two_paths_level_2.py | 00:00:03 | Exit: 1
+2025-03-11 20:53:01 | ./tests/miac/perp1/ppo_perp1_level_0.py | 00:00:11 | Exit: 0
+2025-03-11 20:53:01 | ./tests/miac/perp2/ppo_perp2_level_0.py | 00:00:11 | Exit: 0
+2025-03-11 20:53:44 | ./tests/miac/perp2/ppo_perp2_level_3.py | 00:00:54 | Exit: 0
+----- Batch 2 of 4 -----
+2025-03-11 20:53:46 | ./tests/miac/two_paths/ppo_two_paths_level_1.py | 00:00:02 | Exit: 1
+2025-03-11 20:53:55 | ./tests/miac/circle/ppo_circle_level_0.py | 00:00:11 | Exit: 0
+2025-03-11 20:53:59 | ./tests/miac/perp1/ppo_perp1_level_1.py | 00:00:15 | Exit: 0
+2025-03-11 20:54:01 | ./tests/miac/perp2/ppo_perp2_level_1.py | 00:00:17 | Exit: 0
+2025-03-11 20:54:18 | ./tests/miac/perp1/ppo_perp1_level_3.py | 00:00:34 | Exit: 0
+----- Batch 3 of 4 -----
+2025-03-11 20:54:20 | ./tests/miac/two_paths/ppo_two_paths_level_0.py | 00:00:02 | Exit: 1
+2025-03-11 20:54:26 | ./tests/miac/incoming/ppo_incoming_level_0.py | 00:00:08 | Exit: 0
+2025-03-11 20:54:48 | ./tests/miac/incoming/ppo_incoming_level_3.py | 00:00:30 | Exit: 0
+2025-03-11 20:55:13 | ./tests/miac/circle/ppo_circle_level_2.py | 00:00:55 | Exit: 0
+2025-03-11 20:56:27 | ./tests/miac/circle/ppo_circle_level_3.py | 00:02:09 | Exit: 0
+----- Batch 4 of 4 -----
+2025-03-11 20:56:38 | ./tests/miac/incoming/ppo_incoming_level_1.py | 00:00:11 | Exit: 0
+2025-03-11 20:56:42 | ./tests/miac/circle/ppo_circle_level_1.py | 00:00:15 | Exit: 0
+2025-03-11 20:56:53 | ./tests/miac/incoming/ppo_incoming_level_2.py | 00:00:26 | Exit: 0
+2025-03-11 20:57:02 | ./tests/miac/perp1/ppo_perp1_level_2.py | 00:00:35 | Exit: 0
+2025-03-11 20:57:23 | ./tests/miac/perp2/ppo_perp2_level_2.py | 00:00:56 | Exit: 0
+All PPO tests completed at 2025-03-11 20:57:23

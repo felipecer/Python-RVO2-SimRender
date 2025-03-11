@@ -211,6 +211,6 @@ class StopOnExitAreaDynamic(OnStepDynamic):
     def execute(self):
         x, y = self._simulator.get_agent_position(self.agent_id)
         if not (-self.boundary_x <= x <= self.boundary_x and -self.boundary_y <= y <= self.boundary_y):
-            print(f"Position: {x},{y} is outside the boundary x[-{self.boundary_x}:+{self.boundary_x}], y[-{self.boundary_y}:+{self.boundary_y}]")
-            print(f"Agent {self.agent_id} stepped outside the boundary. Stopping simulation.")
+            # print(f"Position: {x},{y} is outside the boundary x[-{self.boundary_x}:+{self.boundary_x}], y[-{self.boundary_y}:+{self.boundary_y}]")
+            # print(f"Agent {self.agent_id} stepped outside the boundary. Stopping simulation.")
             self._simulator.stop_simulation()

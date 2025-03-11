@@ -28,6 +28,10 @@ def parse_cli_args(script_dir):
                         help='Optional tag for the run')
     parser.add_argument('--save_path', type=str, default=None,
                         help='Path to the saved model for testing')
+    parser.add_argument('--progress_bar', type=bool, default=True,
+                        help='Display progress bar during training (default: True)')
+    parser.add_argument('--device', choices=['cpu', 'cuda'], default='cpu',
+                        help='Device to use for training (default: cpu)')
     args = parser.parse_args()
 
     # Generate a unique ID for the run
@@ -69,11 +73,11 @@ class PPOTrainerTester:
                 writer.writerow(['timestamp', 'tag', 'unique_id', 'config_file', 'total_timesteps', 'n_steps', 'n_envs', 'seed', 'log_dir', 'save_path', 'hyperparameters', 'mean_reward'])
             writer.writerow([datetime.now().isoformat(), self.tag, self.unique_id, params['config_file'], params['total_timesteps'], params['n_steps'], params['n_envs'], params['seed'], params['log_dir'], params['save_path'], str(params['hyperparameters']), params['mean_reward']])
 
-    def train(self, n_envs=64, total_timesteps=1000000, n_steps=1024):
+    def train(self, n_envs=32, total_timesteps=1000000, n_steps=256, device='cpu', progress_bar=True):
         vec_env = self.create_env(n_envs=n_envs)
-        model = PPO("MlpPolicy", vec_env, n_steps=n_steps, verbose=1, device='cpu',
+        model = PPO("MlpPolicy", vec_env, n_steps=n_steps, verbose=1, device=device,
                     tensorboard_log=self.log_dir, **self.hyperparams)
-        model.learn(total_timesteps=total_timesteps, progress_bar=True)
+        model.learn(total_timesteps=total_timesteps, progress_bar=progress_bar)
         model.save(self.save_path)
         print("Training completed")
         del model
