@@ -202,7 +202,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             direction = directions[i]
             # track smallest valid t across all segments
             best_t = float('inf')
-            best_point = [None, None]
+            best_point = [9999, 9999]
 
                         # For each obstacle segment in ALL segments
             for seg in static_segments:

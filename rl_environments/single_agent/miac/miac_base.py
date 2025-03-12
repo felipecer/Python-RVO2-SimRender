@@ -35,18 +35,21 @@ class RVOBaseEnv(gym.Env):
         self.seed_val = seed
         self.step_mode = step_mode  # either 'naive' or 'min_dist'
         self.sim = None
-        # Initialize default spaces (child classes may override these)
-        # Example: assume 2D action, 92D observation
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(92,), dtype=np.float32)
+        
 
         # Load config if provided
         if config_file:
-            self._load_config(config_file)
+            self._load_config(config_file)        
 
         # Set up simulator if config was loaded
         if hasattr(self, 'world_config'):
             self._init_simulator()
+
+        # Initialize default spaces (child classes may override these)
+        # Example: assume 2D action, 92D observation
+        obs_d = 2 + 720 + 15 * 6
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_d,), dtype=np.float32)
 
         
 

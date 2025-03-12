@@ -14,25 +14,34 @@ class RVOMiacPerp1(RVOBaseEnv):
 
     def _get_obs(self):
         """
-        Retrieves the observation for agent ID=0, including padding for neighbor data.
+        Gets the observation for the agent (ID=0), with padding for neighbor data.
+        By default, we expect 2 values for (goal-pos), plus neighbor data.
         """
         pos = self.sim.get_agent_position(0)
         goal = self.sim.get_goal(0)
-
         max_neigh = self.sim.get_agent_max_num_neighbors(0)
-        agent_neighbors = self.sim.get_neighbors_data(0)
-        expected_len = max_neigh * 6
-
-        # Pad or truncate neighbor data
-        if len(agent_neighbors) < expected_len:
-            agent_neighbors.extend([-9999] * (expected_len - len(agent_neighbors)))
+        neighbor_data = self.sim.get_neighbors_data(0)  # Should return a list of floats
+        ray_casting = self.sim.vector_360_ray_intersections(0)
+        # ray_casting = self.sim.debug_360_ray_intersections_loop(0)
+        self.ray_casting = ray_casting
+        # print(self.ray_casting)
+        
+        flattened = [coord
+             for row in ray_casting
+             for coord in row]
+               
+        # Each neighbor might provide 6 values (distance, direction, etc.)
+        expected_length = max_neigh * 6
+        if len(neighbor_data) < expected_length:
+            neighbor_data.extend([-9999]*(expected_length - len(neighbor_data)))
         else:
-            agent_neighbors = agent_neighbors[:expected_len]
+            neighbor_data = neighbor_data[:expected_length]
 
-        # Observation: (goal - position) + neighbor data
-        obs = [goal[0] - pos[0], goal[1] - pos[1]]
-        obs.extend(agent_neighbors)
-        return np.array(obs, dtype=np.float32)
+        # Observations begin with goal offset, then neighbor info
+        observations = [goal[0] - pos[0], goal[1] - pos[1]]
+        observations.extend(flattened)
+        observations.extend(neighbor_data)
+        return np.array(observations, dtype=np.float32)
 
     def calculate_reward(self, agent_id=0):
         """
