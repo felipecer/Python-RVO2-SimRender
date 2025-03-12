@@ -15,7 +15,7 @@ run_ppo_test() {
     local start_time=$(date +%s)
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting: $test_file with $TIMESTEPS timesteps"
     
-    python "$test_file" --mode train --total_timesteps $TIMESTEPS
+    python "$test_file" --mode train --total_timesteps $TIMESTEPS --device cuda
     
     local exit_status=$?
     local end_time=$(date +%s)

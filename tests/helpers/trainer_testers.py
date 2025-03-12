@@ -28,7 +28,7 @@ def parse_cli_args(script_dir):
                         help='Optional tag for the run')
     parser.add_argument('--save_path', type=str, default=None,
                         help='Path to the saved model for testing')
-    parser.add_argument('--progress_bar', type=bool, default=True,
+    parser.add_argument('--progress_bar', type=bool, default=False,
                         help='Display progress bar during training (default: True)')
     parser.add_argument('--device', choices=['cpu', 'cuda'], default='cpu',
                         help='Device to use for training (default: cpu)')
