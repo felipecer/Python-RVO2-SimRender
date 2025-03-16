@@ -8,3 +8,7 @@ timestamp,tag,unique_id,config_file,algorithm,success_rate,avg_steps,std_steps,a
 2025-03-16T17:49:33.605112,baseline_orca_incoming_1,162e2c95-15ef-4946-9b93-cefcdddad1e5,./simulator/worlds/miac/incoming/incoming_level_1.yaml,baseline_orca,0.8000,144.40,30.23,6556.00,4064.24,0.14,10,42
 2025-03-16T17:49:41.044340,baseline_orca_incoming_2,7da1347a-fa09-4632-8f2b-b848c6e0fc2f,./simulator/worlds/miac/incoming/incoming_level_2.yaml,baseline_orca,0.0000,116.10,15.93,-1161.00,159.27,0.30,10,42
 2025-03-16T17:49:50.546268,baseline_orca_incoming_3,09f43361-60be-4d83-bbed-bcf25869c6d4,./simulator/worlds/miac/incoming/incoming_level_3.yaml,baseline_orca,0.6000,109.50,43.51,4905.00,4990.03,0.41,10,42
+2025-03-16T17:52:43.622011,baseline_orca_perp1_0,e2a16506-31d5-47be-8200-661f73eaf635,./simulator/worlds/miac/perp1/perp1_level_0.yaml,baseline_orca,0.0000,129.00,0.00,-1290.00,0.00,0.08,10,42
+2025-03-16T17:52:49.379364,baseline_orca_perp1_1,9deedb90-2cdf-4283-a0c6-b3d0356837da,./simulator/worlds/miac/perp1/perp1_level_1.yaml,baseline_orca,0.0000,116.30,9.41,-1163.00,94.05,0.13,10,42
+2025-03-16T17:52:58.178665,baseline_orca_perp1_2,f245e746-6ebf-4c03-980b-e64fc72f2449,./simulator/worlds/miac/perp1/perp1_level_2.yaml,baseline_orca,0.5000,122.40,25.87,3776.00,5109.93,0.44,10,42
+2025-03-16T17:53:06.025706,baseline_orca_perp1_3,4376af9f-a33e-44ac-bc92-b68bd15d61fe,./simulator/worlds/miac/perp1/perp1_level_3.yaml,baseline_orca,0.9000,80.90,24.25,8191.00,3189.38,0.29,10,42
