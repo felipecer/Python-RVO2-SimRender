@@ -1,0 +1,6 @@
+timestamp,tag,unique_id,config_file,algorithm,success_rate,avg_steps,std_steps,avg_reward,std_reward,avg_duration,num_runs,seed
+2025-03-16T17:15:02.771233,baseline_orca_circle_0,4a5c69f4-e122-4110-a46b-1d8d091af90c,./simulator/worlds/miac/circle/circle_level_0.yaml,baseline_orca,1.0000,98.00,0.00,9020.00,0.00,0.10,10,42
+2025-03-16T17:15:33.373102,baseline_orca_circle_0,bee722ec-5292-4a26-9faf-589a88d82802,./simulator/worlds/miac/circle/circle_level_0.yaml,baseline_orca,1.0000,98.00,0.00,9020.00,0.00,0.08,10,42
+2025-03-16T17:22:23.471459,baseline_orca_circle_1,1b8458c1-a24c-4cee-9d55-3ea3ce079585,./simulator/worlds/miac/circle/circle_level_1.yaml,baseline_orca,0.8000,145.60,64.65,6544.00,4811.12,0.17,10,42
+2025-03-16T17:22:35.954078,baseline_orca_circle_2,d21cf6ba-457b-4543-9378-0be53aafbb38,./simulator/worlds/miac/circle/circle_level_2.yaml,baseline_orca,1.0000,138.60,44.63,8614.00,446.35,0.74,10,42
+2025-03-16T17:23:11.155992,baseline_orca_circle_3,b0f9180b-f91d-481a-932d-cfcf3f2d7002,./simulator/worlds/miac/circle/circle_level_3.yaml,baseline_orca,1.0000,233.80,234.84,7662.00,2348.36,3.00,10,42
