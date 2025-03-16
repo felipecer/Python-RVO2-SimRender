@@ -18,7 +18,7 @@ simulation:
     - behaviour: "non-reactive"
       pattern:
         start_position: "right"
-        name: "circle"
+        name: "ring"
         count: 30
         radius: 5
         center: [0.0, 0.0]
@@ -27,7 +27,7 @@ simulation:
         radius: 0.4
         pattern:
           start_position: "left"
-          name: "circle"
+          name: "ring"
           count: 30
           radius: 5 
           center: [0.0, 0.0]
