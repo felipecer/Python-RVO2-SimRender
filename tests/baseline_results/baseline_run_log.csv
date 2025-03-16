@@ -16,3 +16,6 @@ timestamp,tag,unique_id,config_file,algorithm,success_rate,avg_steps,std_steps,a
 2025-03-16T17:56:25.959616,baseline_orca_perp2_1,51923057-c163-438f-a939-cb04d2234f47,./simulator/worlds/miac/perp2/perp2_level_1.yaml,baseline_orca,0.3000,142.00,21.96,1580.00,4676.58,0.18,10,42
 2025-03-16T17:56:36.375516,baseline_orca_perp2_2,d1eca724-8ba1-406e-b689-301f96f9fea0,./simulator/worlds/miac/perp2/perp2_level_2.yaml,baseline_orca,1.0000,93.00,29.37,9070.00,293.71,0.58,10,42
 2025-03-16T17:56:45.639670,baseline_orca_perp2_3,72c3eea3-fe92-418d-a55c-8a4dfd2dc137,./simulator/worlds/miac/perp2/perp2_level_3.yaml,baseline_orca,1.0000,79.00,26.70,9210.00,267.00,0.46,10,42
+2025-03-16T18:01:49.204693,baseline_orca_two_paths_0,23f31c20-62d5-4620-ae33-f1934cc191e7,./simulator/worlds/miac/two_paths/two_paths_level_0.yaml,baseline_orca,0.0000,120.70,0.48,-1207.00,4.83,13.27,10,42
+2025-03-16T18:04:28.743885,baseline_orca_two_paths_1,d84945f6-dcb8-4626-9cfd-4d69403ae9e8,./simulator/worlds/miac/two_paths/two_paths_level_1.yaml,baseline_orca,0.3000,128.20,19.23,1718.00,4638.64,14.36,10,42
+2025-03-16T18:09:20.270353,baseline_orca_two_paths_2,9474384c-053a-4f24-ac93-05d15b30f114,./simulator/worlds/miac/two_paths/two_paths_level_2.yaml,baseline_orca,0.2000,235.30,41.56,-353.00,4357.30,28.44,10,42

@@ -28,8 +28,15 @@ def run_baseline_orca_two_paths_level1(num_runs=10, render_mode=None, seed=42, t
     os.makedirs(log_dir, exist_ok=True)
     os.makedirs(save_dir, exist_ok=True)
     
-    # Setup CSV for run logging (similar to logs/run_log.csv)
-    run_log_file = os.path.join(os.path.dirname(log_dir), 'baseline_run_log.csv')
+    # Setup a central CSV file for all baseline run logging
+    # Put it at the project root level in a dedicated directory
+    # Setup a central CSV file for all baseline run logging in the miac directory
+    miac_dir = os.path.join(os.path.dirname(os.path.dirname(script_dir)))  # This gets the miac directory
+    central_log_dir = os.path.join(miac_dir, 'baseline_results')
+    os.makedirs(central_log_dir, exist_ok=True)
+    run_log_file = os.path.join(central_log_dir, 'baseline_run_log.csv')
+    
+    # Check if file exists to determine if we need to write headers
     file_exists = os.path.isfile(run_log_file)
     
     for run in range(num_runs):
@@ -101,12 +108,17 @@ def run_baseline_orca_two_paths_level1(num_runs=10, render_mode=None, seed=42, t
     df.to_csv(results_file, index=False)
     print(f"\nDetailed results saved to: {results_file}")
     
-    # Log summary in run_log.csv (similar to PPOTrainerTester format)
+    import fcntl
+    
     with open(run_log_file, mode='a', newline='') as file:
+        # Acquire an exclusive lock
+        fcntl.flock(file.fileno(), fcntl.LOCK_EX)
+        
         writer = csv.writer(file)
+        # Only write header if file is newly created
         if not file_exists:
             writer.writerow(['timestamp', 'tag', 'unique_id', 'config_file', 'algorithm', 'success_rate', 
-                             'avg_steps', 'std_steps', 'avg_reward', 'std_reward', 'avg_duration', 'num_runs', 'seed'])
+                            'avg_steps', 'std_steps', 'avg_reward', 'std_reward', 'avg_duration', 'num_runs', 'seed'])
         
         writer.writerow([
             datetime.now().isoformat(),
@@ -123,10 +135,13 @@ def run_baseline_orca_two_paths_level1(num_runs=10, render_mode=None, seed=42, t
             num_runs,
             seed
         ])
+        
+        # Release the lock
+        fcntl.flock(file.fileno(), fcntl.LOCK_UN)
     
     print(f"Summary logged to: {run_log_file}")
     return df
 
 if __name__ == "__main__":
     # Run without visualization by default
-    df = run_baseline_orca_two_paths_level1(num_runs=1000, render_mode=None, seed=42, tag='baseline_orca_two_paths_1')
+    df = run_baseline_orca_two_paths_level1(num_runs=10, render_mode=None, seed=42, tag='baseline_orca_two_paths_1')
