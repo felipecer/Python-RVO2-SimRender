@@ -69,7 +69,7 @@ class RVOMiacTwoPaths(RVOBaseEnv):
 
 if __name__ == "__main__":
     env = RVOMiacTwoPaths(
-        config_file='./simulator/worlds/miac/two_paths/two_paths_level_3.yaml',
+        config_file='./simulator/worlds/miac/two_paths/two_paths_level_5.yaml',
         render_mode='rgb',
         seed=42,
         step_mode='min_dist'

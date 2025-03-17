@@ -13,7 +13,7 @@ from rl_environments.single_agent.miac.two_paths import RVOMiacTwoPaths
 def run_baseline_orca_two_paths_level0(num_runs=10, render_mode=None, seed=42, tag='baseline_orca'):
     """Run baseline ORCA algorithm on two_paths_level_0 with action=[0,0]"""
     
-    config_file = './simulator/worlds/miac/two_paths/two_paths_level_0.yaml'
+    config_file = './simulator/worlds/miac/two_paths/two_paths_level_4.yaml'
     results = []
     
     # Generate unique ID for this batch of runs
@@ -144,4 +144,4 @@ def run_baseline_orca_two_paths_level0(num_runs=10, render_mode=None, seed=42, t
 
 if __name__ == "__main__":
     # Run without visualization by default
-    df = run_baseline_orca_two_paths_level0(num_runs=10, render_mode=None, seed=42, tag='baseline_orca_two_paths_0')
+    df = run_baseline_orca_two_paths_level0(num_runs=50, render_mode=None, seed=42, tag='baseline_orca_two_paths_0')
