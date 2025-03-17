@@ -35,192 +35,141 @@ simulation:
           count: 1
           positions:
             - [ 9, 0 ]
+    - behaviour: "aggressive"
+      pattern:
+        name: "line"
+        count: 14
+        x_value: -1.0
+        y_start: -3.3
+        y_end: 3.3
+        std_dev: 0.75
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 14
+          x_value: -33.0
+          y_start: -3.3
+          y_end: 3.3
+          std_dev: 0
     - behaviour: "shy"
       pattern:
         name: "line"
-        count: 10
-        x_value: -3.0
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
+        count: 14
+        x_value: 0.0
+        y_start: -3.3
+        y_end: 3.3
+        std_dev: 0.75
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 10
-          x_value: -33.0
-          y_start: -4.3
-          y_end: 4.3
-          std_dev: 0
-    - behaviour: "non-reactive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: -1.7
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 10
+          count: 14
           x_value: -31.0
-          y_start: -4.3
-          y_end: 4.3
+          y_start: -3.3
+          y_end: 3.3
           std_dev: 0
     - behaviour: "tense"
       pattern:
         name: "line"
-        count: 10
-        x_value: -0.4
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
+        count: 14
+        x_value: 1.0
+        y_start: -3.3
+        y_end: 3.3
+        std_dev: 0.75
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 10
+          count: 14
           x_value: -29.0
-          y_start: -4.3
-          y_end: 4.3
+          y_start: -3.3
+          y_end: 3.3
           std_dev: 0
     - behaviour: "aggressive"
       pattern:
         name: "line"
-        count: 10
-        x_value: 0.9
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
+        count: 14
+        x_value: 2.0
+        y_start: -3.3
+        y_end: 3.3
+        std_dev: 0.75
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 10
+          count: 14
           x_value: -27.0
-          y_start: -4.3
-          y_end: 4.3
+          y_start: -3.3
+          y_end: 3.3
           std_dev: 0
-    - behaviour: "non-reactive"
+    - behaviour: "shy"
       pattern:
         name: "line"
-        count: 9
-        x_value: 2.2
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
+        count: 14
+        x_value: 3.0
+        y_start: -3.3
+        y_end: 3.3
+        std_dev: 0.75
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 10
+          count: 14
           x_value: -25.0
-          y_start: -4.3
-          y_end: 4.3
-          std_dev: 0
-    - behaviour: "aggressive"
-      pattern:
-        name: "line"
-        count: 10
-        x_value: 3.5
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 10
-          x_value: -23.0
-          y_start: -4.3
-          y_end: 4.3
-          std_dev: 0
-    - behaviour: "non-reactive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: 4.8
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 10
-          x_value: -21.0
-          y_start: -4.3
-          y_end: 4.3
+          y_start: -3.3
+          y_end: 3.3
           std_dev: 0
     - behaviour: "tense"
       pattern:
         name: "line"
-        count: 10
-        x_value: 6.1
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
+        count: 14
+        x_value: 4.0
+        y_start: -3.3
+        y_end: 3.3
+        std_dev: 0.75
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 10
-          x_value: -19.0
-          y_start: -4.3
-          y_end: 4.3
+          count: 14
+          x_value: -23.0
+          y_start: -3.3
+          y_end: 3.3
           std_dev: 0
     - behaviour: "aggressive"
       pattern:
         name: "line"
-        count: 10
-        x_value: 7.4
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
+        count: 14
+        x_value: 5.0
+        y_start: -3.3
+        y_end: 3.3
+        std_dev: 0.75
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 10
-          x_value: -19.0
-          y_start: -4.3
-          y_end: 4.3
-          std_dev: 0
-    - behaviour: "non-reactive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: 8.7
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 10
-          x_value: -19.0
-          y_start: -4.3
-          y_end: 4.3
+          count: 14
+          x_value: -21.0
+          y_start: -3.3
+          y_end: 3.3
           std_dev: 0
     - behaviour: "assertive"
       pattern:
         name: "line"
-        count: 10
-        x_value: 10.1
-        y_start: -4.3
-        y_end: 4.3
-        std_dev: 0.5
+        count: 14
+        x_value: 6.0
+        y_start: -3.3
+        y_end: 3.3
+        std_dev: 0.75
       goals:
         radius: 0.4
         pattern:
           name: "line"
-          count: 10
+          count: 14
           x_value: -19.0
-          y_start: -4.3
-          y_end: 4.3
+          y_start: -3.3
+          y_end: 3.3
           std_dev: 0
   dynamics:
     - name: "max_steps"

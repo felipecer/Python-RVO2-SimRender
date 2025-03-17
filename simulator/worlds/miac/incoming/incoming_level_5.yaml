@@ -35,10 +35,10 @@ simulation:
           count: 1
           positions:
             - [ 9, 0 ]  
-    - behaviour: "diverse-crowd-mostly-non-reactive-0"
+    - behaviour: "diverse-crowd-mostly-non-reactive-1"
       pattern:
         name: "rectangle"
-        count: 150  # Total count (8 groups × 14 agents = 112 agents)
+        count: 200  # Total count (8 groups × 14 agents = 112 agents)
         x_min: -1.0
         x_max: 6.0
         y_min: -3.3
@@ -48,7 +48,7 @@ simulation:
         radius: 0.4
         pattern:
           name: "rectangle"
-          count: 150
+          count: 200
           x_min: -33.0
           x_max: -19.0
           y_min: -3.3

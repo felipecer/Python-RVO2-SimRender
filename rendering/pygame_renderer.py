@@ -249,7 +249,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             #                                              goal_y), color=self.color_scheme.distance_line_color, line_width=4
             #                       )
 
-        draw_text(self.window, f"agent 0 position: {agents[0][1]}, {agents[0][2]}", self.window_width - 150, 50)
+        draw_text(self.window, f"Step: {step}", self.window_width - 150, 50)
         self.draw_goals()
         self.draw_intersections()
         self.update_display()
