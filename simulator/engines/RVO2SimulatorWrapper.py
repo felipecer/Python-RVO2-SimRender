@@ -19,7 +19,9 @@ from simulator.models.messages import (
     GoalsProcessedMessage
 )
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
+from simulator.models.simulation_configuration.registry import global_registry
 import traceback
+import pprint
 
 class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
     def __init__(self, world_config: BaseModel, simulation_id: str, seed: int = None):
@@ -86,7 +88,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         # Initialize the global agent_id counter
         global_agent_id = 0
         agent_behaviours = {}
-
+        # pprint.pprint(config.agents, indent=4)
         # Iterate over each group of agents
         for agent_group in config.agents:
             positions = agent_group.pattern.generate_positions()
@@ -118,9 +120,13 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                     # Assign the correct goal to the agent using the local index
                     self.agent_goals[agent_id] = goals[local_agent_index]
                     self.notify_observers(GoalsProcessedMessage(step=-1, goals=self.agent_goals))
-
-                # Store the agent's behavior in the dictionary
-                agent_behaviours[agent_id] = agent_group.behaviour
+                
+                if agent_group.assigned_behaviors:
+                    final_behavior_name = agent_group.assigned_behaviors[local_agent_index]
+                    agent_behaviours[agent_id] = final_behavior_name
+                    self.update_agent_with_behavior_params(agent_id, final_behavior_name)
+                else:
+                    final_behavior_name = None
                 # Increment the global agent ID for the next agent
                 global_agent_id += 1
 
@@ -152,7 +158,21 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
         # Send initialization information to observers
         self.notify_observers(SimulationInitializedMessage(step=-1, agent_initialization_data=agent_initialization_data))
-        self._setup_obstacle_vertex_array()
+        self._setup_obstacle_vertex_array()    
+    
+
+    def update_agent_with_behavior_params(self, agent_id: int, behavior_name: str):
+        if behavior_name:
+            behavior = global_registry.get('behaviour', behavior_name)
+            agent_defaults = behavior.get_agent_params()
+            self.sim.setAgentMaxSpeed(agent_id, agent_defaults.max_speed)
+            self.sim.setAgentRadius(agent_id, agent_defaults.radius)
+            self.sim.setAgentTimeHorizon(agent_id, agent_defaults.time_horizon)
+            self.sim.setAgentTimeHorizonObst(agent_id, agent_defaults.time_horizon_obst)
+            self.sim.setAgentMaxNeighbors(agent_id, agent_defaults.max_neighbors)
+            self.sim.setAgentNeighborDist(agent_id, agent_defaults.neighbor_dist)
+            self.sim.setAgentVelocity(agent_id, agent_defaults.velocity)
+            print(f"Agent {agent_id} updated with {behavior_name} parameters")
 
     def _setup_obstacle_vertex_array(self):
         simulator = self.sim

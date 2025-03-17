@@ -45,6 +45,61 @@ class Registry:
         
         # Instantiate the class with the kwargs, including 'name'
         return cls(**kwargs)
+    
+    def __str__(self):
+        """Return a human-readable string representation of the registry contents."""
+        lines = ["Registry Contents:"]
+        
+        for category, items in self._registries.items():
+            lines.append(f"\n• Category: {category} ({len(items)} items)")
+            
+            if not items:
+                lines.append("  [Empty]")
+                continue
+            
+            # Sort items alphabetically
+            for name in sorted(items.keys()):
+                item = items[name]
+                
+                # Get class name
+                if hasattr(item, '__class__'):
+                    class_name = item.__class__.__name__
+                else:
+                    class_name = "Unknown"
+                
+                # Get additional details based on item type
+                details = self._get_item_details(category, name, item)
+                lines.append(f"  - {name} ({class_name}{details})")
+        
+        return "\n".join(lines)
+    
+    def _get_item_details(self, category, name, item):
+        """Extract readable details from registry items based on their type."""
+        details = ""
+        
+        # For behavior objects, show additional info
+        if category == 'behaviour':
+            if hasattr(item, 'behaviors'):  # EitherBehaviour
+                details += f", behaviors: {item.behaviors}"
+                if hasattr(item, 'weights') and item.weights:
+                    details += f", weights: {item.weights}"
+            elif hasattr(item, 'agent_defaults'):  # OrcaBehaviour
+                if hasattr(item.agent_defaults, 'max_speed'):
+                    details += f", max_speed: {item.agent_defaults.max_speed}"
+                if hasattr(item.agent_defaults, 'radius'):
+                    details += f", radius: {item.agent_defaults.radius}"
+        
+        # For distribution patterns
+        elif category == 'distribution_pattern':
+            if hasattr(item, 'count'):
+                details += f", count: {item.count}"
+        
+        return details
+    
+    def __repr__(self):
+        """Return the string representation."""
+        return self.__str__()
+    
 
 # Global instance of the registry with predefined categories
 global_registry = Registry(categories={

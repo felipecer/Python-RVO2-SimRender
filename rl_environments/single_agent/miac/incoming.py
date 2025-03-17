@@ -66,7 +66,7 @@ class RVOMiacIncoming(RVOBaseEnv):
     
 if __name__ == "__main__":
     env = RVOMiacIncoming(
-        config_file='./simulator/worlds/miac/incoming/incoming_level_2.yaml',
+        config_file='./simulator/worlds/miac/incoming/incoming_level_4.yaml',
         render_mode='rgb',
         seed=42,
         step_mode='min_dist'
