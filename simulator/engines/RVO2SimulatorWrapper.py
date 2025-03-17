@@ -172,7 +172,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             self.sim.setAgentMaxNeighbors(agent_id, agent_defaults.max_neighbors)
             self.sim.setAgentNeighborDist(agent_id, agent_defaults.neighbor_dist)
             self.sim.setAgentVelocity(agent_id, agent_defaults.velocity)
-            print(f"Agent {agent_id} updated with {behavior_name} parameters")
+            # print(f"Agent {agent_id} updated with {behavior_name} parameters")
 
     def _setup_obstacle_vertex_array(self):
         simulator = self.sim

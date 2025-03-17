@@ -1,0 +1,152 @@
+simulation:
+  time_step: 0.2
+  map_settings:
+    x_min: -18.0
+    x_max: 18
+    y_min: -18.0
+    y_max: 18.0
+    cell_size: 30
+  agent_defaults:
+    max_speed: 1.0
+    radius: 0.25
+    time_horizon: 5.0
+    time_horizon_obst: 5.0
+    max_neighbors: 10
+    neighbor_dist: 0.35
+    velocity: [0.0, 0.0]
+  agents:
+    - agent_defaults:
+        max_speed: 1.5
+        radius: 0.25
+        time_horizon: 5.0
+        time_horizon_obst: 5.0
+        max_neighbors: 15
+        neighbor_dist: 10
+        velocity: [ 0.0, 0.0 ]
+      pattern:
+        name: "explicit"
+        count: 1
+        positions:
+          - [ 0, 4 ]
+      goals:
+        radius: 0.4
+        pattern:
+          name: "explicit"
+          count: 1
+          positions:
+            - [ 0, -4 ]
+    - behaviour: "non-reactive"
+      pattern:
+        name: "line"
+        count: 3
+        x_value: -6.0
+        y_start: -1.3
+        y_end: 1.3
+        std_dev: 0.25
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 3
+          x_value: 19.0
+          y_start: -1.3
+          y_end: 1.3
+          std_dev: 0.25
+    - behaviour: "non-reactive"
+      pattern:
+        name: "line"
+        count: 3
+        x_value: -4.5
+        y_start: -1.3
+        y_end: 1.3
+        std_dev: 0.25
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 3
+          x_value: 21.0
+          y_start: -1.3
+          y_end: 1.3
+          std_dev: 0.25
+    - behaviour: "non-reactive"
+      pattern:
+        name: "line"
+        count: 3
+        x_value: -3.0
+        y_start: -1.3
+        y_end: 1.3
+        std_dev: 0.25
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 3
+          x_value: 23.0
+          y_start: -1.3
+          y_end: 1.3
+          std_dev: 0.25
+    - behaviour: "non-reactive"
+      pattern:
+        name: "line"
+        count: 3
+        x_value: 3.0
+        y_start: -1.1
+        y_end: 1.5
+        std_dev: 0.25
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 3
+          x_value: -23.0
+          y_start: -1.1
+          y_end: 1.5
+          std_dev: 0.25
+    - behaviour: "non-reactive"
+      pattern:
+        name: "line"
+        count: 3
+        x_value: 4.5
+        y_start: -1.1
+        y_end: 1.5
+        std_dev: 0.25
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 3
+          x_value: -21.0
+          y_start: -1.1
+          y_end: 1.5
+          std_dev: 0.25
+    - behaviour: "non-reactive"
+      pattern:
+        name: "line"
+        count: 3
+        x_value: 6.0
+        y_start: -1.1
+        y_end: 1.5
+        std_dev: 0.25
+      goals:
+        radius: 0.4
+        pattern:
+          name: "line"
+          count: 3
+          x_value: -19.0
+          y_start: -1.1
+          y_end: 1.5
+          std_dev: 0.25
+  dynamics:
+    - name: "max_steps"
+      when: "before"
+      max_steps: 128
+    - name: "log_step_info"
+      when: "after"
+    - name: "cleanup_resources"
+      when: "before"
+    - name: "stop_on_exit_area"
+      when: "before"
+      boundary_x: 18
+      boundary_y: 18
+      agent_id: 0

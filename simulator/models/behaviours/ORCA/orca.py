@@ -77,11 +77,11 @@ class EitherBehaviour(Behaviour):
             
         # Select behavior based on distributed strategy
         selected_behavior_name = self._select_next_behavior()
-        print(f"EitherBehaviour '{self._name}' selected behavior: {selected_behavior_name}")
+        # print(f"EitherBehaviour '{self._name}' selected behavior: {selected_behavior_name}")
         
         behavior = global_registry.get('behaviour', selected_behavior_name)
         params = behavior.get_agent_params()
-        print(f"Got params from {selected_behavior_name}: {params}")
+        # print(f"Got params from {selected_behavior_name}: {params}")
         return params
     
     def _select_next_behavior(self) -> str:
