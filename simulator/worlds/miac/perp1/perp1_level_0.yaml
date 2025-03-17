@@ -22,74 +22,42 @@ simulation:
         time_horizon_obst: 5.0
         max_neighbors: 15
         neighbor_dist: 10
-        velocity: [ 0.0, 0.0 ]
+        velocity: [0.0, 0.0]
       pattern:
         name: "explicit"
         count: 1
         positions:
-          - [ -4, 4 ]
+          - [-4, 4]
       goals:
         radius: 0.4
         pattern:
           name: "explicit"
           count: 1
           positions:
-            - [ -4, -6 ]
-    - behaviour: "non-reactive"
+            - [-4, -6]
+    - behaviour: "diverse-crowd-mostly-non-reactive-0"
       pattern:
-        name: "line"
-        count: 3
-        x_value: -1.0
-        y_start: -1.1
-        y_end: 1.1
-        std_dev: 0.0
+        name: "rectangle"
+        count: 126  # 9 lines × 14 agents = 126 total
+        x_min: -1.0
+        x_max: 7.0
+        y_min: -3.3
+        y_max: 3.3
+        std_dev: 0.75
       goals:
         radius: 0.4
         pattern:
-          name: "line"
-          count: 3
-          x_value: -23.0
-          y_start: -1.1
-          y_end: 1.1
-          std_dev: 0
-    - behaviour: "non-reactive"
-      pattern:
-        name: "line"
-        count: 3
-        x_value: 0.0
-        y_start: -1.1
-        y_end: 1.1
-        std_dev: 0
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 3
-          x_value: -21.0
-          y_start: -1.1
-          y_end: 1.1
-          std_dev: 0
-    - behaviour: "non-reactive"
-      pattern:
-        name: "line"
-        count: 3
-        x_value: 1.0
-        y_start: -1.1
-        y_end: 1.1
-        std_dev: 0
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 3
-          x_value: -19.0
-          y_start: -1.1
-          y_end: 1.1
+          name: "rectangle"
+          count: 126
+          x_min: -35.0
+          x_max: -19.0
+          y_min: -3.3
+          y_max: 3.3
           std_dev: 0
   dynamics:
     - name: "max_steps"
       when: "before"
-      max_steps: 128
+      max_steps: 256
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"

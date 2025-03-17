@@ -121,3 +121,4 @@ echo "Results are saved in the respective 'saves' folders and logs are available
 
 # Clean up temporary directory
 rm -rf "$TEMP_DIR"
+exit 0
