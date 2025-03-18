@@ -66,7 +66,7 @@ class RVOMiacPerp2(RVOBaseEnv):
 
 if __name__ == "__main__":
     env = RVOMiacPerp2(
-        config_file='./simulator/worlds/miac/perp2/perp2_level_2.yaml',
+        config_file='./simulator/worlds/miac/perp2/perp2_level_0.yaml',
         render_mode='rgb',
         seed=42,
         step_mode='min_dist'

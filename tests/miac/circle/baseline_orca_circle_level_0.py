@@ -13,7 +13,7 @@ from rl_environments.single_agent.miac.circle import RVOMiacCircle
 def run_baseline_orca_circle_level0(num_runs=10, render_mode=None, seed=42, tag='baseline_orca'):
     """Run baseline ORCA algorithm on circle_level_0 with action=[0,0]"""
     
-    config_file = './simulator/worlds/miac/circle/circle_level_4.yaml'
+    config_file = './simulator/worlds/miac/circle/circle_level_0.yaml'
     results = []
     
     # Generate unique ID for this batch of runs
