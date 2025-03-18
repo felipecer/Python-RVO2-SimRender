@@ -34,12 +34,32 @@ simulation:
           name: "explicit"
           count: 1
           positions:
-            - [ 0, -5 ]
+            - [ 0, -8 ]
     # Left side group (moving rightward)
     - behaviour: "diverse-crowd-mostly-non-reactive-3"
       pattern:
         name: "rectangle"
-        count: 250  # 6 groups × 19 agents
+        count: 150  # 6 groups × 19 agents
+        x_min: -14.0
+        x_max: -9.0
+        y_min: -3.3
+        y_max: 3.3
+        std_dev: 0.75
+      goals:
+        radius: 0.4
+        pattern:
+          name: "rectangle"
+          count: 150
+          x_min: 19.0
+          x_max: 29.0
+          y_min: -3.3
+          y_max: 3.3
+          std_dev: 0
+    # Left side group (moving rightward)
+    - behaviour: "diverse-crowd-mostly-non-reactive-3"
+      pattern:
+        name: "rectangle"
+        count: 150  # 6 groups × 19 agents
         x_min: -7.0
         x_max: -2.0
         y_min: -3.3
@@ -49,9 +69,9 @@ simulation:
         radius: 0.4
         pattern:
           name: "rectangle"
-          count: 250
-          x_min: 19.0
-          x_max: 29.0
+          count: 150
+          x_min: 31.0
+          x_max: 41.0
           y_min: -3.3
           y_max: 3.3
           std_dev: 0
@@ -59,7 +79,26 @@ simulation:
     - behaviour: "diverse-crowd-mostly-non-reactive-3"
       pattern:
         name: "rectangle"
-        count: 250  # 6 groups × 19 agents
+        count: 150  # 6 groups × 19 agents
+        x_min: 11.0
+        x_max: 17.0
+        y_min: -3.3
+        y_max: 3.3
+        std_dev: 0.75
+      goals:
+        radius: 0.4
+        pattern:
+          name: "rectangle"
+          count: 150
+          x_min: -31.0
+          x_max: -19.0
+          y_min: -3.3
+          y_max: 3.3
+          std_dev: 0
+    - behaviour: "diverse-crowd-mostly-non-reactive-3"
+      pattern:
+        name: "rectangle"
+        count: 150  # 6 groups × 19 agents
         x_min: 3.0
         x_max: 9.0
         y_min: -3.3
@@ -69,9 +108,9 @@ simulation:
         radius: 0.4
         pattern:
           name: "rectangle"
-          count: 250
-          x_min: -31.0
-          x_max: -19.0
+          count: 150
+          x_min: -45.0
+          x_max: -33.0
           y_min: -3.3
           y_max: 3.3
           std_dev: 0

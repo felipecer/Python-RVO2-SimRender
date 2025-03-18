@@ -34,22 +34,22 @@ simulation:
           name: "explicit"
           count: 1
           positions:
-            - [ 0, -5 ]
+            - [ 0, -8 ]
     # Left side group (moving rightward)
     - behaviour: "diverse-crowd-mostly-non-reactive-0"
       pattern:
         name: "rectangle"
-        count: 114  # 6 groups × 19 agents
+        count: 60  # 6 groups × 19 agents
         x_min: -7.0
         x_max: -2.0
         y_min: -3.3
         y_max: 3.3
-        std_dev: 0.75
+        std_dev: 0.0
       goals:
         radius: 0.4
         pattern:
           name: "rectangle"
-          count: 114
+          count: 60
           x_min: 19.0
           x_max: 29.0
           y_min: -3.3
@@ -59,17 +59,17 @@ simulation:
     - behaviour: "diverse-crowd-mostly-non-reactive-0"
       pattern:
         name: "rectangle"
-        count: 114  # 6 groups × 19 agents
+        count: 60  # 6 groups × 19 agents
         x_min: 3.0
         x_max: 9.0
         y_min: -3.3
         y_max: 3.3
-        std_dev: 0.75
+        std_dev: 0.0
       goals:
         radius: 0.4
         pattern:
           name: "rectangle"
-          count: 114
+          count: 60
           x_min: -31.0
           x_max: -19.0
           y_min: -3.3
