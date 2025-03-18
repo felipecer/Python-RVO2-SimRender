@@ -85,11 +85,11 @@ simulation:
       width: 15.0
       height: 0.5
     - name: "rectangle"
-      center: [0, 4.5]
+      center: [0, 5.0]
       width: 25.0
       height: 0.5
     - name: "rectangle"
-      center: [0, -4.5]
+      center: [0, -5.0]
       width: 25.0
       height: 0.5
       
