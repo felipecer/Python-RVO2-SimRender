@@ -144,4 +144,4 @@ def run_baseline_orca_two_paths_level2(num_runs=10, render_mode=None, seed=42, t
 
 if __name__ == "__main__":
     # Run without visualization by default
-    df = run_baseline_orca_two_paths_level2(num_runs=200, render_mode=None, seed=42, tag='baseline_orca_two_paths_2')
+    df = run_baseline_orca_two_paths_level2(num_runs=500, render_mode=None, seed=42, tag='baseline_orca_two_paths_2')
