@@ -41,7 +41,7 @@ simulation:
     - behaviour: "diverse-crowd-mostly-non-reactive-1"
       pattern:
         name: "rectangle"
-        count: 50  # 4 lines × 4 agents = 16 total
+        count: 40  # 4 lines × 4 agents = 16 total
         x_min: 3.8
         x_max: 9.0
         y_min: -3.4
@@ -51,7 +51,7 @@ simulation:
         radius: 0.4
         pattern:
           name: "rectangle"
-          count: 50
+          count: 40
           x_min: -33.0
           x_max: -29.0
           y_min: -3.4
@@ -62,7 +62,7 @@ simulation:
     - behaviour: "diverse-crowd-mostly-non-reactive-1"
       pattern:
         name: "rectangle" 
-        count: 32  # 5 lines × 4 agents = 20 total
+        count: 24  # 5 lines × 4 agents = 20 total
         x_min: 3.0
         x_max: 11.0
         y_min: 0.6
@@ -72,7 +72,7 @@ simulation:
         radius: 0.4
         pattern:
           name: "rectangle"
-          count: 32
+          count: 24
           x_min: -27.0
           x_max: -19.0
           y_min: 0.6
