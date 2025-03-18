@@ -2,7 +2,7 @@
 # filepath: /home/felipecerda/repos/memoria/Python-RVO2-SimRender/run_ppo_tests.sh
 
 # Set the number of timesteps
-TIMESTEPS=10000
+TIMESTEPS=5000000
 LOG_FILE="ppo_test_results.log"
 
 # Initialize log file

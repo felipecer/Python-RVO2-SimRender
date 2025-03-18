@@ -1,10 +1,14 @@
-PPO Test Results - Started at 2025-03-11 21:46:25
+PPO Test Results - Started at 2025-03-11 21:49:48
 =========================================================
 Found 20 total PPO test files to process
 =========================================================
 Format: TIMESTAMP | FILE | DURATION (HH:MM:SS) | Exit Status
 =========================================================
 ----- Batch 1 of 4 -----
-2025-03-11 21:46:39 | ./tests/miac/incoming/ppo_incoming_level_0.py | 00:00:14 | Exit: 0
-2025-03-11 21:46:48 | ./tests/miac/perp2/ppo_perp2_level_1.py | 00:00:23 | Exit: 0
-2025-03-11 21:47:05 | ./tests/miac/perp1/ppo_perp1_level_3.py | 00:00:40 | Exit: 0
+2025-03-11 22:10:32 | ./tests/miac/perp2/ppo_perp2_level_2.py | 00:20:43 | Exit: 137
+2025-03-12 01:13:52 | ./tests/miac/perp1/ppo_perp1_level_3.py | 03:24:04 | Exit: 137
+2025-03-12 07:23:05 | ./tests/miac/incoming/ppo_incoming_level_2.py | 09:33:17 | Exit: 137
+2025-03-12 16:55:31 | ./tests/miac/incoming/ppo_incoming_level_1.py | 19:05:43 | Exit: 137
+2025-03-13 18:09:46 | ./tests/miac/circle/ppo_circle_level_0.py | 44:19:58 | Exit: 139
+----- Batch 2 of 4 -----
+2025-03-13 20:02:42 | ./tests/miac/perp2/ppo_perp2_level_1.py | 01:52:56 | Exit: 137
