@@ -71,7 +71,7 @@ class RVOMiacCircle(RVOBaseEnv):
 
 if __name__ == "__main__":
     env = RVOMiacCircle(
-        config_file='./simulator/worlds/miac/circle/circle_level_2.yaml',
+        config_file='./simulator/worlds/miac/circle/circle_level_7.yaml',
         render_mode='rgb',
         seed=42,
         step_mode='min_dist'

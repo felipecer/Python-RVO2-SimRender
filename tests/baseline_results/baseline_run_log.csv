@@ -71,3 +71,17 @@ timestamp,tag,unique_id,config_file,algorithm,success_rate,avg_steps,std_steps,a
 2025-03-17T20:10:33.810397,baseline_orca_two_paths_1,ea6d44da-f60a-4cbd-9147-71ff99358ad5,./simulator/worlds/miac/two_paths/two_paths_level_5.yaml,baseline_orca,0.1400,152.64,57.29,-126.40,3345.96,19.86,50,42
 2025-03-17T20:11:44.185201,baseline_orca_two_paths_0,38a327bd-9815-4031-b4a3-ee1a6def585b,./simulator/worlds/miac/two_paths/two_paths_level_4.yaml,baseline_orca,0.8000,169.40,49.78,6306.00,4273.17,21.27,50,42
 2025-03-17T20:15:40.546698,baseline_orca_two_paths_0,56ad8963-4464-4759-aa15-2aa7b94c6467,./simulator/worlds/miac/two_paths/two_paths_level_4.yaml,baseline_orca,0.7700,169.07,50.86,6009.30,4481.49,19.94,100,42
+2025-03-17T20:54:45.399244,baseline_orca_two_paths_2,b98eb818-484b-481b-936a-a9b4c8ca8070,./simulator/worlds/miac/two_paths/two_paths_level_6.yaml,baseline_orca,0.1200,138.68,37.91,-186.80,3040.74,18.00,50,42
+2025-03-17T20:55:32.691106,baseline_orca_two_paths_1,b1a9e2d4-bf95-4428-9ae9-6a36e963abc6,./simulator/worlds/miac/two_paths/two_paths_level_5.yaml,baseline_orca,0.2600,147.06,38.41,1129.40,4213.65,18.93,50,42
+2025-03-17T20:55:35.323899,baseline_orca_two_paths_3,84011d8b-dc17-4332-b294-fc699ea532f1,./simulator/worlds/miac/two_paths/two_paths_level_7.yaml,baseline_orca,0.1000,146.90,49.65,-469.00,2851.35,19.00,50,42
+2025-03-17T20:57:09.058864,baseline_orca_circle_0,067ffce6-8324-471f-a010-1d639ba47513,./simulator/worlds/miac/circle/circle_level_4.yaml,baseline_orca,0.9500,90.05,21.15,8599.50,2278.02,0.22,1000,42
+2025-03-17T20:58:17.935523,baseline_orca_two_paths_0,23753f49-84e0-47ec-b6cf-dee1d520ed38,./simulator/worlds/miac/two_paths/two_paths_level_4.yaml,baseline_orca,0.8400,174.84,44.23,6651.60,3891.50,22.25,50,42
+2025-03-17T21:03:14.536696,baseline_orca_circle_0,5b3168fb-4634-4a1d-a5aa-d464ba0a1372,./simulator/worlds/miac/circle/circle_level_4.yaml,baseline_orca,0.7500,109.78,19.52,6402.25,4446.24,0.24,1000,42
+2025-03-17T21:08:21.218149,baseline_orca_circle_0,0aed246a-d26b-4e06-b640-0effcff1d8e5,./simulator/worlds/miac/circle/circle_level_4.yaml,baseline_orca,0.9500,90.09,21.14,8599.14,2277.93,0.16,1000,42
+2025-03-17T21:09:03.438878,baseline_orca_circle_1,3dc795b2-b1dd-44b3-b0ea-504aa04e42e2,./simulator/worlds/miac/circle/circle_level_5.yaml,baseline_orca,0.8580,101.32,20.31,7566.78,3608.86,0.20,1000,42
+2025-03-17T21:14:22.670405,baseline_orca_circle_0,79b5eff2-8c0a-4b09-b217-3ffb0a8b8de8,./simulator/worlds/miac/circle/circle_level_4.yaml,baseline_orca,0.9500,90.05,21.15,8599.50,2278.02,0.18,1000,42
+2025-03-17T21:15:31.247788,baseline_orca_circle_1,02eb8579-11ee-404c-a0fa-07953792b639,./simulator/worlds/miac/circle/circle_level_5.yaml,baseline_orca,0.7380,108.87,19.02,6291.33,4521.85,0.25,1000,42
+2025-03-17T21:27:55.586807,baseline_orca_circle_0,bf29806a-e38f-4f14-8929-93bbfa5b080e,./simulator/worlds/miac/circle/circle_level_4.yaml,baseline_orca,0.9500,90.05,21.15,8599.50,2278.02,0.17,1000,42
+2025-03-17T21:29:10.797099,baseline_orca_circle_1,00c1bc47-1b14-4b86-8db7-952fd724be5e,./simulator/worlds/miac/circle/circle_level_5.yaml,baseline_orca,0.7050,108.53,20.78,5964.74,4697.94,0.24,1000,42
+2025-03-17T21:30:12.320489,baseline_orca_circle_2,02a50892-99ff-40d6-9461-f9649ee58481,./simulator/worlds/miac/circle/circle_level_6.yaml,baseline_orca,0.3360,123.52,9.62,2124.80,4803.17,0.30,1000,42
+2025-03-17T21:32:39.254274,baseline_orca_circle_3,18c46a98-b1fd-4033-84bf-cd6957a9bed8,./simulator/worlds/miac/circle/circle_level_7.yaml,baseline_orca,0.1290,126.25,8.88,27.54,3425.68,0.45,1000,42
