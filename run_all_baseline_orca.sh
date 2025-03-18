@@ -77,10 +77,10 @@ echo "Total tests to run: $TOTAL_TESTS"
 update_progress
 
 # # Circle environment - all levels
-# run_script tests/miac/circle/baseline_orca_circle_level_0.py
-# run_script tests/miac/circle/baseline_orca_circle_level_1.py
-# run_script tests/miac/circle/baseline_orca_circle_level_2.py
-# run_script tests/miac/circle/baseline_orca_circle_level_3.py
+run_script tests/miac/circle/baseline_orca_circle_level_0.py
+run_script tests/miac/circle/baseline_orca_circle_level_1.py
+run_script tests/miac/circle/baseline_orca_circle_level_2.py
+run_script tests/miac/circle/baseline_orca_circle_level_3.py
 
 # Incoming environment - all levels
 run_script tests/miac/incoming/baseline_orca_incoming_level_0.py

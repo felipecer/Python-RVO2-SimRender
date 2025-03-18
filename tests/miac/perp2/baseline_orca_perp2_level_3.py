@@ -144,4 +144,4 @@ def run_baseline_orca_perp2_level3(num_runs=10, render_mode=None, seed=42, tag='
 
 if __name__ == "__main__":
     # Run without visualization by default
-    df = run_baseline_orca_perp2_level3(num_runs=500, render_mode=None, seed=42, tag='baseline_orca_perp2_3')
+    df = run_baseline_orca_perp2_level3(num_runs=1000, render_mode=None, seed=42, tag='baseline_orca_perp2_3')
