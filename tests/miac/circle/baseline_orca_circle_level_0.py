@@ -16,24 +16,22 @@ def run_baseline_orca_circle_level0(num_runs=10, render_mode=None, seed=42, tag=
     config_file = './simulator/worlds/miac/circle/circle_level_0.yaml'
     results = []
     
-    # Generate unique ID for this batch of runs
-    unique_id = str(uuid.uuid4())
+    # Generate timestamp-based ID for this batch of runs
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    unique_id = timestamp
     
     # Set up paths similar to PPOTrainerTester structure
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    log_dir = os.path.join(script_dir, 'logs', unique_id)
-    save_dir = os.path.join(script_dir, 'saves')
+    # log_dir = os.path.join(script_dir, 'logs/circle', unique_id)
+    save_dir = os.path.join(script_dir, 'saves/orca')
     
     # Create directories if they don't exist
-    os.makedirs(log_dir, exist_ok=True)
     os.makedirs(save_dir, exist_ok=True)
     
     # Setup a central CSV file for all baseline run logging
     # Put it at the project root level in a dedicated directory
     # Setup a central CSV file for all baseline run logging in the miac directory
-    print(script_dir)
     miac_dir = os.path.join(os.path.dirname(script_dir))  # This gets the miac directory
-    print(miac_dir)
     central_log_dir = os.path.join(miac_dir, 'baseline_results')
     os.makedirs(central_log_dir, exist_ok=True)
     run_log_file = os.path.join(central_log_dir, 'baseline_run_log.csv')

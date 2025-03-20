@@ -16,16 +16,17 @@ def run_baseline_orca_perp2_level2(num_runs=10, render_mode=None, seed=42, tag='
     config_file = './simulator/worlds/miac/perp2/perp2_level_2.yaml'
     results = []
     
-    # Generate unique ID for this batch of runs
-    unique_id = str(uuid.uuid4())
+    # Generate timestamp-based ID for this batch of runs
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    unique_id = timestamp
     
     # Set up paths similar to PPOTrainerTester structure
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    log_dir = os.path.join(script_dir, 'logs', unique_id)
-    save_dir = os.path.join(script_dir, 'saves')
+    # log_dir = os.path.join(script_dir, 'logs', unique_id)
+    save_dir = os.path.join(script_dir, 'saves/orca')
     
     # Create directories if they don't exist
-    os.makedirs(log_dir, exist_ok=True)
+    # os.makedirs(log_dir, exist_ok=True)
     os.makedirs(save_dir, exist_ok=True)
     
     # Setup a central CSV file for all baseline run logging
