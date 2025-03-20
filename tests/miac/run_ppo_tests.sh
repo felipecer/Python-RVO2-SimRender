@@ -2,12 +2,22 @@
 # filepath: /home/felipecerda/repos/memoria/Python-RVO2-SimRender/run_ppo_tests.sh
 
 # Set the number of timesteps
-TIMESTEPS=5000000
+TIMESTEPS=250000
 LOG_FILE="ppo_test_results.log"
+
+# Set up centralized summary directory and file
+SUMMARY_DIR="./ppo_results"
+SUMMARY_FILE="${SUMMARY_DIR}/ppo_summary.csv"
+
+# Create summary directory if it doesn't exist
+mkdir -p "$SUMMARY_DIR"
 
 # Initialize log file
 echo "PPO Test Results - Started at $(date '+%Y-%m-%d %H:%M:%S')" > "$LOG_FILE"
 echo "=========================================================" >> "$LOG_FILE"
+
+# Initialize summary file with headers
+echo "Timestamp,Test File,Environment,Level,Duration,Exit Status" > "$SUMMARY_FILE"
 
 # Function to run a PPO test file and measure execution time
 run_ppo_test() {
@@ -25,20 +35,33 @@ run_ppo_test() {
     local seconds=$((duration % 60))
     
     local time_str=$(printf "%02d:%02d:%02d" $hours $minutes $seconds)
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     if [ $exit_status -eq 0 ]; then
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - Completed: $test_file (Duration: $time_str)"
+        echo "$timestamp - Completed: $test_file (Duration: $time_str)"
     else
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - FAILED: $test_file (Duration: $time_str)"
+        echo "$timestamp - FAILED: $test_file (Duration: $time_str)"
     fi
     
     # Log to file
-    echo "$(date '+%Y-%m-%d %H:%M:%S') | $test_file | $time_str | Exit: $exit_status" >> "$LOG_FILE"
+    echo "$timestamp | $test_file | $time_str | Exit: $exit_status" >> "$LOG_FILE"
+    
+    # Extract environment and level from filename for better summary
+    local env_name=$(echo "$test_file" | grep -o -E '[a-z_]+_level_[0-9]+' | cut -d '_' -f 1)
+    local level=$(echo "$test_file" | grep -o -E 'level_[0-9]+' | cut -d '_' -f 2)
+    
+    # Log to summary file with locking to prevent race conditions
+    (
+        flock -x 200
+        echo "$timestamp,$test_file,$env_name,$level,$time_str,$exit_status" >> "$SUMMARY_FILE"
+    ) 200>"${SUMMARY_DIR}/.lock"
 }
 
 # Main execution
 echo "======================================================================="
 echo "Starting PPO test execution at $(date '+%Y-%m-%d %H:%M:%S')"
+echo "======================================================================="
+echo "Summary will be logged in real-time to $SUMMARY_FILE"
 echo "======================================================================="
 
 # Find all PPO test files excluding optuna related ones
@@ -69,17 +92,17 @@ for ((i=0; i<$TOTAL_FILES; i++)); do
 done
 echo "======================================================================="
 
-# Process files in batches of 5
-TOTAL_BATCHES=$(( (TOTAL_FILES+4)/5 ))
+# Process files in batches of 2
+TOTAL_BATCHES=$(( (TOTAL_FILES+1)/2 ))
 
-for ((i=0; i<$TOTAL_FILES; i+=5)); do
-    BATCH_NUM=$((i/5+1))
+for ((i=0; i<$TOTAL_FILES; i+=2)); do
+    BATCH_NUM=$((i/2+1))
     
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting batch $BATCH_NUM of $TOTAL_BATCHES"
     echo "----- Batch $BATCH_NUM of $TOTAL_BATCHES -----" >> "$LOG_FILE"
     
-    # Run up to 5 tests in parallel
-    for ((j=0; j<5 && i+j<$TOTAL_FILES; j++)); do
+    # Run up to 2 tests in parallel
+    for ((j=0; j<2 && i+j<$TOTAL_FILES; j++)); do
         echo "Launching process for: ${SHUFFLED_FILES[$i+j]}"
         run_ppo_test "${SHUFFLED_FILES[$i+j]}" &
     done
@@ -92,3 +115,4 @@ done
 
 echo "All PPO tests completed at $(date '+%Y-%m-%d %H:%M:%S')"
 echo "All PPO tests completed at $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE"
+echo "Summary results available in $SUMMARY_FILE"
