@@ -1,3 +1,5 @@
+from datetime import datetime
+import os
 import numpy as np
 from gymnasium import logger
 from simulator.engines.base import SimulationState
@@ -9,10 +11,10 @@ class RVOMiacTwoPaths(RVOBaseEnv):
     Uses the base class's step() logic with either 'naive' or 'min_dist' mode.
     """
 
-    def __init__(self, config_file=None, render_mode="rgb", seed=None, step_mode='min_dist'):
+    def __init__(self, config_file=None, render_mode="rgb_array", seed=None, step_mode='min_dist'):
         """
         :param config_file: Path to the YAML config file
-        :param render_mode: 'rgb', 'ansi', or None
+        :param render_mode: 'rgb_array', 'ansi', or None
         :param seed: Optional seed
         :param step_mode: 'naive' or 'min_dist'
         """
@@ -68,11 +70,25 @@ class RVOMiacTwoPaths(RVOBaseEnv):
         return {}
 
 if __name__ == "__main__":
+    from gymnasium.wrappers import RecordVideo
     env = RVOMiacTwoPaths(
-        config_file='./simulator/worlds/miac/two_paths/two_paths_level_0.yaml',
-        render_mode='rgb',
+        config_file='./simulator/worlds/miac/two_paths/two_paths_level_3.yaml',
+        render_mode='rgb_array',
         seed=42,
         step_mode='min_dist'
+    )
+    # Extract filename without extension from config_file path
+    config_filename = os.path.basename(env.config_file)  # Gets 'two_paths_level_0.yaml'
+    config_name = os.path.splitext(config_filename)[0]  # Gets 'two_paths_level_0'
+    
+    # Generate a unique name_prefix with filename and datetime
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    name_prefix = f"{config_name}_{timestamp}"
+
+    env = RecordVideo(
+        env, 
+        video_folder="videos/",
+        name_prefix=name_prefix,
     )
     obs, info = env.reset()
     done = False
