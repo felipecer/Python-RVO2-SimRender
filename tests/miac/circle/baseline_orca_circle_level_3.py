@@ -31,7 +31,7 @@ def run_baseline_orca_circle_level3(num_runs=10, render_mode=None, seed=42, tag=
     # Setup a central CSV file for all baseline run logging
     # Put it at the project root level in a dedicated directory
     # Setup a central CSV file for all baseline run logging in the miac directory
-    miac_dir = os.path.join(os.path.dirname(os.path.dirname(script_dir)))  # This gets the miac directory
+    miac_dir = os.path.join(os.path.dirname(script_dir))   # This gets the miac directory
     central_log_dir = os.path.join(miac_dir, 'baseline_results')
     os.makedirs(central_log_dir, exist_ok=True)
     run_log_file = os.path.join(central_log_dir, 'baseline_run_log.csv')
