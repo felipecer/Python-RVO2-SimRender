@@ -3,11 +3,11 @@
 
 # Set the number of timesteps
 TIMESTEPS=250000
-LOG_FILE="ppo_test_results.log"
 
 # Set up centralized summary directory and file
 SUMMARY_DIR="./ppo_results"
 SUMMARY_FILE="${SUMMARY_DIR}/ppo_summary.csv"
+LOG_FILE="${SUMMARY_DIR}/ppo_test_results.log"
 
 # Create summary directory if it doesn't exist
 mkdir -p "$SUMMARY_DIR"
