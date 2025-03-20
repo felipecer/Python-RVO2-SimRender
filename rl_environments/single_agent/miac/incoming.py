@@ -1,3 +1,5 @@
+from datetime import datetime
+import os
 import numpy as np
 from gymnasium import logger
 from simulator.engines.base import SimulationState
@@ -9,7 +11,7 @@ class RVOMiacIncoming(RVOBaseEnv):
     Inherits simulator initialization, rendering, seed setup, and step logic from the base class.
     """
 
-    def __init__(self, config_file=None, render_mode="rgb", seed=None, step_mode='min_dist'):
+    def __init__(self, config_file=None, render_mode="rgb_array", seed=None, step_mode='min_dist'):
         super().__init__(config_file=config_file, render_mode=render_mode, seed=seed, step_mode=step_mode)
 
     def _get_obs(self):
@@ -65,11 +67,25 @@ class RVOMiacIncoming(RVOBaseEnv):
         return {}
     
 if __name__ == "__main__":
+    from gymnasium.wrappers import RecordVideo
     env = RVOMiacIncoming(
-        config_file='./simulator/worlds/miac/incoming/incoming_level_0.yaml',
-        render_mode='rgb',
+        config_file='./simulator/worlds/miac/incoming/incoming_level_3.yaml',
+        render_mode='rgb_array',
         seed=42,
         step_mode='min_dist'
+    )
+    # Extract filename without extension from config_file path
+    config_filename = os.path.basename(env.config_file)  # Gets 'two_paths_level_0.yaml'
+    config_name = os.path.splitext(config_filename)[0]  # Gets 'two_paths_level_0'
+    
+    # Generate a unique name_prefix with filename and datetime
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    name_prefix = f"{config_name}_{timestamp}"
+
+    env = RecordVideo(
+        env, 
+        video_folder="videos/",
+        name_prefix=name_prefix,
     )
     obs, info = env.reset()
     done = False
@@ -77,6 +93,7 @@ if __name__ == "__main__":
     while not done:
         action = env.action_space.sample()  # Random actions
         obs, reward, done, truncated, info = env.step(action)
+        # env.render()
         if done or truncated:
             logger.info(f"Episode done: {done}, truncated: {truncated}")
             break
