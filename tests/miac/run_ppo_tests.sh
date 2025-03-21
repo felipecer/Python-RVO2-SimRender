@@ -1,16 +1,30 @@
 #!/bin/bash
-# filepath: /home/felipecerda/repos/memoria/Python-RVO2-SimRender/run_ppo_tests.sh
+# filepath: /home/felipecerda/repos/memoria/Python-RVO2-SimRender/tests/miac/run_ppo_tests.sh
+
+# Set up project root for correct imports and path resolution
+PROJECT_ROOT=$(cd "$(dirname "$0")/../.." && pwd)
+echo "Project root: $PROJECT_ROOT"
 
 # Set the number of timesteps
 TIMESTEPS=250000
 
+# Generate a common timestamp for this batch run
+BATCH_TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")
+echo "Using batch timestamp: $BATCH_TIMESTAMP"
+
 # Set up centralized summary directory and file
 SUMMARY_DIR="./ppo_results"
-SUMMARY_FILE="${SUMMARY_DIR}/ppo_summary.csv"
-LOG_FILE="${SUMMARY_DIR}/ppo_test_results.log"
+SUMMARY_FILE="${SUMMARY_DIR}/ppo_summary_${BATCH_TIMESTAMP}.csv"
+LOG_FILE="${SUMMARY_DIR}/ppo_test_results_${BATCH_TIMESTAMP}.log"
 
 # Create summary directory if it doesn't exist
 mkdir -p "$SUMMARY_DIR"
+
+# Create common batch directories for logs and saves
+BATCH_LOGS_DIR="logs/${BATCH_TIMESTAMP}"
+BATCH_SAVES_DIR="saves/${BATCH_TIMESTAMP}"
+mkdir -p "$BATCH_LOGS_DIR"
+mkdir -p "$BATCH_SAVES_DIR"
 
 # Initialize log file
 echo "PPO Test Results - Started at $(date '+%Y-%m-%d %H:%M:%S')" > "$LOG_FILE"
@@ -25,9 +39,36 @@ run_ppo_test() {
     local start_time=$(date +%s)
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting: $test_file with $TIMESTEPS timesteps"
     
-    python "$test_file" --mode train --total_timesteps $TIMESTEPS --device cuda
+    # Extract environment name and level from filename
+    local env_name=$(echo "$test_file" | grep -o -E '[a-z_]+_level_[0-9]+' | cut -d '_' -f 1)
+    local level=$(echo "$test_file" | grep -o -E 'level_[0-9]+' | cut -d '_' -f 2)
     
-    local exit_status=$?
+    # Create environment-specific subdirectories
+    local env_logs_dir="${BATCH_LOGS_DIR}/${env_name}_${level}"
+    local env_saves_dir="${BATCH_SAVES_DIR}/${env_name}_${level}"
+    mkdir -p "$env_logs_dir"
+    mkdir -p "$env_saves_dir"
+    
+    local model_name=$(basename "$test_file" .py)
+    local model_save_path="${env_saves_dir}/${model_name}"
+    
+    # Run from project root with correct PYTHONPATH
+    (
+        cd "$PROJECT_ROOT"
+        export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
+        python "tests/miac/$test_file" \
+            --mode train \
+            --total_timesteps $TIMESTEPS \
+            --device cuda \
+            --log_dir "tests/miac/${env_logs_dir}" \
+            --save_path "tests/miac/${model_save_path}"
+        
+        echo $? > "${SUMMARY_DIR}/.exit_status"
+    )
+    
+    local exit_status=$(cat "${SUMMARY_DIR}/.exit_status")
+    rm -f "${SUMMARY_DIR}/.exit_status"
+    
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     local hours=$((duration / 3600))
@@ -46,10 +87,6 @@ run_ppo_test() {
     # Log to file
     echo "$timestamp | $test_file | $time_str | Exit: $exit_status" >> "$LOG_FILE"
     
-    # Extract environment and level from filename for better summary
-    local env_name=$(echo "$test_file" | grep -o -E '[a-z_]+_level_[0-9]+' | cut -d '_' -f 1)
-    local level=$(echo "$test_file" | grep -o -E 'level_[0-9]+' | cut -d '_' -f 2)
-    
     # Log to summary file with locking to prevent race conditions
     (
         flock -x 200
@@ -59,14 +96,17 @@ run_ppo_test() {
 
 # Main execution
 echo "======================================================================="
-echo "Starting PPO test execution at $(date '+%Y-%m-%d %H:%M:%S')"
+echo "Starting PPO test batch run at $(date '+%Y-%m-%d %H:%M:%S')"
 echo "======================================================================="
+echo "Batch timestamp: $BATCH_TIMESTAMP"
 echo "Summary will be logged in real-time to $SUMMARY_FILE"
+echo "All logs will be saved in: $BATCH_LOGS_DIR"
+echo "All models will be saved in: $BATCH_SAVES_DIR"
 echo "======================================================================="
 
 # Find all PPO test files excluding optuna related ones
 echo "Scanning for PPO test files..."
-ALL_PPO_FILES=$(find ./tests/miac -name "ppo_*_level_*.py" | grep -v "optuna")
+ALL_PPO_FILES=$(find . -name "ppo_*_level_*.py" | grep -v "optuna" | sed 's|^./||')
 TOTAL_FILES=$(echo "$ALL_PPO_FILES" | wc -l)
 
 if [ $TOTAL_FILES -eq 0 ]; then
@@ -116,3 +156,5 @@ done
 echo "All PPO tests completed at $(date '+%Y-%m-%d %H:%M:%S')"
 echo "All PPO tests completed at $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE"
 echo "Summary results available in $SUMMARY_FILE"
+echo "All logs saved in: $BATCH_LOGS_DIR"
+echo "All models saved in: $BATCH_SAVES_DIR"

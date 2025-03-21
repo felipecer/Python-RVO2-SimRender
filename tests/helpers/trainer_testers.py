@@ -58,6 +58,13 @@ class PPOTrainerTester:
         self.unique_id = unique_id
         self.tag = tag
         self.hyperparams = hyperparams if hyperparams is not None else {}
+        # Create directories if they don't exist
+        if self.log_dir:
+            os.makedirs(self.log_dir, exist_ok=True)
+        if self.save_path:
+            # Create directory for the save path (excluding the file itself)
+            save_dir = os.path.dirname(self.save_path)
+            os.makedirs(save_dir, exist_ok=True)
 
     def create_env(self, n_envs):
         return make_vec_env(self.env_class, n_envs=n_envs, env_kwargs={
@@ -65,6 +72,8 @@ class PPOTrainerTester:
         })
 
     def log_parameters(self, params):
+        log_dir = os.path.dirname(self.log_dir)
+        os.makedirs(log_dir, exist_ok=True)
         log_file = os.path.join(os.path.dirname(self.log_dir), 'run_log.csv')
         file_exists = os.path.isfile(log_file)
         with open(log_file, mode='a', newline='') as file:
