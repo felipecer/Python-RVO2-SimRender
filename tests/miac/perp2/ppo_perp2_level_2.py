@@ -12,7 +12,9 @@ def main(env_class, args):
         save_path=args.save_path,
         render_mode=args.render_mode,
         seed=args.seed,
-        unique_id=args.unique_id
+        unique_id=args.unique_id,
+        level=2,
+        env_name='perp2'
     )
 
     device = args.device
