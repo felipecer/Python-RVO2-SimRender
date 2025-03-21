@@ -1,6 +1,13 @@
 #!/bin/bash
 # filepath: /home/felipecerda/repos/memoria/Python-RVO2-SimRender/tests/miac/run_all_baseline_orca.sh
 
+# Set up project root for correct imports and path resolution
+PROJECT_ROOT=$(cd "$(dirname "$0")/../.." && pwd)
+echo "Project root: $PROJECT_ROOT"
+
+# Create baseline results directory for centralized logging
+mkdir -p baseline_results
+
 # Create logs and saves directories if they don't exist
 mkdir -p circle/logs
 mkdir -p circle/saves
@@ -56,7 +63,12 @@ run_script() {
     
     # Run the script and create a flag file when done
     (
-        python "$script_path" > "$log_file" 2>&1
+        # Run from project root with correct PYTHONPATH
+        cd "$PROJECT_ROOT"
+        export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
+        
+        # The script path needs to be adjusted to be run from project root
+        python "tests/miac/$script_path" > "tests/miac/$log_file" 2>&1
         local status=$?
         echo "$status" > "$flag_file"
         
