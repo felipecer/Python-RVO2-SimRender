@@ -13,7 +13,9 @@ def main(env_class, args):
         save_path=args.save_path,
         render_mode=args.render_mode,
         seed=args.seed,
-        unique_id=args.unique_id
+        unique_id=args.unique_id,
+        level=3,
+        env_name='two_paths'
     )
 
     device = args.device

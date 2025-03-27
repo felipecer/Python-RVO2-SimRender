@@ -20,12 +20,6 @@ LOG_FILE="${SUMMARY_DIR}/ppo_test_results_${BATCH_TIMESTAMP}.log"
 # Create summary directory if it doesn't exist
 mkdir -p "$SUMMARY_DIR"
 
-# Create common batch directories for logs and saves
-BATCH_LOGS_DIR="logs/${BATCH_TIMESTAMP}"
-BATCH_SAVES_DIR="saves/${BATCH_TIMESTAMP}"
-mkdir -p "$BATCH_LOGS_DIR"
-mkdir -p "$BATCH_SAVES_DIR"
-
 # Initialize log file
 echo "PPO Test Results - Started at $(date '+%Y-%m-%d %H:%M:%S')" > "$LOG_FILE"
 echo "=========================================================" >> "$LOG_FILE"
@@ -39,13 +33,14 @@ run_ppo_test() {
     local start_time=$(date +%s)
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting: $test_file with $TIMESTEPS timesteps"
     
-    # Extract environment name and level from filename
+    # Extract environment directory, name and level from filename
+    local env_dir=$(dirname "$test_file")  # This gives us 'circle', 'incoming', etc.
     local env_name=$(echo "$test_file" | grep -o -E '[a-z_]+_level_[0-9]+' | cut -d '_' -f 1)
     local level=$(echo "$test_file" | grep -o -E 'level_[0-9]+' | cut -d '_' -f 2)
     
-    # Create environment-specific subdirectories
-    local env_logs_dir="${BATCH_LOGS_DIR}/${env_name}_${level}"
-    local env_saves_dir="${BATCH_SAVES_DIR}/${env_name}_${level}"
+    # Create environment-specific timestamped subdirectories
+    local env_logs_dir="${env_dir}/logs/${BATCH_TIMESTAMP}"
+    local env_saves_dir="${env_dir}/saves/${BATCH_TIMESTAMP}"
     mkdir -p "$env_logs_dir"
     mkdir -p "$env_saves_dir"
     
@@ -61,7 +56,9 @@ run_ppo_test() {
             --total_timesteps $TIMESTEPS \
             --device cuda \
             --log_dir "tests/miac/${env_logs_dir}" \
-            --save_path "tests/miac/${model_save_path}"
+            --save_path "tests/miac/${model_save_path}" \
+            --env_name "$env_name" \
+            --level "$level"
         
         echo $? > "${SUMMARY_DIR}/.exit_status"
     )
@@ -100,8 +97,6 @@ echo "Starting PPO test batch run at $(date '+%Y-%m-%d %H:%M:%S')"
 echo "======================================================================="
 echo "Batch timestamp: $BATCH_TIMESTAMP"
 echo "Summary will be logged in real-time to $SUMMARY_FILE"
-echo "All logs will be saved in: $BATCH_LOGS_DIR"
-echo "All models will be saved in: $BATCH_SAVES_DIR"
 echo "======================================================================="
 
 # Find all PPO test files excluding optuna related ones
@@ -156,5 +151,3 @@ done
 echo "All PPO tests completed at $(date '+%Y-%m-%d %H:%M:%S')"
 echo "All PPO tests completed at $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG_FILE"
 echo "Summary results available in $SUMMARY_FILE"
-echo "All logs saved in: $BATCH_LOGS_DIR"
-echo "All models saved in: $BATCH_SAVES_DIR"
