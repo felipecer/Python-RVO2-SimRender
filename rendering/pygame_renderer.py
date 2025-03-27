@@ -78,8 +78,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
     def draw_obstacles(self):
         for obstacle in self.obstacles:
-            vertices_transformed = [
-                self.transform_coordinates(x, y) for x, y in obstacle]
+            vertices_transformed = [ self.transform_coordinates(x, y) for x, y in obstacle.vertices]
             pygame.draw.polygon(
                 self.window, self.color_scheme.obstacle_color, vertices_transformed, 3)
 
@@ -180,14 +179,16 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         if isinstance(message, SimulationInitializedMessage):
             print("Simulation initialized.")
             # Save the agent radii and neighbourDist
-            self.agent_radii = {agent_data["agent_id"]: agent_data["radius"]
+            self.agent_radii = {agent_data.agent_id: agent_data.radius
                                 for agent_data in message.agent_initialization_data}
-            self.agent_neighbour_dist = {agent_data["agent_id"]: agent_data["neighbor_dist"]
+            self.agent_neighbour_dist = {agent_data.agent_id: agent_data.neighbor_dist
                                          for agent_data in message.agent_initialization_data}
             self.agent_behaviours = {
-                agent_data["agent_id"]: agent_data["behaviour"]
+                agent_data.agent_id: agent_data.behaviour
                 for agent_data in message.agent_initialization_data
             }
+            self.goals_processed(message.goals)
+            self.obstacles_processed(message.obstacles)
         elif isinstance(message, AgentsStateUpdateMessage):
             self.render_step_with_agents(message.agent_state_list, message.step)
         elif isinstance(message, ObstaclesProcessedMessage):

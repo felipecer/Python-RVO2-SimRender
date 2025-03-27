@@ -14,11 +14,9 @@ from simulator.models.simulation import Simulation
 from simulator.models.messages import (
     AgentState,
     RayCastingUpdateMessage,
-    SimulationInitializedMessage,
     AgentsStateUpdateMessage,
-    ObstaclesProcessedMessage,
-    AllGoalsProcessedMessage, 
-    AgentGoal
+    AgentGoal,
+    SimulationInitializedMessage, AgentInitData, Obstacle, AgentGoal
 )
 
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
@@ -133,35 +131,39 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 # Increment the global agent ID for the next agent
                 global_agent_id += 1
         agent_goal_list = [AgentGoal(agent_id=aid, goal=goal) for aid, goal in self.agent_goals.items()]
-        self.notify_observers(AllGoalsProcessedMessage(step=-1, goals=agent_goal_list))
+        obstacle_shapes = []
         # Add obstacles to the simulation
         if config.obstacles:
-            obstacle_shapes = []
+            
             for obstacle_shape in config.obstacles:
                 shape = obstacle_shape.generate_shape()
                 self.sim.addObstacle(shape)
                 obstacle_shapes.append(shape)
-            self.sim.processObstacles()
-            self.notify_observers(ObstaclesProcessedMessage(step=-1, obstacles=obstacle_shapes))
+            self.sim.processObstacles()           
 
-        agent_initialization_data = [
-            {
-                "agent_id": agent_id,
-                "radius": self.sim.getAgentRadius(agent_id),
-                "max_speed": self.sim.getAgentMaxSpeed(agent_id),
-                "neighbor_dist": self.sim.getAgentNeighborDist(agent_id),
-                "max_neighbors": self.sim.getAgentMaxNeighbors(agent_id),
-                "time_horizon": self.sim.getAgentTimeHorizon(agent_id),
-                "time_horizon_obst": self.sim.getAgentTimeHorizonObst(agent_id),
-                "goal": self.agent_goals[agent_id],
-                # Agent behavior
-                "behaviour": agent_behaviours.get(agent_id)
-            }
-            for agent_id in range(self.sim.getNumAgents())
-        ]
+        agent_init = []
+        for agent_id in range(self.sim.getNumAgents()):
+            agent_init.append(AgentInitData(
+                agent_id=agent_id,
+                radius=self.sim.getAgentRadius(agent_id),
+                max_speed=self.sim.getAgentMaxSpeed(agent_id),
+                neighbor_dist=self.sim.getAgentNeighborDist(agent_id),
+                max_neighbors=self.sim.getAgentMaxNeighbors(agent_id),
+                time_horizon=self.sim.getAgentTimeHorizon(agent_id),
+                time_horizon_obst=self.sim.getAgentTimeHorizonObst(agent_id),
+                goal=self.agent_goals[agent_id],
+                behaviour=agent_behaviours.get(agent_id)
+            ))
+            
 
-        # Send initialization information to observers
-        self.notify_observers(SimulationInitializedMessage(step=-1, agent_initialization_data=agent_initialization_data))
+        obstacle_data = [Obstacle(vertices=shape) for shape in obstacle_shapes]
+
+        self.notify_observers(SimulationInitializedMessage(
+            step=-1,
+            agent_initialization_data=agent_init,
+            obstacles=obstacle_data,
+            goals=agent_goal_list
+        ))
         self._setup_obstacle_vertex_array()    
     
 

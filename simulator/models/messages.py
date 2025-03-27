@@ -24,13 +24,30 @@ class AgentState:
     distance_to_goal: float
 
 @dataclass
+class AgentInitData:
+    agent_id: int
+    radius: float
+    max_speed: float
+    neighbor_dist: float
+    max_neighbors: int
+    time_horizon: float
+    time_horizon_obst: float
+    goal: Tuple[float, float]
+    behaviour: Optional[str] = None
+
+@dataclass
+class Obstacle:
+    vertices: List[Tuple[float, float]]
+
+@dataclass
 class AllGoalsProcessedMessage(BaseMessage):
     goals: List[AgentGoal]
 
 @dataclass
 class SimulationInitializedMessage(BaseMessage):
-    message: str = "simulation_initialized"
-    agent_initialization_data: Optional[List[dict]] = None
+    agent_initialization_data: List[AgentInitData]
+    obstacles: List[Obstacle]
+    goals: List[AgentGoal]
 
 @dataclass
 class AgentsStateUpdateMessage(BaseMessage):

@@ -85,14 +85,14 @@ class RVOBaseEnv(gym.Env):
         window_height = int((wcfg.y_max - wcfg.y_min) * wcfg.cell_size)
 
         if self.render_mode == "human":
-            self.renderer = WebSocketRenderer()
-            # self.renderer = PyGameRenderer(
-            #     width=window_width,
-            #     height=window_height,
-            #     cell_size=int(wcfg.cell_size),
-            #     obstacles=[],
-            #     goals={}
-            # )
+            # self.renderer = WebSocketRenderer()
+            self.renderer = PyGameRenderer(
+                width=window_width,
+                height=window_height,
+                cell_size=int(wcfg.cell_size),
+                obstacles=[],
+                goals={}
+            )
             self.renderer.setup()
             self.sim.register_observer(self.renderer)
 

@@ -73,7 +73,7 @@ if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo
     env = RVOMiacTwoPaths(
         config_file='./simulator/worlds/miac/two_paths/two_paths_level_3.yaml',
-        render_mode='rgb_array',
+        render_mode='human',
         seed=42,
         step_mode='min_dist'
     )
@@ -85,11 +85,11 @@ if __name__ == "__main__":
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     name_prefix = f"{config_name}_{timestamp}"
 
-    env = RecordVideo(
-        env, 
-        video_folder="videos/",
-        name_prefix=name_prefix,
-    )
+    # env = RecordVideo(
+    #     env, 
+    #     video_folder="videos/",
+    #     name_prefix=name_prefix,
+    # )
     obs, info = env.reset()
     done = False
     i = 0
