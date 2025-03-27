@@ -5,7 +5,7 @@ from typing import Tuple, Optional
 import numpy as np
 from pydantic import BaseModel, PrivateAttr
 
-from simulator.models.messages import GoalPositionUpdatedMessage
+from simulator.models.messages import GoalPositionUpdatedMessage, AgentGoal
 from simulator.models.simulation_configuration.registry import register
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent, SimulationEvent
 
@@ -95,8 +95,9 @@ class GoalSpawnerDynamic(EventBasedDynamic, ABC):
         self._simulator.agent_goals[event.agent_id] = new_goal
         self._simulator.notify_observers(GoalPositionUpdatedMessage(
             step=event.step,
-            goal_id=event.agent_id,
-            new_position=new_goal
+            goals=[
+                AgentGoal(agent_id=event.agent_id, goal=new_goal)
+            ]
         ))
 
     def _generate_new_goal(self) -> Tuple[float, float]:

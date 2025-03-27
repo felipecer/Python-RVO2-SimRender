@@ -11,9 +11,9 @@ from simulator.models.simulation import Simulation as SimulationModel
 
 
 class RVOSimulationEnv(gym.Env):
-    metadata = {'render.modes': ['ansi', 'rgb']}
+    metadata = {'render.modes': ['human', 'ansi', 'rgb_array']}
 
-    def __init__(self, config_file=None, render_mode="rgb", seed=None):
+    def __init__(self, config_file=None, render_mode="human", seed=None):
         super(RVOSimulationEnv, self).__init__()
         # Load YAML configuration
         with open(config_file, 'r') as stream:
@@ -29,7 +29,7 @@ class RVOSimulationEnv(gym.Env):
 
         # Set up renderers if rendering is required
         self.render_mode = render_mode
-        if render_mode == "rgb":
+        if render_mode == "human":
             window_width = int((self.sim.world_config.map_settings.x_max - self.sim.world_config.map_settings.x_min) * self.sim.world_config.map_settings.cell_size)
             window_height = int((self.sim.world_config.map_settings.y_max - self.sim.world_config.map_settings.y_min) * self.sim.world_config.map_settings.cell_size)
 
@@ -108,20 +108,16 @@ class RVOSimulationEnv(gym.Env):
         return {}
 
 if __name__ == "__main__":
-    env = RVOSimulationEnv('./simulator/worlds/simple_v2.yaml', render_mode='rgb')
+    env = RVOSimulationEnv('./simulator/worlds/mpe/simple.yaml', render_mode='human')
     observations = env.reset()
     done = False
     i = 0
     while not done:
         action = env.action_space.sample()  # Take random actions
-        # print(f"Action: {action}")
         observations, reward, done, truncated, info = env.step(action)
-
         # Monitor the agent's position
         agent_position = env.sim.get_agent_position(0)
-        # print(f"Step {i}: Agent position: {agent_position}")
         if done or truncated:
             print(f"Episode done: {done}, truncated: {truncated}")
             break
-        # print(f"Step {i} reward: {reward}")
         i += 1

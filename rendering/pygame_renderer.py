@@ -108,7 +108,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             for intersection in self.raycasting_intersections:
                 if intersection.x != None and intersection.y != None:
                     x, y = self.transform_coordinates(intersection.x, intersection.y)
-                    pygame.draw.circle(self.window, (255, 105, 180), (x, y), 2)
+                    pygame.draw.circle(self.window, (255, 105, 180), (x, y), 2) #hardcoded
 
     def game_loop(self):
         step = 0
@@ -196,7 +196,8 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         elif isinstance(message, AllGoalsProcessedMessage):
             self.goals_processed(message.goals)
         elif isinstance(message, GoalPositionUpdatedMessage):
-            self.goal_position_updated(message.goal_id, message.new_position)
+            for agent_goal in message.goals:
+                self.goal_position_updated(agent_goal.agent_id, agent_goal.goal)
         elif isinstance(message, NewObstacleAddedMessage):
             self.new_obstacle_added(message.obstacle)
         elif isinstance(message, RayCastingUpdateMessage):
@@ -215,6 +216,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
     def goal_position_updated(self, goal_id: int, new_position: tuple):
         if goal_id in self.goals:
+            print(goal_id, new_position)
             self.goals[goal_id] = new_position
 
     def new_obstacle_added(self, obstacle: list):

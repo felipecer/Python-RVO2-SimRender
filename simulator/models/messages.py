@@ -60,9 +60,7 @@ class ObstaclesProcessedMessage(BaseMessage):
 
 @dataclass
 class GoalPositionUpdatedMessage(BaseMessage):
-    goal_id: int
-    new_position: Tuple[float, float]
-
+    goals: List[AgentGoal] 
 
 @dataclass
 class NewObstacleAddedMessage(BaseMessage):

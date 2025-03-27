@@ -26,7 +26,7 @@ simulation:
           name: "explicit"
           count: 1
           positions:
-            - [-0.75, 0.75]
+            - [-0.5,0.5]
   dynamics:    
     - name: "annulus_goal_spawner"
       when: "before"
