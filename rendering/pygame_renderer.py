@@ -106,8 +106,8 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
     def draw_intersections(self):
         if self.raycasting_intersections:
             for intersection in self.raycasting_intersections:
-                if intersection[0] != None and intersection[1] != None:
-                    x, y = self.transform_coordinates(*intersection)
+                if intersection.x != None and intersection.y != None:
+                    x, y = self.transform_coordinates(intersection.x, intersection.y)
                     pygame.draw.circle(self.window, (255, 105, 180), (x, y), 2)
 
     def game_loop(self):
@@ -200,7 +200,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         elif isinstance(message, NewObstacleAddedMessage):
             self.new_obstacle_added(message.obstacle)
         elif isinstance(message, RayCastingUpdateMessage):
-            self.raycasting_updated(message.intersections)
+            self.raycasting_updated(message.hits)
         
     def raycasting_updated(self, intersections):
         self.raycasting_intersections = intersections

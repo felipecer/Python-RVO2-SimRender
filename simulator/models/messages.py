@@ -69,5 +69,12 @@ class NewObstacleAddedMessage(BaseMessage):
     obstacle: List[Tuple[float, float]]
 
 @dataclass
+class RayHit:
+    x: Optional[float]
+    y: Optional[float]
+
+@dataclass
 class RayCastingUpdateMessage(BaseMessage):
-    intersections: List[Tuple[Optional[float], Optional[float]]]
+    agent_id: int
+    hits: List[RayHit]  # 360 expected
+

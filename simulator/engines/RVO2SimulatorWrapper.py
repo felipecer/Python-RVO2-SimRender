@@ -16,6 +16,7 @@ from simulator.models.messages import (
     RayCastingUpdateMessage,
     AgentsStateUpdateMessage,
     AgentGoal,
+    RayHit,
     SimulationInitializedMessage, AgentInitData, Obstacle, AgentGoal
 )
 
@@ -324,7 +325,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         # Send the message with additional data
         self.notify_observers(AgentsStateUpdateMessage(step=self.current_step, agent_state_list=agent_state_list))
         if self.intersect_list != None:
-            self.notify_observers(RayCastingUpdateMessage(step=self.current_step, intersections=self.intersect_list))
+            rayhits = [RayHit(x,y) for x, y in self.intersect_list]
+            self.notify_observers(RayCastingUpdateMessage(step=self.current_step, agent_id = 0, hits=rayhits)) # agent_id hardcoded
         self.store_step(self.current_step)
 
     def run_simulation(self, steps: int):
