@@ -1,4 +1,4 @@
-from datetime import datetime
+import time
 import os
 import numpy as np
 from gymnasium import logger
@@ -67,26 +67,26 @@ class RVOMiacIncoming(RVOBaseEnv):
         return {}
     
 if __name__ == "__main__":
-    from gymnasium.wrappers import RecordVideo
+    # from gymnasium.wrappers import RecordVideo
     env = RVOMiacIncoming(
         config_file='./simulator/worlds/miac/incoming/incoming_level_3.yaml',
-        render_mode='rgb_array',
+        render_mode='human',
         seed=42,
         step_mode='min_dist'
     )
-    # Extract filename without extension from config_file path
-    config_filename = os.path.basename(env.config_file)  # Gets 'two_paths_level_0.yaml'
-    config_name = os.path.splitext(config_filename)[0]  # Gets 'two_paths_level_0'
+    # # Extract filename without extension from config_file path
+    # config_filename = os.path.basename(env.config_file)  # Gets 'two_paths_level_0.yaml'
+    # config_name = os.path.splitext(config_filename)[0]  # Gets 'two_paths_level_0'
     
-    # Generate a unique name_prefix with filename and datetime
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    name_prefix = f"{config_name}_{timestamp}"
+    # # Generate a unique name_prefix with filename and datetime
+    # timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    # name_prefix = f"{config_name}_{timestamp}"
 
-    env = RecordVideo(
-        env, 
-        video_folder="videos/",
-        name_prefix=name_prefix,
-    )
+    # env = RecordVideo(
+    #     env, 
+    #     video_folder="videos/",
+    #     name_prefix=name_prefix,
+    # )
     obs, info = env.reset()
     done = False
     i = 0
@@ -98,3 +98,4 @@ if __name__ == "__main__":
             logger.info(f"Episode done: {done}, truncated: {truncated}")
             break
         i += 1
+        time.sleep(1)

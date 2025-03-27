@@ -12,3 +12,4 @@ tensorboard-data-server==0.7.2
 torch
 torchvision
 torchaudio
+websockets
