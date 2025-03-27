@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from simulator.models.messages import (
+from simulator.models.communication.messages import (
     BaseMessage
 )
 

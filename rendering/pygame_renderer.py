@@ -6,7 +6,7 @@ import pygame
 from rendering.color_scheme_parser import load_color_schemes
 from rendering.drawing_utils import draw_text, draw_arrow, draw_detection_radius, draw_distance_to_goal, Grid
 from rendering.interfaces import RendererInterface
-from simulator.models.messages import (
+from simulator.models.communication.messages import (
     AgentsStateUpdateMessage,
     RayCastingUpdateMessage,
     SimulationInitializedMessage,

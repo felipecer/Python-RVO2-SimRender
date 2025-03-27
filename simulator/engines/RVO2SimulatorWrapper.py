@@ -11,7 +11,7 @@ from rendering.text_renderer import TextRenderer
 from simulator.engines.base import SimulationEngine, SimulationState
 from simulator.models.observer import SimulationSubject
 from simulator.models.simulation import Simulation
-from simulator.models.messages import (
+from simulator.models.communication.messages import (
     AgentState,
     RayCastingUpdateMessage,
     AgentsStateUpdateMessage,

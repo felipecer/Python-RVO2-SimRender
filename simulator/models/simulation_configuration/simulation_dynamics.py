@@ -5,7 +5,7 @@ from typing import Tuple, Optional
 import numpy as np
 from pydantic import BaseModel, PrivateAttr
 
-from simulator.models.messages import GoalPositionUpdatedMessage, AgentGoal
+from simulator.models.communication.messages import GoalPositionUpdatedMessage, AgentGoal
 from simulator.models.simulation_configuration.registry import register
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent, SimulationEvent
 

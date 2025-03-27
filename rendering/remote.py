@@ -5,7 +5,7 @@ import websockets
 from typing import Set, Tuple, Optional
 
 from simulator.models.observer import SimulationObserver
-from simulator.models.messages import (
+from simulator.models.communication.messages import (
     BaseMessage,
     SimulationInitializedMessage,
     ObstaclesProcessedMessage,

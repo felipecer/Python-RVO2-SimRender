@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package sim_protobuf_messages;
+
+// Shared vector2 representation
+message Vector2 {
+  float x = 1;
+  float y = 2;
+}
+
+// Agent goal assignment
+message AgentGoal {
+  int32 agent_id = 1;
+  Vector2 goal = 2;
+}
+
+// Agent state per step
+message AgentState {
+  int32 agent_id = 1;
+  Vector2 position = 2;
+  Vector2 velocity = 3;
+  Vector2 preferred_velocity = 4;
+  float distance_to_goal = 5;
+}
+
+// Agent initialization data
+message AgentInitData {
+  int32 agent_id = 1;
+  float radius = 2;
+  float max_speed = 3;
+  float neighbor_dist = 4;
+  int32 max_neighbors = 5;
+  float time_horizon = 6;
+  float time_horizon_obst = 7;
+  Vector2 goal = 8;
+  string behaviour = 9;
+}
+
+// Obstacles are a list of vertex sequences
+message Obstacle {
+  repeated Vector2 vertices = 1;
+}
+
+message AllGoalsProcessedMessage {
+  int32 step = 1;
+  repeated AgentGoal goals = 2;
+}
+
+message SimulationInitializedMessage {
+  int32 step = 1;
+  repeated AgentInitData agent_initialization_data = 2;
+  repeated Obstacle obstacles = 3;
+  repeated AgentGoal goals = 4;
+}
+
+message AgentsStateUpdateMessage {
+  int32 step = 1;
+  repeated AgentState agent_state_list = 2;
+}
+
+message ObstaclesProcessedMessage {
+  int32 step = 1;
+  repeated Obstacle obstacles = 2;
+}
+
+message GoalPositionUpdatedMessage {
+  int32 step = 1;
+  repeated AgentGoal goals = 2;
+}
+
+message NewObstacleAddedMessage {
+  int32 step = 1;
+  Obstacle obstacle = 2;
+}
+
+message RayHit {
+  float x = 1;
+  float y = 2;
+}
+
+message RayCastingUpdateMessage {
+  int32 step = 1;
+  int32 agent_id = 2;
+  repeated RayHit hits = 3;
+}
