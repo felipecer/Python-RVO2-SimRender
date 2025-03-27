@@ -10,25 +10,25 @@ def to_protobuf_and_type(msg: orig.BaseMessage) -> Tuple[str, bytes]:
     """
     if isinstance(msg, orig.SimulationInitializedMessage):
         proto = to_simulation_initialized_message(msg)
-        return "SimulationInitializedMessage", proto.serialize()
+        return "SimulationInitializedMessage", bytes(proto)
     elif isinstance(msg, orig.AllGoalsProcessedMessage):
         proto = to_all_goals_processed_message(msg)
-        return "AllGoalsProcessedMessage", proto.serialize()
+        return "AllGoalsProcessedMessage", bytes(proto)
     elif isinstance(msg, orig.GoalPositionUpdatedMessage):
         proto = to_goal_position_updated_message(msg)
-        return "GoalPositionUpdatedMessage", proto.serialize()
+        return "GoalPositionUpdatedMessage", bytes(proto)
     elif isinstance(msg, orig.AgentsStateUpdateMessage):
         proto = to_agents_state_update_message(msg)
-        return "AgentsStateUpdateMessage", proto.serialize()
+        return "AgentsStateUpdateMessage", bytes(proto)
     elif isinstance(msg, orig.ObstaclesProcessedMessage):
         proto = to_obstacles_processed_message(msg)
-        return "ObstaclesProcessedMessage", proto.serialize()
+        return "ObstaclesProcessedMessage", bytes(proto)
     elif isinstance(msg, orig.NewObstacleAddedMessage):
         proto = to_new_obstacle_added_message(msg)
-        return "NewObstacleAddedMessage", proto.serialize()
+        return "NewObstacleAddedMessage", bytes(proto)
     elif isinstance(msg, orig.RayCastingUpdateMessage):
         proto = to_ray_casting_update_message(msg)
-        return "RayCastingUpdateMessage", proto.serialize()
+        return "RayCastingUpdateMessage", bytes(proto)
     else:
         raise ValueError(f"Unsupported message type: {type(msg)}")
 
