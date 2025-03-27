@@ -9,7 +9,7 @@ from simulator.models.messages import (
     BaseMessage,
     SimulationInitializedMessage,
     ObstaclesProcessedMessage,
-    AgentPositionsUpdateMessage
+    AgentsStateUpdateMessage
 )
 
 class WebSocketRenderer(SimulationObserver):
@@ -77,24 +77,6 @@ class WebSocketRenderer(SimulationObserver):
             data = {
                 "type": "obstacles_processed",
                 "obstacles": message.obstacles
-            }
-            self._send_to_clients(data)
-
-        elif isinstance(message, AgentPositionsUpdateMessage):
-            agents = []
-            for agent_data in message.agent_positions:
-                agent_id, x, y, velocity, pref_velocity, distance = agent_data
-                agents.append({
-                    "id": agent_id,
-                    "position": [x, y],
-                    "velocity": velocity,
-                    "preferred_velocity": pref_velocity,
-                    "distance_to_goal": distance
-                })
-            data = {
-                "type": "agent_update",
-                "step": message.step,
-                "agents": agents
             }
             self._send_to_clients(data)
 

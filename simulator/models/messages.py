@@ -16,6 +16,14 @@ class AgentGoal:
     goal: Tuple[float, float]
 
 @dataclass
+class AgentState:
+    agent_id: int
+    position: Tuple[float, float]
+    velocity: Tuple[float, float]
+    preferred_velocity: Tuple[float, float]
+    distance_to_goal: float
+
+@dataclass
 class AllGoalsProcessedMessage(BaseMessage):
     goals: List[AgentGoal]
 
@@ -25,10 +33,9 @@ class SimulationInitializedMessage(BaseMessage):
     agent_initialization_data: Optional[List[dict]] = None
 
 @dataclass
-class AgentPositionsUpdateMessage(BaseMessage):
+class AgentsStateUpdateMessage(BaseMessage):
     # In addition to the position, we also include the velocity, preferred velocity, and the distance to the goal
-    agent_positions: List[Tuple[int, float, float,
-                                Tuple[float, float], Tuple[float, float], float]]
+    agent_state_list: List[AgentState]
 
 @dataclass
 class ObstaclesProcessedMessage(BaseMessage):

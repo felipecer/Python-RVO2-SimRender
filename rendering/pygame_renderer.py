@@ -7,7 +7,7 @@ from rendering.color_scheme_parser import load_color_schemes
 from rendering.drawing_utils import draw_text, draw_arrow, draw_detection_radius, draw_distance_to_goal, Grid
 from rendering.interfaces import RendererInterface
 from simulator.models.messages import (
-    AgentPositionsUpdateMessage,
+    AgentsStateUpdateMessage,
     RayCastingUpdateMessage,
     SimulationInitializedMessage,
     ObstaclesProcessedMessage,
@@ -132,7 +132,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self.draw_goals()
         draw_text(self.window, f"step: {step}", self.window_width - 10, 10)
         
-    def render_step_with_agents(self, agents, step):
+    def render_step_with_agents(self, agent_state_list, step):
         self._pygame_event_manager()
         if not self._rendering_is_active:
             return
@@ -140,12 +140,12 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self.draw_grid()
         self.draw_obstacles()
 
-        for agent_data in agents:
-            agent_id = agent_data[0]
-            x, y = agent_data[1], agent_data[2]
-            velocity = agent_data[3]  # Current velocity
-            pref_velocity = agent_data[4]  # Preferred velocity
-            distance_to_goal = agent_data[5]  # Distance to goal
+        for agent_state in agent_state_list:
+            agent_id = agent_state.agent_id
+            (x, y) = agent_state.position
+            velocity = agent_state.velocity  # Current velocity
+            pref_velocity = agent_state.preferred_velocity  # Preferred velocity
+            distance_to_goal = agent_state.distance_to_goal # Distance to goal
             radius = self.agent_radii.get(agent_id, 10)
 
             x_screen, y_screen = self.transform_coordinates(x, y)
@@ -188,8 +188,8 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
                 agent_data["agent_id"]: agent_data["behaviour"]
                 for agent_data in message.agent_initialization_data
             }
-        elif isinstance(message, AgentPositionsUpdateMessage):
-            self.render_step_with_agents(message.agent_positions, message.step)
+        elif isinstance(message, AgentsStateUpdateMessage):
+            self.render_step_with_agents(message.agent_state_list, message.step)
         elif isinstance(message, ObstaclesProcessedMessage):
             self.obstacles_processed(message.obstacles)
         elif isinstance(message, AllGoalsProcessedMessage):

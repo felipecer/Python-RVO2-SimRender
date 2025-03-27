@@ -12,9 +12,10 @@ from simulator.engines.base import SimulationEngine, SimulationState
 from simulator.models.observer import SimulationSubject
 from simulator.models.simulation import Simulation
 from simulator.models.messages import (
+    AgentState,
     RayCastingUpdateMessage,
     SimulationInitializedMessage,
-    AgentPositionsUpdateMessage,
+    AgentsStateUpdateMessage,
     ObstaclesProcessedMessage,
     AllGoalsProcessedMessage, 
     AgentGoal
@@ -307,20 +308,19 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 )
                 self.handle_event(event.alias, event)
 
-        # Collect more data from each agent
-        agent_data = [
-            (
-                agent_id,
-                *self.sim.getAgentPosition(agent_id),  # Current position (x, y)
-                self.sim.getAgentVelocity(agent_id),  # Current velocity
-                self.sim.getAgentPrefVelocity(agent_id),  # Preferred velocity
-                math.dist(self.sim.getAgentPosition(agent_id), self.agent_goals[agent_id])  # Distance to goal
+        agent_state_list = [
+            AgentState(
+                agent_id=agent_id,
+                position=self.sim.getAgentPosition(agent_id),
+                velocity=self.sim.getAgentVelocity(agent_id),
+                preferred_velocity=self.sim.getAgentPrefVelocity(agent_id),
+                distance_to_goal=math.dist(self.sim.getAgentPosition(agent_id), self.agent_goals[agent_id])
             )
             for agent_id in range(self.sim.getNumAgents())
         ]
         
         # Send the message with additional data
-        self.notify_observers(AgentPositionsUpdateMessage(step=self.current_step, agent_positions=agent_data))
+        self.notify_observers(AgentsStateUpdateMessage(step=self.current_step, agent_state_list=agent_state_list))
         if self.intersect_list != None:
             self.notify_observers(RayCastingUpdateMessage(step=self.current_step, intersections=self.intersect_list))
         self.store_step(self.current_step)
@@ -349,7 +349,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
             agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id)) for agent_id in range(self.sim.getNumAgents())]
             print(f"Sending AgentPositionsUpdateMessage for step {self.current_step}")
-            self.notify_observers(AgentPositionsUpdateMessage(step=self.current_step, agent_positions=agent_positions))
+            self.notify_observers(AgentsStateUpdateMessage(step=self.current_step, agent_state_list=agent_positions))
             self.store_step(step)
 
     def store_step(self, step: int):

@@ -2,7 +2,7 @@ from simulator.models.observer import SimulationObserver
 from simulator.models.messages import (
     AllGoalsProcessedMessage,
     BaseMessage,
-    AgentPositionsUpdateMessage,
+    AgentsStateUpdateMessage,
     ObstaclesProcessedMessage,
     GoalPositionUpdatedMessage,
     NewObstacleAddedMessage,
@@ -55,22 +55,17 @@ class TextRenderer(SimulationObserver):
                 agent_id = agent_goal.agent_id
                 print(f"Agent {agent_id} goal at position {goal}")
 
-        elif isinstance(message, AgentPositionsUpdateMessage):
+        elif isinstance(message, AgentsStateUpdateMessage):
             # Assuming we are now passing more data, such as velocity and distance to the goal
-            for agent_data in message.agent_positions:
-                agent_id = agent_data[0]
-                x, y = agent_data[1], agent_data[2]
-                # If you are sending other parameters like velocity and pref_velocity
-                if len(agent_data) > 3:
-                    velocity = agent_data[3]
-                    pref_velocity = agent_data[4]
-                    # In case you are also passing the distance
-                    distance_to_goal = agent_data[5] if len(
-                        agent_data) > 5 else None
-                    print(f"Step {message.step}: Agent {agent_id} at position ({x}, {y}), velocity ({velocity}), preferred velocity ({pref_velocity}), distance to goal: {distance_to_goal}")
-                else:
-                    print(
-                        f"Step {message.step}: Agent {agent_id} at position ({x}, {y})")
+            for agent_state in message.agent_state_list:
+                agent_id = agent_state.agent_id
+                (x, y) = agent_state.position
+                # If you are sending other parameters like velocity and pref_velocity                
+                velocity = agent_state.velocity
+                pref_velocity = agent_state.preferred_velocity
+                # In case you are also passing the distance
+                distance_to_goal = agent_state.distance_to_goal
+                print(f"Step {message.step}: Agent {agent_id} at position ({x}, {y}), velocity ({velocity}), preferred velocity ({pref_velocity}), distance to goal: {distance_to_goal}")
 
         elif isinstance(message, GoalPositionUpdatedMessage):
             # Print the new position of a specific agent's goal
