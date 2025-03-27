@@ -11,7 +11,7 @@ from simulator.models.messages import (
     RayCastingUpdateMessage,
     SimulationInitializedMessage,
     ObstaclesProcessedMessage,
-    GoalsProcessedMessage,
+    AllGoalsProcessedMessage,
     GoalPositionUpdatedMessage,
     NewObstacleAddedMessage
 )
@@ -91,7 +91,9 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
                     self.window, self.color_scheme.obstacle_color, (x, y), 10)
 
     def draw_goals(self):
-        for agent_id, goal in self.goals.items():
+        for agent_goal  in self.goals:
+            agent_id = agent_goal.agent_id
+            goal = agent_goal.goal
             x, y = self.transform_coordinates(*goal)
             # Use the same radius as the agent
             radius = self.agent_radii.get(agent_id, 10)
@@ -190,7 +192,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             self.render_step_with_agents(message.agent_positions, message.step)
         elif isinstance(message, ObstaclesProcessedMessage):
             self.obstacles_processed(message.obstacles)
-        elif isinstance(message, GoalsProcessedMessage):
+        elif isinstance(message, AllGoalsProcessedMessage):
             self.goals_processed(message.goals)
         elif isinstance(message, GoalPositionUpdatedMessage):
             self.goal_position_updated(message.goal_id, message.new_position)

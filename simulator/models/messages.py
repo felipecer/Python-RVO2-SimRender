@@ -10,12 +10,19 @@ class BaseMessage:
     """
     step: int
 
+@dataclass
+class AgentGoal:
+    agent_id: int
+    goal: Tuple[float, float]
+
+@dataclass
+class AllGoalsProcessedMessage(BaseMessage):
+    goals: List[AgentGoal]
 
 @dataclass
 class SimulationInitializedMessage(BaseMessage):
     message: str = "simulation_initialized"
     agent_initialization_data: Optional[List[dict]] = None
-
 
 @dataclass
 class AgentPositionsUpdateMessage(BaseMessage):
@@ -23,16 +30,9 @@ class AgentPositionsUpdateMessage(BaseMessage):
     agent_positions: List[Tuple[int, float, float,
                                 Tuple[float, float], Tuple[float, float], float]]
 
-
 @dataclass
 class ObstaclesProcessedMessage(BaseMessage):
     obstacles: List[List[Tuple[float, float]]]
-
-
-@dataclass
-class GoalsProcessedMessage(BaseMessage):
-    goals: dict
-
 
 @dataclass
 class GoalPositionUpdatedMessage(BaseMessage):

@@ -16,8 +16,10 @@ from simulator.models.messages import (
     SimulationInitializedMessage,
     AgentPositionsUpdateMessage,
     ObstaclesProcessedMessage,
-    GoalsProcessedMessage
+    AllGoalsProcessedMessage, 
+    AgentGoal
 )
+
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
 from simulator.models.simulation_configuration.registry import global_registry
 import traceback
@@ -95,7 +97,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
             # Generate goal positions for this group if they exist
             goals = agent_group.goals.pattern.generate_positions() if agent_group.goals else None
-
+            
             # Iterate over the generated agent positions
             for local_agent_index, position in enumerate(positions):
                 agent_defaults = agent_group.agent_defaults or config.agent_defaults
@@ -118,8 +120,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 # If goals are defined for the agent group
                 if goals:
                     # Assign the correct goal to the agent using the local index
-                    self.agent_goals[agent_id] = goals[local_agent_index]
-                    self.notify_observers(GoalsProcessedMessage(step=-1, goals=self.agent_goals))
+                    self.agent_goals[agent_id] = goals[local_agent_index]                    
+                    # self.notify_observers(GoalsProcessedMessage(step=-1, goals=self.agent_goals))
                 
                 if agent_group.assigned_behaviors:
                     final_behavior_name = agent_group.assigned_behaviors[local_agent_index]
@@ -129,7 +131,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                     final_behavior_name = None
                 # Increment the global agent ID for the next agent
                 global_agent_id += 1
-
+        agent_goal_list = [AgentGoal(agent_id=aid, goal=goal) for aid, goal in self.agent_goals.items()]
+        self.notify_observers(AllGoalsProcessedMessage(step=-1, goals=agent_goal_list))
         # Add obstacles to the simulation
         if config.obstacles:
             obstacle_shapes = []

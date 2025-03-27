@@ -1,9 +1,9 @@
 from simulator.models.observer import SimulationObserver
 from simulator.models.messages import (
+    AllGoalsProcessedMessage,
     BaseMessage,
     AgentPositionsUpdateMessage,
     ObstaclesProcessedMessage,
-    GoalsProcessedMessage,
     GoalPositionUpdatedMessage,
     NewObstacleAddedMessage,
     SimulationInitializedMessage
@@ -46,11 +46,13 @@ class TextRenderer(SimulationObserver):
             for i, obstacle in enumerate(message.obstacles):
                 print(f"Obstacle {i}: {obstacle}")
 
-        elif isinstance(message, GoalsProcessedMessage):
+        elif isinstance(message, AllGoalsProcessedMessage):
             # Print the number of processed goals
             print(f"Goals Processed: {len(message.goals)} goals")
             # Print the positions of the goals if necessary
-            for agent_id, goal in message.goals.items():
+            for agent_goal in message.goals:
+                goal = agent_goal.goal
+                agent_id = agent_goal.agent_id
                 print(f"Agent {agent_id} goal at position {goal}")
 
         elif isinstance(message, AgentPositionsUpdateMessage):
