@@ -47,6 +47,7 @@ class AgentInitData(betterproto.Message):
     time_horizon_obst: float = betterproto.float_field(7)
     goal: "Vector2" = betterproto.message_field(8)
     behaviour: str = betterproto.string_field(9)
+    position: "Vector2" = betterproto.message_field(10)
 
 
 @dataclass
@@ -105,3 +106,9 @@ class RayCastingUpdateMessage(betterproto.Message):
     step: int = betterproto.int32_field(1)
     agent_id: int = betterproto.int32_field(2)
     hits: List["RayHit"] = betterproto.message_field(3)
+
+
+@dataclass
+class SimulationTerminatedMessage(betterproto.Message):
+    step: int = betterproto.int32_field(1)
+    reason: str = betterproto.string_field(2)

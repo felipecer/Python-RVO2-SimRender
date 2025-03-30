@@ -34,6 +34,7 @@ class AgentInitData:
     time_horizon_obst: float
     goal: Tuple[float, float]
     behaviour: Optional[str] = None
+    position: Tuple[float, float] = (0,0)
 
 @dataclass
 class Obstacle:
@@ -76,3 +77,6 @@ class RayCastingUpdateMessage(BaseMessage):
     agent_id: int
     hits: List[RayHit]  # 360 expected
 
+@dataclass
+class SimulationTerminatedMessage(BaseMessage):
+    reason: str = "Terminated"

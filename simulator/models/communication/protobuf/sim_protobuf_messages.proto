@@ -34,6 +34,7 @@ message AgentInitData {
   float time_horizon_obst = 7;
   Vector2 goal = 8;
   string behaviour = 9;
+  Vector2 position = 10;
 }
 
 // Obstacles are a list of vertex sequences
@@ -83,3 +84,9 @@ message RayCastingUpdateMessage {
   int32 agent_id = 2;
   repeated RayHit hits = 3;
 }
+
+message SimulationTerminatedMessage {
+  int32 step = 1;  // Final step number (optional)
+  string reason = 2; // Optional message like "completed", "timeout", "manual stop"
+}
+

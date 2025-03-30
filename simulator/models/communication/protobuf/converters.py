@@ -76,7 +76,8 @@ def to_agent_init(data: orig.AgentInitData) -> pb.AgentInitData:
         time_horizon=data.time_horizon,
         time_horizon_obst=data.time_horizon_obst,
         goal=to_vector2(data.goal),
-        behaviour=data.behaviour or ""
+        behaviour=data.behaviour or "",
+        position=to_vector2(data.position)
     )
 
 def from_agent_init(data: pb.AgentInitData) -> orig.AgentInitData:
@@ -89,7 +90,8 @@ def from_agent_init(data: pb.AgentInitData) -> orig.AgentInitData:
         time_horizon=data.time_horizon,
         time_horizon_obst=data.time_horizon_obst,
         goal=from_vector2(data.goal),
-        behaviour=data.behaviour or None
+        behaviour=data.behaviour or None,
+        position=from_vector2(data.position)
     )
 
 def to_obstacle(obs: orig.Obstacle) -> pb.Obstacle:
@@ -198,4 +200,16 @@ def from_ray_casting_update_message(msg: pb.RayCastingUpdateMessage) -> orig.Ray
         step=msg.step,
         agent_id=msg.agent_id,
         hits=[from_ray_hit(h) for h in msg.hits]
+    )
+
+def to_simulation_terminated_message(msg: orig.SimulationTerminatedMessage) -> pb.SimulationTerminatedMessage:
+    return pb.SimulationTerminatedMessage(
+        step=msg.step,
+        reason=msg.reason
+    )
+
+def from_simulation_terminated_message(msg: pb.SimulationTerminatedMessage) -> orig.SimulationTerminatedMessage:
+    return orig.SimulationTerminatedMessage(
+        step=msg.step,
+        reason=msg.reason
     )

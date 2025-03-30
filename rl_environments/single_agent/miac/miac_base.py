@@ -161,7 +161,7 @@ class RVOBaseEnv(gym.Env):
         reward = self.calculate_reward(0)
         done = self.is_done(0)
         truncated = (self.sim.get_state() == SimulationState.STOPPED)
-        info = self._get_info()
+        info = self._get_info()       
 
         return obs, reward, done, truncated, info
 
@@ -210,8 +210,12 @@ class RVOBaseEnv(gym.Env):
         raise NotImplementedError("Please implement calculate_reward() in the child class.")
 
     def is_done(self, agent_id):
-        """Override in child classes (default raises error)."""
-        raise NotImplementedError("Please implement is_done() in the child class.")
+        
+        """Check if the agent has reached its goal."""
+        done = self.sim.is_goal_reached(agent_id)
+        if done:
+            self.sim.notify_observers()
+        return done
 
     def _get_obs(self):
         """Override in child classes if you need actual observations."""

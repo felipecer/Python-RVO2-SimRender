@@ -100,3 +100,5 @@ if __name__ == "__main__":
             logger.info(f"Episode done: {done}, truncated: {truncated}")
             break
         i += 1
+    while True:
+        a = 1

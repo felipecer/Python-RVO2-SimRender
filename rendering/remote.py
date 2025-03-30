@@ -67,7 +67,7 @@ class WebSocketRenderer(SimulationObserver):
         self.loop.call_soon_threadsafe(self.loop.stop)
 
     def update(self, message: BaseMessage):
-        print(f"[WebSocketRenderer] Received message: {type(message)}")
+        # print(f"[WebSocketRenderer] Received message: {type(message)}")
         self.message_log.append(message)
         msg_type, binary = to_protobuf_and_type(message)
         header = f"{msg_type}\n".encode("utf-8")

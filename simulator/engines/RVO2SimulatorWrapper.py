@@ -17,7 +17,8 @@ from simulator.models.communication.messages import (
     AgentsStateUpdateMessage,
     AgentGoal,
     RayHit,
-    SimulationInitializedMessage, AgentInitData, Obstacle, AgentGoal
+    SimulationInitializedMessage, AgentInitData, Obstacle, AgentGoal,
+    SimulationTerminatedMessage
 )
 
 from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
@@ -153,6 +154,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 time_horizon=self.sim.getAgentTimeHorizon(agent_id),
                 time_horizon_obst=self.sim.getAgentTimeHorizonObst(agent_id),
                 goal=self.agent_goals[agent_id],
+                position=self.sim.getAgentPosition(agent_id),
                 behaviour=agent_behaviours.get(agent_id)
             ))
             
@@ -160,7 +162,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         obstacle_data = [Obstacle(vertices=shape) for shape in obstacle_shapes]
 
         self.notify_observers(SimulationInitializedMessage(
-            step=-1,
+            step=0,
             agent_initialization_data=agent_init,
             obstacles=obstacle_data,
             goals=agent_goal_list
@@ -277,7 +279,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
     def reset(self):
         """Resets the simulation to its initial state."""
-        self.current_step = 0
+        self.current_step = 1
         self._state = SimulationState.SETUP
 
         # Reset agent positions to initial positions
@@ -543,8 +545,11 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             (current_position[0] - goal_position[0]) ** 2 +
             (current_position[1] - goal_position[1]) ** 2
         )
+        goal_reached = distance <= 0.50
+        if goal_reached:
+            self.notify_observers(SimulationTerminatedMessage(step=self.current_step))
         # Consider the goal reached if the distance is less than or equal to a threshold
-        return distance <= 0.50
+        return goal_reached
 
 
 def main():
