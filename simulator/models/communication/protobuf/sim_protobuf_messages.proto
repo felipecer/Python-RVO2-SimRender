@@ -45,6 +45,7 @@ message Obstacle {
 message AllGoalsProcessedMessage {
   int32 step = 1;
   repeated AgentGoal goals = 2;
+  string simulationId = 3;
 }
 
 message SimulationInitializedMessage {
@@ -52,26 +53,31 @@ message SimulationInitializedMessage {
   repeated AgentInitData agent_initialization_data = 2;
   repeated Obstacle obstacles = 3;
   repeated AgentGoal goals = 4;
+  string simulationId = 5;
 }
 
 message AgentsStateUpdateMessage {
   int32 step = 1;
   repeated AgentState agent_state_list = 2;
+  string simulationId = 3;
 }
 
 message ObstaclesProcessedMessage {
   int32 step = 1;
   repeated Obstacle obstacles = 2;
+  string simulationId = 3;
 }
 
 message GoalPositionUpdatedMessage {
   int32 step = 1;
   repeated AgentGoal goals = 2;
+  string simulationId = 3;
 }
 
 message NewObstacleAddedMessage {
   int32 step = 1;
   Obstacle obstacle = 2;
+  string simulationId = 3;
 }
 
 message RayHit {
@@ -83,10 +89,12 @@ message RayCastingUpdateMessage {
   int32 step = 1;
   int32 agent_id = 2;
   repeated RayHit hits = 3;
+  string simulationId = 4;
 }
 
 message SimulationTerminatedMessage {
   int32 step = 1;  // Final step number (optional)
   string reason = 2; // Optional message like "completed", "timeout", "manual stop"
+  string simulationId = 3;
 }
 

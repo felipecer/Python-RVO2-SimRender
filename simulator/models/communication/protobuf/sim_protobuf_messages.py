@@ -61,6 +61,7 @@ class Obstacle(betterproto.Message):
 class AllGoalsProcessedMessage(betterproto.Message):
     step: int = betterproto.int32_field(1)
     goals: List["AgentGoal"] = betterproto.message_field(2)
+    simulation_id: str = betterproto.string_field(3)
 
 
 @dataclass
@@ -69,30 +70,35 @@ class SimulationInitializedMessage(betterproto.Message):
     agent_initialization_data: List["AgentInitData"] = betterproto.message_field(2)
     obstacles: List["Obstacle"] = betterproto.message_field(3)
     goals: List["AgentGoal"] = betterproto.message_field(4)
+    simulation_id: str = betterproto.string_field(5)
 
 
 @dataclass
 class AgentsStateUpdateMessage(betterproto.Message):
     step: int = betterproto.int32_field(1)
     agent_state_list: List["AgentState"] = betterproto.message_field(2)
+    simulation_id: str = betterproto.string_field(3)
 
 
 @dataclass
 class ObstaclesProcessedMessage(betterproto.Message):
     step: int = betterproto.int32_field(1)
     obstacles: List["Obstacle"] = betterproto.message_field(2)
+    simulation_id: str = betterproto.string_field(3)
 
 
 @dataclass
 class GoalPositionUpdatedMessage(betterproto.Message):
     step: int = betterproto.int32_field(1)
     goals: List["AgentGoal"] = betterproto.message_field(2)
+    simulation_id: str = betterproto.string_field(3)
 
 
 @dataclass
 class NewObstacleAddedMessage(betterproto.Message):
     step: int = betterproto.int32_field(1)
     obstacle: "Obstacle" = betterproto.message_field(2)
+    simulation_id: str = betterproto.string_field(3)
 
 
 @dataclass
@@ -106,9 +112,11 @@ class RayCastingUpdateMessage(betterproto.Message):
     step: int = betterproto.int32_field(1)
     agent_id: int = betterproto.int32_field(2)
     hits: List["RayHit"] = betterproto.message_field(3)
+    simulation_id: str = betterproto.string_field(4)
 
 
 @dataclass
 class SimulationTerminatedMessage(betterproto.Message):
     step: int = betterproto.int32_field(1)
     reason: str = betterproto.string_field(2)
+    simulation_id: str = betterproto.string_field(3)
