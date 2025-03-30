@@ -165,7 +165,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             step=0,
             agent_initialization_data=agent_init,
             obstacles=obstacle_data,
-            goals=agent_goal_list
+            goals=agent_goal_list,
+            simulationId=self.simulation_id
         ))
         self._setup_obstacle_vertex_array()    
     
@@ -325,10 +326,19 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         ]
         
         # Send the message with additional data
-        self.notify_observers(AgentsStateUpdateMessage(step=self.current_step, agent_state_list=agent_state_list))
+        self.notify_observers(
+            AgentsStateUpdateMessage(
+                step=self.current_step, 
+                agent_state_list=agent_state_list,
+                simulationId=self.simulation_id))
         if self.intersect_list != None:
             rayhits = [RayHit(x,y) for x, y in self.intersect_list]
-            self.notify_observers(RayCastingUpdateMessage(step=self.current_step, agent_id = 0, hits=rayhits)) # agent_id hardcoded
+            self.notify_observers(
+                RayCastingUpdateMessage(
+                    step=self.current_step, 
+                    agent_id = 0, 
+                    hits=rayhits,
+                    simulationId=self.simulation_id)) # agent_id hardcoded
         self.store_step(self.current_step)
 
     def run_simulation(self, steps: int):
@@ -355,7 +365,11 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
             agent_positions = [(agent_id, *self.sim.getAgentPosition(agent_id)) for agent_id in range(self.sim.getNumAgents())]
             print(f"Sending AgentPositionsUpdateMessage for step {self.current_step}")
-            self.notify_observers(AgentsStateUpdateMessage(step=self.current_step, agent_state_list=agent_positions))
+            self.notify_observers(
+                AgentsStateUpdateMessage(
+                    step=self.current_step, 
+                    agent_state_list=agent_positions,
+                    simulationId=self.simulation_id))
             self.store_step(step)
 
     def store_step(self, step: int):
@@ -547,7 +561,10 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         )
         goal_reached = distance <= 0.50
         if goal_reached:
-            self.notify_observers(SimulationTerminatedMessage(step=self.current_step))
+            self.notify_observers(
+                SimulationTerminatedMessage(
+                    step=self.current_step,
+                    simulationId=self.simulation_id))
         # Consider the goal reached if the distance is less than or equal to a threshold
         return goal_reached
 
