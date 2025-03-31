@@ -29,6 +29,9 @@ def to_protobuf_and_type(msg: orig.BaseMessage) -> Tuple[str, bytes]:
     elif isinstance(msg, orig.RayCastingUpdateMessage):
         proto = to_ray_casting_update_message(msg)
         return "RayCastingUpdateMessage", bytes(proto)
+    elif isinstance(msg, orig.SimulationTerminatedMessage):
+        proto = to_simulation_terminated_message(msg)
+        return "SimulationTerminatedMessage", bytes(proto)
     else:
         raise ValueError(f"Unsupported message type: {type(msg)}")
 
@@ -112,7 +115,7 @@ def to_simulation_initialized_message(msg: orig.SimulationInitializedMessage) ->
         agent_initialization_data=[to_agent_init(a) for a in msg.agent_initialization_data],
         obstacles=[to_obstacle(o) for o in msg.obstacles],
         goals=[to_agent_goal(g) for g in msg.goals],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 def from_simulation_initialized_message(msg: pb.SimulationInitializedMessage) -> orig.SimulationInitializedMessage:
@@ -121,7 +124,7 @@ def from_simulation_initialized_message(msg: pb.SimulationInitializedMessage) ->
         agent_initialization_data=[from_agent_init(a) for a in msg.agent_initialization_data],
         obstacles=[from_obstacle(o) for o in msg.obstacles],
         goals=[from_agent_goal(g) for g in msg.goals],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 
@@ -129,14 +132,14 @@ def to_agents_state_update_message(msg: orig.AgentsStateUpdateMessage) -> pb.Age
     return pb.AgentsStateUpdateMessage(
         step=msg.step,
         agent_state_list=[to_agent_state(a) for a in msg.agent_state_list],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 def from_agents_state_update_message(msg: pb.AgentsStateUpdateMessage) -> orig.AgentsStateUpdateMessage:
     return orig.AgentsStateUpdateMessage(
         step=msg.step,
         agent_state_list=[from_agent_state(a) for a in msg.agent_state_list],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 
@@ -144,14 +147,14 @@ def to_goal_position_updated_message(msg: orig.GoalPositionUpdatedMessage) -> pb
     return pb.GoalPositionUpdatedMessage(
         step=msg.step,
         goals=[to_agent_goal(g) for g in msg.goals],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 def from_goal_position_updated_message(msg: pb.GoalPositionUpdatedMessage) -> orig.GoalPositionUpdatedMessage:
     return orig.GoalPositionUpdatedMessage(
         step=msg.step,
         goals=[from_agent_goal(g) for g in msg.goals],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 
@@ -159,14 +162,14 @@ def to_obstacles_processed_message(msg: orig.ObstaclesProcessedMessage) -> pb.Ob
     return pb.ObstaclesProcessedMessage(
         step=msg.step,
         obstacles=[to_obstacle(o) for o in msg.obstacles],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 def from_obstacles_processed_message(msg: pb.ObstaclesProcessedMessage) -> orig.ObstaclesProcessedMessage:
     return orig.ObstaclesProcessedMessage(
         step=msg.step,
         obstacles=[from_obstacle(o).vertices for o in msg.obstacles],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 
@@ -174,14 +177,14 @@ def to_all_goals_processed_message(msg: orig.AllGoalsProcessedMessage) -> pb.All
     return pb.AllGoalsProcessedMessage(
         step=msg.step,
         goals=[to_agent_goal(g) for g in msg.goals],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 def from_all_goals_processed_message(msg: pb.AllGoalsProcessedMessage) -> orig.AllGoalsProcessedMessage:
     return orig.AllGoalsProcessedMessage(
         step=msg.step,
         goals=[from_agent_goal(g) for g in msg.goals],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 
@@ -189,14 +192,14 @@ def to_new_obstacle_added_message(msg: orig.NewObstacleAddedMessage) -> pb.NewOb
     return pb.NewObstacleAddedMessage(
         step=msg.step,
         obstacle=to_obstacle(orig.Obstacle(vertices=msg.obstacle)),
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 def from_new_obstacle_added_message(msg: pb.NewObstacleAddedMessage) -> orig.NewObstacleAddedMessage:
     return orig.NewObstacleAddedMessage(
         step=msg.step,
         obstacle=[from_vector2(v) for v in msg.obstacle.vertices],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 
@@ -205,7 +208,7 @@ def to_ray_casting_update_message(msg: orig.RayCastingUpdateMessage) -> pb.RayCa
         step=msg.step,
         agent_id=msg.agent_id,
         hits=[to_ray_hit(h) for h in msg.hits],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 def from_ray_casting_update_message(msg: pb.RayCastingUpdateMessage) -> orig.RayCastingUpdateMessage:
@@ -213,19 +216,19 @@ def from_ray_casting_update_message(msg: pb.RayCastingUpdateMessage) -> orig.Ray
         step=msg.step,
         agent_id=msg.agent_id,
         hits=[from_ray_hit(h) for h in msg.hits],
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 def to_simulation_terminated_message(msg: orig.SimulationTerminatedMessage) -> pb.SimulationTerminatedMessage:
     return pb.SimulationTerminatedMessage(
         step=msg.step,
         reason=msg.reason,
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )
 
 def from_simulation_terminated_message(msg: pb.SimulationTerminatedMessage) -> orig.SimulationTerminatedMessage:
     return orig.SimulationTerminatedMessage(
         step=msg.step,
         reason=msg.reason,
-        simulationId=msg.simulationId
+        simulation_id=msg.simulation_id
     )

@@ -11,14 +11,14 @@ class RVOMiacTwoPaths(RVOBaseEnv):
     Uses the base class's step() logic with either 'naive' or 'min_dist' mode.
     """
 
-    def __init__(self, config_file=None, render_mode="rgb_array", seed=None, step_mode='min_dist'):
+    def __init__(self, config_file=None, render_mode="rgb_array", seed=None, step_mode='min_dist', simulation_id=None):
         """
         :param config_file: Path to the YAML config file
         :param render_mode: 'rgb_array', 'ansi', or None
         :param seed: Optional seed
         :param step_mode: 'naive' or 'min_dist'
         """
-        super().__init__(config_file=config_file, render_mode=render_mode, seed=seed, step_mode=step_mode)
+        super().__init__(config_file=config_file, render_mode=render_mode, seed=seed, step_mode=step_mode, simulation_id=simulation_id)
 
     def _get_obs(self):
         """
@@ -71,11 +71,13 @@ class RVOMiacTwoPaths(RVOBaseEnv):
 
 if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo
+    simulation_id = f"two_paths_level_3_{datetime.now()}" 
     env = RVOMiacTwoPaths(
         config_file='./simulator/worlds/miac/two_paths/two_paths_level_3.yaml',
         render_mode='human',
         seed=42,
-        step_mode='min_dist'
+        step_mode='min_dist',
+        simulation_id=simulation_id
     )
     # Extract filename without extension from config_file path
     config_filename = os.path.basename(env.config_file)  # Gets 'two_paths_level_0.yaml'

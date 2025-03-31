@@ -21,9 +21,9 @@ class RVOBaseEnv(gym.Env):
       - Default 'naive' / 'min_dist' step behavior
     """
 
-    metadata = {'render.modes': ['ansi', 'rgb_array', 'human']}
+    metadata = {'render.modes': ['ansi', 'rgb_array', 'human']}    
 
-    def __init__(self, config_file=None, render_mode="human", seed=None, step_mode='min_dist'):
+    def __init__(self, config_file=None, render_mode="human", seed=None, step_mode='min_dist', simulation_id=None):
         """
         :param config_file: path to YAML config (optional)
         :param render_mode: 'rgb', 'ansi', or None
@@ -36,7 +36,7 @@ class RVOBaseEnv(gym.Env):
         self.seed_val = seed
         self.step_mode = step_mode  # either 'naive' or 'min_dist'
         self.sim = None
-        
+        self.simulation_id = simulation_id
 
         # Load config if provided
         if config_file:
@@ -62,7 +62,8 @@ class RVOBaseEnv(gym.Env):
 
     def _init_simulator(self):
         """Initialize the RVO2 simulator and register dynamics."""
-        self.sim = RVO2SimulatorWrapper(self.world_config, "test_simulation", seed=self.seed_val)
+        simulation_id = self.simulation_id if self.simulation_id != None else "test_simulation"
+        self.sim = RVO2SimulatorWrapper(self.world_config, simulation_id=simulation_id, seed=self.seed_val)
         for dynamic_config in self.world_config.dynamics:
             self.sim.register_dynamic(dynamic_config)
         self._init_renderers()

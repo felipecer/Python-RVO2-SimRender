@@ -166,7 +166,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             agent_initialization_data=agent_init,
             obstacles=obstacle_data,
             goals=agent_goal_list,
-            simulationId=self.simulation_id
+            simulation_id=self.simulation_id
         ))
         self._setup_obstacle_vertex_array()    
     
@@ -330,7 +330,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             AgentsStateUpdateMessage(
                 step=self.current_step, 
                 agent_state_list=agent_state_list,
-                simulationId=self.simulation_id))
+                simulation_id=self.simulation_id))
         if self.intersect_list != None:
             rayhits = [RayHit(x,y) for x, y in self.intersect_list]
             self.notify_observers(
@@ -338,7 +338,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                     step=self.current_step, 
                     agent_id = 0, 
                     hits=rayhits,
-                    simulationId=self.simulation_id)) # agent_id hardcoded
+                    simulation_id=self.simulation_id)) # agent_id hardcoded
         self.store_step(self.current_step)
 
     def run_simulation(self, steps: int):
@@ -369,7 +369,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 AgentsStateUpdateMessage(
                     step=self.current_step, 
                     agent_state_list=agent_positions,
-                    simulationId=self.simulation_id))
+                    simulation_id=self.simulation_id))
             self.store_step(step)
 
     def store_step(self, step: int):
@@ -564,7 +564,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             self.notify_observers(
                 SimulationTerminatedMessage(
                     step=self.current_step,
-                    simulationId=self.simulation_id))
+                    simulation_id=self.simulation_id))
         # Consider the goal reached if the distance is less than or equal to a threshold
         return goal_reached
 

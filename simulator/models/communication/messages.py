@@ -43,35 +43,35 @@ class Obstacle:
 @dataclass
 class AllGoalsProcessedMessage(BaseMessage):
     goals: List[AgentGoal]
-    simulationId: str
+    simulation_id: str
 
 @dataclass
 class SimulationInitializedMessage(BaseMessage):
     agent_initialization_data: List[AgentInitData]
     obstacles: List[Obstacle]
     goals: List[AgentGoal]
-    simulationId: str
+    simulation_id: str
 
 @dataclass
 class AgentsStateUpdateMessage(BaseMessage):
     # In addition to the position, we also include the velocity, preferred velocity, and the distance to the goal
     agent_state_list: List[AgentState]
-    simulationId: str
+    simulation_id: str
 
 @dataclass
 class ObstaclesProcessedMessage(BaseMessage):
     obstacles: List[List[Tuple[float, float]]]
-    simulationId: str
+    simulation_id: str
 
 @dataclass
 class GoalPositionUpdatedMessage(BaseMessage):
     goals: List[AgentGoal] 
-    simulationId: str
+    simulation_id: str
 
 @dataclass
 class NewObstacleAddedMessage(BaseMessage):
     obstacle: List[Tuple[float, float]]
-    simulationId: str
+    simulation_id: str
 
 @dataclass
 class RayHit:
@@ -82,9 +82,9 @@ class RayHit:
 class RayCastingUpdateMessage(BaseMessage):
     agent_id: int
     hits: List[RayHit]  # 360 expected
-    simulationId: str
+    simulation_id: str
 
 @dataclass
 class SimulationTerminatedMessage(BaseMessage):
-    simulationId: str
+    simulation_id: str
     reason: str = "Terminated"
