@@ -6,7 +6,7 @@ PROJECT_ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 echo "Project root: $PROJECT_ROOT"
 
 # Set the number of timesteps
-TIMESTEPS=250000
+TIMESTEPS=1000000
 
 # Generate a common timestamp for this batch run
 BATCH_TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")
@@ -128,10 +128,10 @@ done
 echo "======================================================================="
 
 # Process files in batches of 2
-TOTAL_BATCHES=$(( (TOTAL_FILES+1)/2 ))
+TOTAL_BATCHES=$(( (TOTAL_FILES+1)/1 ))
 
-for ((i=0; i<$TOTAL_FILES; i+=2)); do
-    BATCH_NUM=$((i/2+1))
+for ((i=0; i<$TOTAL_FILES; i+=1)); do
+    BATCH_NUM=$((i+1))
     
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting batch $BATCH_NUM of $TOTAL_BATCHES"
     echo "----- Batch $BATCH_NUM of $TOTAL_BATCHES -----" >> "$LOG_FILE"

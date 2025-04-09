@@ -43,6 +43,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         self.agent_initial_positions = []
         self._manual_velocity_updates = []
         self.intersect_list = None
+        self.initial_distance_from_goal_array = []
 
     def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):
         vector_to_goal = (
@@ -158,7 +159,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
         # Send initialization information to observers
         self.notify_observers(SimulationInitializedMessage(step=-1, agent_initialization_data=agent_initialization_data))
-        self._setup_obstacle_vertex_array()    
+        self._setup_obstacle_vertex_array()   
+        self.initial_distance_from_goal_array = [self.distance_from_goal(agent_id) for agent_id in range(self.sim.getNumAgents())] 
     
 
     def update_agent_with_behavior_params(self, agent_id: int, behavior_name: str):
@@ -527,6 +529,11 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         Returns:
             bool: True if the agent has reached its goal, False otherwise.
         """
+        distance = self.distance_from_goal(agent_id)
+        # Consider the goal reached if the distance is less than or equal to a threshold
+        return distance <= 0.50
+
+    def distance_from_goal(self, agent_id):
         current_position = self.sim.getAgentPosition(agent_id)
         goal_position = self.get_goal(agent_id)
         if not goal_position:
@@ -536,9 +543,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             (current_position[0] - goal_position[0]) ** 2 +
             (current_position[1] - goal_position[1]) ** 2
         )
-        # Consider the goal reached if the distance is less than or equal to a threshold
-        return distance <= 0.50
-
+            # Consider the goal reached if the distance is less than or equal to a threshold
+        return distance
 
 def main():
     parser = argparse.ArgumentParser(

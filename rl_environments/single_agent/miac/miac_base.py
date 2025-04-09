@@ -214,6 +214,8 @@ class RVOBaseEnv(gym.Env):
         reward = self.calculate_reward(0)
         done = self.is_done(0)
         truncated = (self.sim.get_state() == SimulationState.STOPPED)
+        if truncated and not done:
+            reward += (1 - (self.sim.distance_from_goal(0)/self.sim.initial_distance_from_goal_array[0])) * 2560
         info = self._get_info()
 
         return obs, reward, done, truncated, info

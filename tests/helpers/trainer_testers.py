@@ -114,7 +114,7 @@ class PPOTrainerTester:
         
         # Create a run name that includes environment and level information
         run_name = f"PPO"
-        if self.env_name and self.level:
+        if self.env_name and self.level != None:
             run_name = f"PPO_{self.env_name}_level_{self.level}"
         elif self.env_name:
             run_name = f"PPO_{self.env_name}"
