@@ -203,13 +203,16 @@ class UpdateInitialPositionOnGoalReachedDynamic(EventBasedDynamic):
         # Update the initial position in the simulator
         self._simulator.agent_initial_positions[agent_id] = current_position
 
+
 @register(alias="stop_on_exit_area", category="dynamic")
 class StopOnExitAreaDynamic(OnStepDynamic):
     boundary_x: float
     boundary_y: float
     agent_id: int
+
     def execute(self):
-        x, y = self._simulator.get_agent_position(self.agent_id)
+        agent_position = self._simulator.get_agent_position(self.agent_id)
+        x, y = agent_position.x(), agent_position.y()
         if not (-self.boundary_x <= x <= self.boundary_x and -self.boundary_y <= y <= self.boundary_y):
             # print(f"Position: {x},{y} is outside the boundary x[-{self.boundary_x}:+{self.boundary_x}], y[-{self.boundary_y}:+{self.boundary_y}]")
             # print(f"Agent {self.agent_id} stepped outside the boundary. Stopping simulation.")

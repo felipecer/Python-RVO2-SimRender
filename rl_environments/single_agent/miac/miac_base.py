@@ -35,11 +35,10 @@ class RVOBaseEnv(gym.Env):
         self.seed_val = seed
         self.step_mode = step_mode  # either 'naive' or 'min_dist'
         self.sim = None
-        
 
         # Load config if provided
         if config_file:
-            self._load_config(config_file)        
+            self._load_config(config_file)
 
         # Set up simulator if config was loaded
         if hasattr(self, 'world_config'):
@@ -48,10 +47,10 @@ class RVOBaseEnv(gym.Env):
         # Initialize default spaces (child classes may override these)
         # Example: assume 2D action, 92D observation
         obs_d = 2 + 720 + 15 * 6
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_d,), dtype=np.float32)
-
-        
+        self.action_space = spaces.Box(
+            low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.Box(
+            low=-np.inf, high=np.inf, shape=(obs_d,), dtype=np.float32)
 
     def _load_config(self, config_file):
         """Load YAML configuration and store it in self.world_config."""
@@ -61,7 +60,8 @@ class RVOBaseEnv(gym.Env):
 
     def _init_simulator(self):
         """Initialize the RVO2 simulator and register dynamics."""
-        self.sim = RVO2SimulatorWrapper(self.world_config, "test_simulation", seed=self.seed_val)
+        self.sim = RVO2SimulatorWrapper(
+            self.world_config, "test_simulation", seed=self.seed_val)
         for dynamic_config in self.world_config.dynamics:
             self.sim.register_dynamic(dynamic_config)
         self._init_renderers()
@@ -118,7 +118,6 @@ class RVOBaseEnv(gym.Env):
             # No known render mode
             self.renderer = None
 
-
     # def step(self, action):
     #     """
     #     Default step method with two built-in modes:
@@ -162,7 +161,7 @@ class RVOBaseEnv(gym.Env):
 
     #     # 5. Collect results
     #     obs = self._get_obs()
-        
+
     #     reward = self.calculate_reward(0)
     #     done = self.is_done(0)
     #     truncated = self.sim.get_state() == SimulationState.STOPPED
@@ -176,7 +175,8 @@ class RVOBaseEnv(gym.Env):
 
     def step(self, action):
         if self.sim is None:
-            raise RuntimeError("Simulator not initialized. Please check your config_file.")
+            raise RuntimeError(
+                "Simulator not initialized. Please check your config_file.")
 
         # 1. Determine base velocity
         if self.step_mode == 'min_dist':
@@ -205,7 +205,7 @@ class RVOBaseEnv(gym.Env):
 
         # 4. Update simulator
         self.sim.update_agent_velocity(0, tuple(clipped))
-        self.sim.update_agent_velocities()
+        # self.sim.update_agent_velocities()
         self.sim.execute_simulation_step()
         self.sim.current_step += 1
 
@@ -215,7 +215,8 @@ class RVOBaseEnv(gym.Env):
         done = self.is_done(0)
         truncated = (self.sim.get_state() == SimulationState.STOPPED)
         if truncated and not done:
-            reward += (1 - (self.sim.distance_from_goal(0)/self.sim.initial_distance_from_goal_array[0])) * 2560
+            reward += (1 - (self.sim.distance_from_goal(0) /
+                       self.sim.initial_distance_from_goal_array[0])) * 2560
         info = self._get_info()
 
         return obs, reward, done, truncated, info
@@ -247,7 +248,8 @@ class RVOBaseEnv(gym.Env):
     def reset(self, seed=None, options=None):
         """Resets the environment and the simulation."""
         if self.sim is None:
-            raise RuntimeError("Simulator is not initialized. Make sure config_file is valid.")
+            raise RuntimeError(
+                "Simulator is not initialized. Make sure config_file is valid.")
 
         if seed is not None:
             self.sim.reset_rng_with_seed(seed)
@@ -262,11 +264,13 @@ class RVOBaseEnv(gym.Env):
 
     def calculate_reward(self, agent_id):
         """Override in child classes (default raises error)."""
-        raise NotImplementedError("Please implement calculate_reward() in the child class.")
+        raise NotImplementedError(
+            "Please implement calculate_reward() in the child class.")
 
     def is_done(self, agent_id):
         """Override in child classes (default raises error)."""
-        raise NotImplementedError("Please implement is_done() in the child class.")
+        raise NotImplementedError(
+            "Please implement is_done() in the child class.")
 
     def _get_obs(self):
         """Override in child classes if you need actual observations."""

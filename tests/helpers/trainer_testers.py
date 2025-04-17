@@ -7,11 +7,12 @@ from stable_baselines3.common.env_util import make_vec_env
 import os
 import csv
 
+
 def parse_cli_args(script_dir):
     parser = argparse.ArgumentParser(
         description='Train or test the PPO model in a simulation environment.')
     parser.add_argument('--mode', choices=['train', 'test'],
-                        required=True, help='Operation mode: train or test')
+                        required=True, help='Operation mode: train or test', default='train')
     parser.add_argument('--config_file', default='',
                         help='Environment configuration file')
     parser.add_argument('--total_timesteps', type=int, default=1000000,
@@ -47,7 +48,8 @@ def parse_cli_args(script_dir):
     if args.log_dir is None:
         args.log_dir = os.path.join(script_dir, 'logs', unique_id)
     if args.save_path is None:
-        args.save_path = os.path.join(script_dir, 'saves', f'ppo_model_{unique_id}')
+        args.save_path = os.path.join(
+            script_dir, 'saves', f'ppo_model_{unique_id}')
 
     args.render_mode = args.render_mode if args.mode == 'test' else None
     args.unique_id = unique_id
@@ -83,47 +85,49 @@ class PPOTrainerTester:
     def log_parameters(self, params):
         # Use the log_dir as is, don't get its parent directory
         os.makedirs(self.log_dir, exist_ok=True)
-        
+
         # Write the CSV file directly in the log directory
         log_file = os.path.join(self.log_dir, 'run_log.csv')
         file_exists = os.path.isfile(log_file)
-        
+
         with open(log_file, mode='a', newline='') as file:
             writer = csv.writer(file)
             if not file_exists:
-                writer.writerow(['timestamp', 'tag', 'unique_id', 'env_name', 'level', 'config_file', 'total_timesteps', 'n_steps', 'n_envs', 'seed', 'log_dir', 'save_path', 'hyperparameters', 'mean_reward'])
+                writer.writerow(['timestamp', 'tag', 'unique_id', 'env_name', 'level', 'config_file', 'total_timesteps',
+                                'n_steps', 'n_envs', 'seed', 'log_dir', 'save_path', 'hyperparameters', 'mean_reward'])
             writer.writerow([
-                datetime.now().isoformat(), 
-                self.tag, 
+                datetime.now().isoformat(),
+                self.tag,
                 self.unique_id,
                 self.env_name,
-                self.level, 
-                params['config_file'], 
-                params['total_timesteps'], 
-                params['n_steps'], 
-                params['n_envs'], 
-                params['seed'], 
-                params['log_dir'], 
-                params['save_path'], 
-                str(params['hyperparameters']), 
+                self.level,
+                params['config_file'],
+                params['total_timesteps'],
+                params['n_steps'],
+                params['n_envs'],
+                params['seed'],
+                params['log_dir'],
+                params['save_path'],
+                str(params['hyperparameters']),
                 params['mean_reward']
             ])
 
     def train(self, n_envs=32, total_timesteps=1000000, n_steps=256, device='cpu', progress_bar=True):
         vec_env = self.create_env(n_envs=n_envs)
-        
+
         # Create a run name that includes environment and level information
         run_name = f"PPO"
         if self.env_name and self.level != None:
             run_name = f"PPO_{self.env_name}_level_{self.level}"
         elif self.env_name:
             run_name = f"PPO_{self.env_name}"
-        
+
         model = PPO("MlpPolicy", vec_env, n_steps=n_steps, verbose=1, device=device,
                     tensorboard_log=self.log_dir, **self.hyperparams)
-        
+
         # Include run_name in the learn method
-        model.learn(total_timesteps=total_timesteps, progress_bar=progress_bar, tb_log_name=run_name)
+        model.learn(total_timesteps=total_timesteps,
+                    progress_bar=progress_bar, tb_log_name=run_name)
         model.save(self.save_path)
         print("Training completed")
         del model

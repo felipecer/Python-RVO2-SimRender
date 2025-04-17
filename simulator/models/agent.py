@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 class AgentDefaults(BaseModel):
     neighbor_dist: float
-    max_neighbors: float
+    max_neighbors: int
     time_horizon: float
     time_horizon_obst: float
     radius: float
