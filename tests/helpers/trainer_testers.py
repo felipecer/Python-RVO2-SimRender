@@ -4,6 +4,7 @@ from datetime import datetime
 import uuid
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.vec_env import SubprocVecEnv
 import os
 import csv
 
@@ -78,8 +79,8 @@ class PPOTrainerTester:
             os.makedirs(save_dir, exist_ok=True)
 
     def create_env(self, n_envs):
-        return make_vec_env(self.env_class, n_envs=n_envs, env_kwargs={
-            "config_file": self.config_file, "render_mode": self.render_mode, "seed": self.seed
+        return make_vec_env(self.env_class, n_envs=n_envs, vec_env_cls=SubprocVecEnv, env_kwargs={
+            "config_file": self.config_file, "render_mode": self.render_mode, "seed": self.seed,
         })
 
     def log_parameters(self, params):
@@ -112,7 +113,7 @@ class PPOTrainerTester:
                 params['mean_reward']
             ])
 
-    def train(self, n_envs=32, total_timesteps=1000000, n_steps=256, device='cpu', progress_bar=True):
+    def train(self, n_envs=16, total_timesteps=1000000, n_steps=256, device='cpu', progress_bar=True):
         vec_env = self.create_env(n_envs=n_envs)
 
         # Create a run name that includes environment and level information

@@ -39,7 +39,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         self.simulation_id = simulation_id  # Stores the simulation ID
         self.sim = None  # Instance of the RVO2 simulator, will be initialized later
         self.agent_goals = {}  # Dictionary to store agent goals
-        self.steps_buffer = []  # Buffer to store data for each simulation step
+        # self.steps_buffer = []  # Buffer to store data for each simulation step
         self.obstacles = []
         self.agent_initial_positions = []
         self._manual_velocity_updates = []
@@ -136,6 +136,9 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 # Increment the global agent ID for the next agent
                 global_agent_id += 1
 
+        goals_v2 = [rvo2_rl.Vector2(goal[0], goal[1])
+                    for _, goal in self.agent_goals.items()]
+        self.sim.set_goals_list(goals_v2)
         # Add obstacles to the simulation
         if config.obstacles:
             obstacle_shapes = []
@@ -317,7 +320,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 event = GoalReachedEvent(
                     agent_id=agent_id,
                     goal_position=self.agent_goals[agent_id],
-                    current_position=self.sim.get_agent_position(agent_id),
+                    current_position=(self.sim.get_agent_position(
+                        agent_id).x(), self.sim.get_agent_position(agent_id).y()),
                     step=self.current_step
                 )
                 self.handle_event(event.alias, event)
@@ -345,7 +349,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         if self.intersect_list != None:
             self.notify_observers(RayCastingUpdateMessage(
                 step=self.current_step, intersections=self.intersect_list))
-        self.store_step(self.current_step)
+        # self.store_step(self.current_step)
 
     def run_simulation(self, steps: int):
         """
@@ -375,39 +379,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 f"Sending AgentPositionsUpdateMessage for step {self.current_step}")
             self.notify_observers(AgentPositionsUpdateMessage(
                 step=self.current_step, agent_positions=agent_positions))
-            self.store_step(step)
-
-    def store_step(self, step: int):
-        """
-        Stores the agent information at a given step.
-
-        Args:
-            step (int): The current step number in the simulation.
-        """
-        step_data = {'step': step, 'agents': []}
-        for agent_id in range(self.sim.get_num_agents()):
-            position = self.sim.get_agent_position(agent_id)
-            step_data['agents'].append({
-                'id': agent_id,
-                'position': position
-            })
-        self.steps_buffer.append(step_data)
-
-    def save_simulation_runs(self):
-        """
-        Saves the simulation results to a file.
-        """
-        # timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        # filename = f"hardcoded_name_{self.simulation_id}_{timestamp}.txt".replace(" ", "_")
-
-        # with open(filename, 'w') as file:
-        #     for step_data in self.steps_buffer:
-        #         step = step_data['step']
-        #         for agent_data in step_data['agents']:
-        #             file.write(f"{step},{agent_data['id']},{agent_data['position'][0]:.2f},{agent_data['position'][1]:.2f}\n")
-
-        # print(f"Simulation file saved as: {filename}")
-        pass
+            # self.store_step(step)
 
     def update_agent_velocity(self, agent_id: int, velocity: Tuple[float, float]):
         """
@@ -455,6 +427,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         """
         Updates the preferred velocities of agents in the simulation, considering manual updates.
         """
+        self.sim.set_preferred_velocities()
         # Apply manual updates first
         manual_update_ids = set(agent_id for agent_id,
                                 _ in self._manual_velocity_updates)
@@ -462,35 +435,6 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         for agent_id, velocity in self._manual_velocity_updates:
             self.sim.set_agent_pref_velocity(
                 agent_id, rvo2_rl.Vector2(*velocity))
-
-        # Update the rest of the agents with the default logic
-        num_goals = len(self.agent_goals)
-        for agent_id in range(self.sim.get_num_agents()):
-            if agent_id >= num_goals or agent_id in manual_update_ids:
-                continue
-
-            agent_position = self.sim.get_agent_position(agent_id)
-            goal_position = self.agent_goals[agent_id]
-            if goal_position:
-                vector_to_goal = (
-                    goal_position[0] - agent_position.x(),
-                    goal_position[1] - agent_position.y()
-                )
-                distance = math.sqrt(
-                    vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
-                max_speed = self.sim.get_agent_max_speed(agent_id)
-
-                if distance > 0:
-                    preferred_velocity = (
-                        vector_to_goal[0] / distance * max_speed,
-                        vector_to_goal[1] / distance * max_speed
-                    )
-                else:
-                    preferred_velocity = (0, 0)
-
-                self.sim.set_agent_pref_velocity(
-                    agent_id, rvo2_rl.Vector2(*preferred_velocity))
-
         # Clear the queue after applying updates
         self._manual_velocity_updates.clear()
 

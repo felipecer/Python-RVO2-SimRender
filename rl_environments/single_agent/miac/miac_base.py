@@ -118,61 +118,6 @@ class RVOBaseEnv(gym.Env):
             # No known render mode
             self.renderer = None
 
-    # def step(self, action):
-    #     """
-    #     Default step method with two built-in modes:
-    #       - 'naive': interpret action as the velocity directly
-    #       - 'min_dist': interpret action as a deviation from the min-euclid-dist velocity
-    #     Child classes can override this if needed.
-    #     """
-    #     if self.sim is None:
-    #         raise RuntimeError("Simulator is not initialized. Make sure config_file is valid.")
-
-    #     # 1. Determine base velocity according to step_mode
-    #     if self.step_mode == 'min_dist':
-    #         base_vel = np.array(self.sim.get_velocity_min_euclid_dist(0))
-    #     elif self.step_mode == 'naive':
-    #         # 'naive' means the agent doesn't automatically move toward the goal;
-    #         # the action itself is the entire motion vector
-    #         base_vel = np.zeros(2, dtype=np.float32)
-    #     else:
-    #         raise ValueError(f"Unknown step_mode '{self.step_mode}'. Choose 'naive' or 'min_dist'.")
-
-    #     # 2. Add the action as a deviation (for 'min_dist') or as the entire velocity (for 'naive')
-    #     new_vel = base_vel + np.array(action)
-
-    #     # 3. Clip velocity to min/max
-    #     min_magnitude = self.sim.get_agent_min_speed(0)
-    #     max_magnitude = self.sim.get_agent_max_speed(0)
-    #     magnitude = np.linalg.norm(new_vel)
-
-    #     if magnitude < min_magnitude:
-    #         clipped = (new_vel / magnitude) * min_magnitude if magnitude > 1e-9 else np.zeros_like(new_vel)
-    #     elif magnitude > max_magnitude:
-    #         clipped = (new_vel / magnitude) * max_magnitude
-    #     else:
-    #         clipped = new_vel
-
-    #     # 4. Update simulator
-    #     self.sim.update_agent_velocity(0, tuple(clipped))
-    #     self.sim.update_agent_velocities()
-    #     self.sim.execute_simulation_step()
-    #     self.sim.current_step += 1
-
-    #     # 5. Collect results
-    #     obs = self._get_obs()
-
-    #     reward = self.calculate_reward(0)
-    #     done = self.is_done(0)
-    #     truncated = self.sim.get_state() == SimulationState.STOPPED
-    #     info = self._get_info()
-
-    #     # 6. Optionally render
-    #     if self.render_mode:
-    #         self.render()
-
-    #     return obs, reward, done, truncated, info
-
     def step(self, action):
         if self.sim is None:
             raise RuntimeError(
