@@ -143,10 +143,12 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         if config.obstacles:
             obstacle_shapes = []
             for obstacle_shape in config.obstacles:
-                shape = obstacle_shape.generate_shape()
+                vertices = obstacle_shape.generate_shape()
+                shape = [rvo2_rl.Vector2(vertex[0], vertex[1])
+                         for vertex in vertices]
                 self.sim.add_obstacle(shape)
-                obstacle_shapes.append(shape)
-            self.sim.process_obstacle()
+                obstacle_shapes.append(vertices)
+            self.sim.process_obstacles()
             self.notify_observers(ObstaclesProcessedMessage(
                 step=-1, obstacles=obstacle_shapes))
 
@@ -166,10 +168,11 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             for agent_id in range(self.sim.get_num_agents())
         ]
 
+        self.sim.init_raycasting_engine(360, 18.0)
         # Send initialization information to observers
         self.notify_observers(SimulationInitializedMessage(
             step=-1, agent_initialization_data=agent_initialization_data))
-        self._setup_obstacle_vertex_array()
+        # self._setup_obstacle_vertex_array()
         self.initial_distance_from_goal_array = [self.distance_from_goal(
             agent_id) for agent_id in range(self.sim.get_num_agents())]
 
@@ -219,6 +222,9 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
     def get_obstacle_vertex_array(self):
         return self._obstacle_segment_np_array
+
+    def vector_360_ray_intersections2(self, agent_id):
+        return self.sim.get_raycasting(agent_id)
 
     def vector_360_ray_intersections(self, agent_id):
         """
@@ -327,21 +333,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 self.handle_event(event.alias, event)
 
         # Collect more data from each agent
-        agent_data = [
-            (
-                agent_id,
-                # Current position (x, y)
-                *[self.sim.get_agent_position(agent_id).x(),
-                  self.sim.get_agent_position(agent_id).y()],
-                self.sim.get_agent_velocity(agent_id),  # Current velocity
-                self.sim.get_agent_pref_velocity(
-                    agent_id),  # Preferred velocity
-                math.dist([self.sim.get_agent_position(agent_id).x(),
-                           self.sim.get_agent_position(agent_id).y()],
-                          self.agent_goals[agent_id])  # Distance to goal
-            )
-            for agent_id in range(self.sim.get_num_agents())
-        ]
+        agent_data = self.sim.get_agent_data_batch()
+        # print(agent_data)
 
         # Send the message with additional data
         self.notify_observers(AgentPositionsUpdateMessage(

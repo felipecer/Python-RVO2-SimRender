@@ -26,14 +26,15 @@ class RVOMiacPerp2(RVOBaseEnv):
         max_neigh = self.sim.get_agent_max_num_neighbors(0)
         neighbor_data = self.sim.get_neighbors_data(
             0)  # Should return a list of floats
-        ray_casting = self.sim.vector_360_ray_intersections(0)
+        ray_casting = self.sim.vector_360_ray_intersections2(0)
         # ray_casting = self.sim.debug_360_ray_intersections_loop(0)
-        self.ray_casting = ray_casting
+        # self.ray_casting = ray_casting
+        self.ray_casting = ray_casting.tolist()
         # print(self.ray_casting)
 
-        flattened = [coord
-                     for row in ray_casting
-                     for coord in row]
+        # flattened = [coord
+        #              for row in ray_casting
+        #              for coord in row]
 
         # Each neighbor might provide 6 values (distance, direction, etc.)
         expected_length = max_neigh * 6
@@ -45,7 +46,7 @@ class RVOMiacPerp2(RVOBaseEnv):
 
         # Observations begin with goal offset, then neighbor info
         observations = [goal[0] - pos.x(), goal[1] - pos.y()]
-        observations.extend(flattened)
+        observations.extend(ray_casting.ravel())
         observations.extend(neighbor_data)
         return np.array(observations, dtype=np.float32)
 
