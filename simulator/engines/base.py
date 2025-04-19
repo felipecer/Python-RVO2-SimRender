@@ -5,16 +5,23 @@ from enum import Enum
 import numpy as np
 from simulator.models.simulation_configuration.simulation_dynamics import EventBasedDynamic, ExecutionTiming, OnceDynamic
 
+
 class DynamicsQueueManager:
     def __init__(self):
-        self.initial_tasks: List[Callable] = []        # Tasks that run once at the beginning
-        self.cycle_dynamics_before: List[Callable] = []  # Dynamics that run in each cycle before the step
-        self.cycle_dynamics_after: List[Callable] = []   # Dynamics that run in each cycle after the step
-        self.on_demand_before: List[Callable] = []       # On-demand dynamics before the step (removed after execution)
-        self.on_demand_after: List[Callable] = []        # On-demand dynamics after the step (removed after execution)
-        self.final_tasks: List[Callable] = []          # Tasks that run once at the end
+        # Tasks that run once at the beginning
+        self.initial_tasks: List[Callable] = []
+        # Dynamics that run in each cycle before the step
+        self.cycle_dynamics_before: List[Callable] = []
+        # Dynamics that run in each cycle after the step
+        self.cycle_dynamics_after: List[Callable] = []
+        # On-demand dynamics before the step (removed after execution)
+        self.on_demand_before: List[Callable] = []
+        # On-demand dynamics after the step (removed after execution)
+        self.on_demand_after: List[Callable] = []
+        # Tasks that run once at the end
+        self.final_tasks: List[Callable] = []
 
-    def add_dynamic(self, dynamic: Callable, timing: ExecutionTiming, on_demand: bool = False):        
+    def add_dynamic(self, dynamic: Callable, timing: ExecutionTiming, on_demand: bool = False):
         """Adds a dynamic to the corresponding list."""
         if timing == ExecutionTiming.BEFORE:
             if on_demand:
@@ -44,7 +51,7 @@ class DynamicsQueueManager:
         # Execute dynamics that run in each cycle
         for dynamic in self.cycle_dynamics_before:
             dynamic()
-        
+
         # Execute all on-demand dynamics, without removing them yet
         for dynamic in self.on_demand_before:
             dynamic()
@@ -68,21 +75,26 @@ class DynamicsQueueManager:
         for task in self.final_tasks:
             task()
 
+
 class SimulationState(Enum):
     SETUP = "setup"
     RUNNING = "running"
     PAUSED = "paused"  # We will leave this for later
     STOPPED = "stopped"
 
+
 class SimulationEngine(ABC):
     _default_seed = 11
+
     def __init__(self, seed: int = None):
         self._dynamics_manager = DynamicsQueueManager()
         self._event_handlers: Dict[str, List[Callable]] = {}
         self._state = SimulationState.SETUP
         self.current_step: int = 0
-        self._seed = seed if seed is not None else self._default_seed  # Use the provided seed or the default
-        self._random_number_generator = np.random.default_rng(self._seed)  # RNG initialization
+        # Use the provided seed or the default
+        self._seed = seed if seed is not None else self._default_seed
+        self._random_number_generator = np.random.default_rng(
+            self._seed)  # RNG initialization
 
     def reset_rng_with_seed(self, seed: int = None):
         """Resets the random number generator with a new seed."""
@@ -90,7 +102,7 @@ class SimulationEngine(ABC):
             seed = self._default_seed  # Use the default seed if none is provided
         self._seed = seed
         self._random_number_generator = np.random.default_rng(seed)
-    
+
     def get_seed(self) -> int:
         """Returns the current seed used by the RNG."""
         return self._seed
@@ -102,24 +114,27 @@ class SimulationEngine(ABC):
     def register_dynamic(self, dynamic):
         """Registers a dynamic to be executed during the simulation."""
         if self._state != SimulationState.SETUP:
-            raise RuntimeError("Cannot register dynamics after setup is complete.")
+            raise RuntimeError(
+                "Cannot register dynamics after setup is complete.")
 
         # Associate the simulator with the dynamic
         dynamic.register_simulator(self)
 
         # Handling dynamics that run once
         if isinstance(dynamic, OnceDynamic):
-            self._dynamics_manager.add_once_dynamic(dynamic.apply, dynamic.when)
+            self._dynamics_manager.add_once_dynamic(
+                dynamic.apply, dynamic.when)
         # Handling event-based dynamics
         elif isinstance(dynamic, EventBasedDynamic):
             # print(f"Registering event handler {dynamic.name} for event type: {dynamic.event_type}")
             # Register the event handler but do not enqueue it yet
-            self.register_event_handler(dynamic.event_type, dynamic.apply, dynamic.when)
+            self.register_event_handler(
+                dynamic.event_type, dynamic.apply, dynamic.when)
         # Handling dynamics that run in each cycle (OnStepDynamic or similar)
         else:
             self._dynamics_manager.add_dynamic(dynamic.apply, dynamic.when)
 
-    def register_event_handler(self, event_type: str, handler: Callable, when: ExecutionTiming = ExecutionTiming.BEFORE):   
+    def register_event_handler(self, event_type: str, handler: Callable, when: ExecutionTiming = ExecutionTiming.BEFORE):
         """Allows a dynamic to subscribe to a specific event."""
         if event_type not in self._event_handlers:
             self._event_handlers[event_type] = []
@@ -137,7 +152,6 @@ class SimulationEngine(ABC):
             action = make_action(handler, *args, **kwargs)
             self._dynamics_manager.add_dynamic(action, timing, on_demand=True)
 
-
     @abstractmethod
     def initialize_simulation(self):
         """Initializes the simulation, creating agents, goals, and obstacles."""
@@ -153,15 +167,11 @@ class SimulationEngine(ABC):
         """Executes a step in the simulation."""
         pass
 
-    @abstractmethod
-    def run_simulation(self, step: int):
-        """Runs the simulation cycle for a specified number of steps."""
-        pass
-
     def stop_simulation(self):
         """Stops the simulation."""
         self._state = SimulationState.STOPPED
-        self._dynamics_manager.run_final_tasks()  # Execute final tasks when stopping the simulation
+        # Execute final tasks when stopping the simulation
+        self._dynamics_manager.run_final_tasks()
 
     @abstractmethod
     def get_agent_position(self, agent_id) -> Tuple[float, float]:
@@ -191,24 +201,25 @@ class SimulationEngine(ABC):
     def execute_simulation_step(self):
         """
         Executes a simulation step, including dynamics and agent updates.
-        
+
         Args:
             step (int): The current step number in the simulation.
         """
         # Execute dynamics before the step
         self._dynamics_manager.run_before_step_dynamics()
-        
+
         # Execute the simulation step
         # self.run_simulation(1)
         self.step()
-        
+
         # Execute dynamics after the step
         self._dynamics_manager.run_after_step_dynamics()
-    
+
     def run_pipeline(self, steps: int):
         if self._state != SimulationState.SETUP:
-            raise RuntimeError("Simulation can only start from the SETUP state.")
-        
+            raise RuntimeError(
+                "Simulation can only start from the SETUP state.")
+
         # Initialize the simulation
         self.initialize_simulation()
 
@@ -222,7 +233,7 @@ class SimulationEngine(ABC):
             self.current_step = step
             if self._state == SimulationState.STOPPED:
                 break
-            
+
             # Execute a complete simulation step
             self.execute_simulation_step()
 

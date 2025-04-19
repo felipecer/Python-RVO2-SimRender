@@ -62,14 +62,17 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             return (0, 0)
 
     def set_agent_defaults(self, agent_idx, agent_defaults):
-        self.sim.setAgentNeighborDist(agent_idx, agent_defaults.neighbor_dist)
-        self.sim.setAgentMaxNeighbors(agent_idx, agent_defaults.max_neighbors)
-        self.sim.setAgentTimeHorizon(agent_idx, agent_defaults.time_horizon)
-        self.sim.setAgentTimeHorizonObst(
+        self.sim.set_agent_neighbor_dist(
+            agent_idx, agent_defaults.neighbor_dist)
+        self.sim.set_agent_max_neighbors(
+            agent_idx, agent_defaults.max_neighbors)
+        self.sim.set_agent_time_horizon(agent_idx, agent_defaults.time_horizon)
+        self.sim.set_agent_time_horizon_obst(
             agent_idx, agent_defaults.time_horizon_obst)
-        self.sim.setAgentRadius(agent_idx, agent_defaults.radius)
-        self.sim.setAgentMaxSpeed(agent_idx, agent_defaults.max_speed)
-        self.sim.setAgentVelocity(agent_idx, agent_defaults.velocity)
+        self.sim.set_agent_radius(agent_idx, agent_defaults.radius)
+        self.sim.set_agent_max_speed(agent_idx, agent_defaults.max_speed)
+        self.sim.set_agent_velocity(agent_idx, rvo2_rl.Vector2(
+            agent_defaults.velocity[0], agent_defaults.velocity[1]))
 
     def initialize_simulation(self):
         """
@@ -198,7 +201,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         simulator = self.sim
         """
         Precomputes all obstacle segments and stores them in a NumPy array for efficient queries.
-        
+
         Parameters:
         - simulator: Instance of RVOSimulator (Python bindings).
 
@@ -223,76 +226,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
     def get_obstacle_vertex_array(self):
         return self._obstacle_segment_np_array
 
-    def vector_360_ray_intersections2(self, agent_id):
+    def get_lidar_reading(self, agent_id):
         return self.sim.get_raycasting(agent_id)
-
-    def vector_360_ray_intersections(self, agent_id):
-        """
-        A simple, non-vectorized approach to raycasting in 360 degrees,
-        testing all static_segments, ignoring neighbor indices.
-        No max detection radius – all distances are valid.
-
-        Returns a list of 360 intersection points [x, y] or [None, None].
-        """
-
-        simulator = self.sim
-        # shape (N, 2, 2) for all obstacles
-        static_segments = self.get_obstacle_vertex_array()
-        agent_position = np.array(
-            (simulator.get_agent_position(agent_id).x(), simulator.get_agent_position(agent_id).y()), dtype=np.float32)
-        # Generate 360 directions
-        angles = np.radians(np.arange(360), dtype=np.float32)
-        directions = np.column_stack(
-            (np.cos(angles), np.sin(angles))).astype(np.float32)
-        final_result = []
-        for i in range(360):
-            direction = directions[i]
-            # track smallest valid t across all segments
-            best_t = float('inf')
-            best_point = [9999, 9999]
-
-            # For each obstacle segment in ALL segments
-            for seg in static_segments:
-                A = seg[0].astype(np.float32)
-                B = seg[1].astype(np.float32)
-                seg_dir = A - B  # direction of the segment
-
-                # Build the system to solve for [t, u]:
-                #   A + u * seg_dir = O + t * direction
-                # => (A - O) = [direction, seg_dir] * [t, u]^T
-                M = np.array([
-                    [direction[0], seg_dir[0]],
-                    [direction[1], seg_dir[1]]
-                ], dtype=np.float32)
-
-                rhs = A - agent_position  # (2,)
-
-                det = np.linalg.det(M)
-                if abs(det) < 1e-6:
-                    # Parallel or nearly parallel
-                    continue
-
-                # Solve
-                try:
-                    sol = np.linalg.solve(M, rhs)  # returns [t, u]
-                    t, u = sol[0], sol[1]
-                except np.linalg.LinAlgError:
-                    continue  # numerical fail
-
-                # Must be in front of the ray (t >= 0) and on the segment (0 <= u <= 1)
-                if t >= 0 and 0 <= u <= 1:
-                    # No maximum radius filter – any t is valid
-                    if t < best_t:
-                        best_t = t
-                        # Intersection = O + t * direction
-                        x = agent_position[0] + direction[0] * t
-                        y = agent_position[1] + direction[1] * t
-                        best_point = [float(x), float(y)]
-
-            final_result.append(best_point)
-
-        self.intersect_list = final_result
-        return final_result
 
     def reset(self):
         """Resets the simulation to its initial state."""
@@ -343,36 +278,6 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             self.notify_observers(RayCastingUpdateMessage(
                 step=self.current_step, intersections=self.intersect_list))
         # self.store_step(self.current_step)
-
-    def run_simulation(self, steps: int):
-        """
-        Executes the simulation for a specified number of steps.
-
-        Args:
-            steps (int): Number of steps the simulation should execute.
-        """
-        for step in range(steps):
-            self.update_agent_velocities()
-            self.sim.doStep()
-
-            # Detect if any agent has reached its goal
-            for agent_id in range(self.sim.get_num_agents()):
-                if self.is_goal_reached(agent_id):
-                    event = GoalReachedEvent(
-                        agent_id=agent_id,
-                        goal_position=self.agent_goals[agent_id],
-                        current_position=self.sim.get_agent_position(agent_id),
-                        step=step
-                    )
-                    self.handle_event(event.alias, event)
-
-            agent_positions = [(agent_id, *self.sim.get_agent_position(agent_id))
-                               for agent_id in range(self.sim.get_num_agents())]
-            print(
-                f"Sending AgentPositionsUpdateMessage for step {self.current_step}")
-            self.notify_observers(AgentPositionsUpdateMessage(
-                step=self.current_step, agent_positions=agent_positions))
-            # self.store_step(step)
 
     def update_agent_velocity(self, agent_id: int, velocity: Tuple[float, float]):
         """
@@ -541,9 +446,9 @@ def main():
         sys.exit(1)
 
     window_width = int((world_config.map_settings.x_max -
-                       world_config.map_settings.x_min) * world_config.map_settings.cell_size)
+                        world_config.map_settings.x_min) * world_config.map_settings.cell_size)
     window_height = int((world_config.map_settings.y_max -
-                        world_config.map_settings.y_min) * world_config.map_settings.cell_size)
+                         world_config.map_settings.y_min) * world_config.map_settings.cell_size)
 
     if args.renderer == 'pygame':
         renderer = PyGameRenderer(

@@ -32,11 +32,9 @@ class RVOMiacTwoPaths(RVOBaseEnv):
         max_neigh = self.sim.get_agent_max_num_neighbors(0)
         neighbor_data = self.sim.get_neighbors_data(
             0)  # Should return a list of floats
-        ray_casting = self.sim.vector_360_ray_intersections2(0)
-        # ray_casting = self.sim.debug_360_ray_intersections_loop(0)
+        ray_casting = self.sim.get_lidar_reading(0)
         self.ray_casting = ray_casting.tolist()
         self.sim.intersect_list = self.ray_casting
-        # print(self.ray_casting)
 
         # Each neighbor might provide 6 values (distance, direction, etc.)
         expected_length = max_neigh * 6
@@ -50,8 +48,6 @@ class RVOMiacTwoPaths(RVOBaseEnv):
         observations = [goal[0] - pos.x(), goal[1] - pos.y()]
         observations.extend(ray_casting.ravel())
         observations.extend(neighbor_data)
-        # print("holi")
-
         return np.array(observations, dtype=np.float32)
 
     def calculate_reward(self, agent_id):
@@ -89,12 +85,6 @@ if __name__ == "__main__":
     # Generate a unique name_prefix with filename and datetime
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     name_prefix = f"{config_name}_{timestamp}"
-
-    # env = RecordVideo(
-    #     env,
-    #     video_folder="videos/",
-    #     name_prefix=name_prefix,
-    # )
     obs, info = env.reset()
     done = False
     i = 0

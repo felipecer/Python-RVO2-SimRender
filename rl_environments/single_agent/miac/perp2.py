@@ -26,15 +26,9 @@ class RVOMiacPerp2(RVOBaseEnv):
         max_neigh = self.sim.get_agent_max_num_neighbors(0)
         neighbor_data = self.sim.get_neighbors_data(
             0)  # Should return a list of floats
-        ray_casting = self.sim.vector_360_ray_intersections2(0)
-        # ray_casting = self.sim.debug_360_ray_intersections_loop(0)
-        # self.ray_casting = ray_casting
+        ray_casting = self.sim.get_lidar_reading(0)
         self.ray_casting = ray_casting.tolist()
-        # print(self.ray_casting)
-
-        # flattened = [coord
-        #              for row in ray_casting
-        #              for coord in row]
+        self.sim.intersect_list = self.ray_casting
 
         # Each neighbor might provide 6 values (distance, direction, etc.)
         expected_length = max_neigh * 6
@@ -88,12 +82,6 @@ if __name__ == "__main__":
     # Generate a unique name_prefix with filename and datetime
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     name_prefix = f"{config_name}_{timestamp}"
-
-    # env = RecordVideo(
-    #     env,
-    #     video_folder="videos/",
-    #     name_prefix=name_prefix,
-    # )
     obs, info = env.reset()
     done = False
     while not done:
