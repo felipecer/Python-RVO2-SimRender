@@ -80,8 +80,8 @@ class PPOTrainerTester:
 
     def create_env(self, n_envs):
         # vec_env_cls=SubprocVecEnv
-        return make_vec_env(self.env_class, n_envs=n_envs, vec_env_cls=SubprocVecEnv, env_kwargs={
-            # return make_vec_env(self.env_class, n_envs=n_envs, env_kwargs={
+        # return make_vec_env(self.env_class, n_envs=n_envs, vec_env_cls=SubprocVecEnv, env_kwargs={
+        return make_vec_env(self.env_class, n_envs=n_envs, env_kwargs={
             "config_file": self.config_file, "render_mode": self.render_mode, "seed": self.seed,
         })
 

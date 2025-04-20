@@ -33,7 +33,7 @@ class RVOMiacPerp1(RVOBaseEnv):
 
         # Create the goal offset array
         goal_offset = np.array(
-            [self.sim.current_step, goal[0] - pos.x(), goal[1] - pos.y()], dtype=np.float32)
+            [self.sim.current_step/256.0, goal[0] - pos.x(), goal[1] - pos.y()], dtype=np.float32)
 
         # Concatenate all parts of the observation
         return np.concatenate([goal_offset, ray_casting.ravel(), neighbor_data])

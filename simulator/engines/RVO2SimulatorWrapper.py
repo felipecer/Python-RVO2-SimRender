@@ -254,18 +254,19 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         """
         self.update_agent_velocities()
         self.sim.do_step()
-
+        # Collect more data from each agent
+        agent_data = self.sim.get_agent_data_batch()
         # Detect if any agent has reached its goal
-        for agent_id in range(self.sim.get_num_agents()):
-            if self.is_goal_reached(agent_id):
-                event = GoalReachedEvent(
-                    agent_id=agent_id,
-                    goal_position=self.agent_goals[agent_id],
-                    current_position=(self.sim.get_agent_position(
-                        agent_id).x(), self.sim.get_agent_position(agent_id).y()),
-                    step=self.current_step
-                )
-                self.handle_event(event.alias, event)
+        # for agent_id in range(self.sim.get_num_agents()):
+        #     if self.is_goal_reached(agent_id):
+        #         event = GoalReachedEvent(
+        #             agent_id=agent_id,
+        #             goal_position=self.agent_goals[agent_id],
+        #             current_position=(self.sim.get_agent_position(
+        #                 agent_id).x(), self.sim.get_agent_position(agent_id).y()),
+        #             step=self.current_step
+        #         )
+        #         self.handle_event(event.alias, event)
 
         # Collect more data from each agent
         agent_data = self.sim.get_agent_data_batch()
