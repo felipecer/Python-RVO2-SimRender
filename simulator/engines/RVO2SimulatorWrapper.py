@@ -359,6 +359,9 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
             neighbors_data.append(neighbor_pref_velocity.y())
         return neighbors_data
 
+    def get_neighbors_data2(self, agent_id):
+        return self.sim.get_neighbors_data(agent_id)
+
     def get_agent_position(self, agent_id) -> Tuple[float, float]:
         """Returns the current position of the agent."""
         return self.sim.get_agent_position(agent_id)

@@ -46,7 +46,7 @@ class RVOBaseEnv(gym.Env):
 
         # Initialize default spaces (child classes may override these)
         # Example: assume 2D action, 92D observation
-        obs_d = 2 + 720 + 15 * 6
+        obs_d = 3 + 720 + 15 * 6
         self.action_space = spaces.Box(
             low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = spaces.Box(

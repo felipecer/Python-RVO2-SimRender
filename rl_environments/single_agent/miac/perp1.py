@@ -20,29 +20,23 @@ class RVOMiacPerp1(RVOBaseEnv):
         """
         Gets the observation for the agent (ID=0), with padding for neighbor data.
         By default, we expect 2 values for (goal-pos), plus neighbor data.
+        Optimized to work directly with numpy arrays and minimize copying.
         """
         pos = self.sim.get_agent_position(0)
         goal = self.sim.get_goal(0)
-        max_neigh = self.sim.get_agent_max_num_neighbors(0)
-        neighbor_data = self.sim.get_neighbors_data(
-            0)  # Should return a list of floats
-        ray_casting = self.sim.get_lidar_reading(0)
+        neighbor_data = self.sim.get_neighbors_data2(0)  # already numpy array
+        ray_casting = self.sim.get_lidar_reading(0)  # already numpy array
+
+        # Store ray_casting for visualization purposes
         self.ray_casting = ray_casting.tolist()
         self.sim.intersect_list = self.ray_casting
 
-        # Each neighbor might provide 6 values (distance, direction, etc.)
-        expected_length = max_neigh * 6
-        if len(neighbor_data) < expected_length:
-            neighbor_data.extend(
-                [-9999]*(expected_length - len(neighbor_data)))
-        else:
-            neighbor_data = neighbor_data[:expected_length]
+        # Create the goal offset array
+        goal_offset = np.array(
+            [self.sim.current_step, goal[0] - pos.x(), goal[1] - pos.y()], dtype=np.float32)
 
-        # Observations begin with goal offset, then neighbor info
-        observations = [goal[0] - pos.x(), goal[1] - pos.y()]
-        observations.extend(ray_casting.ravel())
-        observations.extend(neighbor_data)
-        return np.array(observations, dtype=np.float32)
+        # Concatenate all parts of the observation
+        return np.concatenate([goal_offset, ray_casting.ravel(), neighbor_data])
 
     def calculate_reward(self, agent_id=0):
         """

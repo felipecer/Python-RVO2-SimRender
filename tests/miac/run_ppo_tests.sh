@@ -6,7 +6,7 @@ PROJECT_ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 echo "Project root: $PROJECT_ROOT"
 
 # Set the number of timesteps
-TIMESTEPS=1000000
+TIMESTEPS=2000000
 
 # Generate a common timestamp for this batch run
 BATCH_TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")
@@ -54,7 +54,7 @@ run_ppo_test() {
         python "tests/miac/$test_file" \
             --mode train \
             --total_timesteps $TIMESTEPS \
-            --device cuda \
+            --device cpu \
             --log_dir "tests/miac/${env_logs_dir}" \
             --save_path "tests/miac/${model_save_path}" \
             --env_name "$env_name" \
@@ -127,23 +127,18 @@ for ((i=0; i<$TOTAL_FILES; i++)); do
 done
 echo "======================================================================="
 
-# Process files in batches of 2
-TOTAL_BATCHES=$(( (TOTAL_FILES+1)/1 ))
+# Process files one at a time
+TOTAL_BATCHES=$TOTAL_FILES
 
-for ((i=0; i<$TOTAL_FILES; i+=1)); do
+for ((i=0; i<$TOTAL_FILES; i++)); do
     BATCH_NUM=$((i+1))
     
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting batch $BATCH_NUM of $TOTAL_BATCHES"
     echo "----- Batch $BATCH_NUM of $TOTAL_BATCHES -----" >> "$LOG_FILE"
     
-    # Run up to 2 tests in parallel
-    for ((j=0; j<2 && i+j<$TOTAL_FILES; j++)); do
-        echo "Launching process for: ${SHUFFLED_FILES[$i+j]}"
-        run_ppo_test "${SHUFFLED_FILES[$i+j]}" &
-    done
+    echo "Launching process for: ${SHUFFLED_FILES[$i]}"
+    run_ppo_test "${SHUFFLED_FILES[$i]}"
     
-    # Wait for all processes in this batch to complete
-    wait
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Completed batch $BATCH_NUM of $TOTAL_BATCHES"
     echo "-----------------------------------------------------"
 done
