@@ -227,7 +227,7 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         return self._obstacle_segment_np_array
 
     def get_lidar_reading(self, agent_id):
-        return self.sim.get_raycasting(agent_id)
+        return self.sim.get_raycasting_processed(agent_id)
 
     def reset(self):
         """Resets the simulation to its initial state."""
@@ -275,9 +275,9 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         # Send the message with additional data
         self.notify_observers(AgentPositionsUpdateMessage(
             step=self.current_step, agent_positions=agent_data))
-        if self.intersect_list != None:
-            self.notify_observers(RayCastingUpdateMessage(
-                step=self.current_step, intersections=self.intersect_list))
+        # if self.intersect_list != None:
+        #     self.notify_observers(RayCastingUpdateMessage(
+        #         step=self.current_step, intersections=self.intersect_list))
         # self.store_step(self.current_step)
 
     def update_agent_velocity(self, agent_id: int, velocity: Tuple[float, float]):
@@ -327,9 +327,6 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         Updates the preferred velocities of agents in the simulation, considering manual updates.
         """
         self.sim.set_preferred_velocities()
-        # Apply manual updates first
-        manual_update_ids = set(agent_id for agent_id,
-                                _ in self._manual_velocity_updates)
         # print("Manual updates:", self._manual_velocity_updates)
         for agent_id, velocity in self._manual_velocity_updates:
             self.sim.set_agent_pref_velocity(
@@ -343,25 +340,8 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
     def get_agent_max_num_neighbors(self, agent_id):
         return self.sim.get_agent_max_neighbors(agent_id)
 
-    def get_neighbors_data(self, agent_id):
-        neighbor_count = self.sim.get_agent_num_agent_neighbors(agent_id)
-        neighbors_data = []
-        for i in range(neighbor_count):
-            neighbor_agent_id = self.sim.get_agent_agent_neighbor(agent_id, i)
-            neighbor_position = self.sim.get_agent_position(neighbor_agent_id)
-            neighbor_velocity = self.sim.get_agent_velocity(neighbor_agent_id)
-            neighbor_pref_velocity = self.sim.get_agent_pref_velocity(
-                neighbor_agent_id)
-            neighbors_data.append(neighbor_position.x())
-            neighbors_data.append(neighbor_position.y())
-            neighbors_data.append(neighbor_velocity.x())
-            neighbors_data.append(neighbor_velocity.y())
-            neighbors_data.append(neighbor_pref_velocity.x())
-            neighbors_data.append(neighbor_pref_velocity.y())
-        return neighbors_data
-
     def get_neighbors_data2(self, agent_id):
-        return self.sim.get_neighbors_data(agent_id)
+        return self.sim.get_neighbors_with_mask(agent_id)
 
     def get_agent_position(self, agent_id) -> Tuple[float, float]:
         """Returns the current position of the agent."""

@@ -25,18 +25,18 @@ class RVOMiacIncoming(RVOBaseEnv):
         pos = self.sim.get_agent_position(0)
         goal = self.sim.get_goal(0)
         neighbor_data = self.sim.get_neighbors_data2(0)  # already numpy array
+        # print(neighbor_data)
         ray_casting = self.sim.get_lidar_reading(0)  # already numpy array
-
+        # print(ray_casting)
         # Store ray_casting for visualization purposes
-        self.ray_casting = ray_casting.tolist()
-        self.sim.intersect_list = self.ray_casting
-
+        self.ray_casting = ray_casting[0].tolist()
+        # self.sim.intersect_list = self.ray_casting
+        current_step = self.sim.current_step/256.0
         # Create the goal offset array
         goal_offset = np.array(
-            [self.sim.current_step/256.0, goal[0] - pos.x(), goal[1] - pos.y()], dtype=np.float32)
-
+            [current_step, goal[0] - pos.x(), goal[1] - pos.y()], dtype=np.float32)
         # Concatenate all parts of the observation
-        return np.concatenate([goal_offset, ray_casting.ravel(), neighbor_data])
+        return np.concatenate([goal_offset, ray_casting[0], ray_casting[1], neighbor_data[0], neighbor_data[1]])
 
     def calculate_reward(self, agent_id=0):
         """

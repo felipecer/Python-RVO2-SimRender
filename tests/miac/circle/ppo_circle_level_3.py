@@ -21,8 +21,8 @@ def main(env_class, args):
     device = args.device
     progress_bar = args.progress_bar
     if args.mode == 'train':
-        trainer_tester.train(total_timesteps=args.total_timesteps,
-                             device=device, progress_bar=progress_bar, n_steps=128)
+        trainer_tester.train(total_timesteps=args.total_timesteps, device=device,
+                             progress_bar=progress_bar, n_envs=args.n_envs, n_steps=args.n_steps)
     elif args.mode == 'test':
         trainer_tester.test()
 

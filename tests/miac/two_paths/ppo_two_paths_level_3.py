@@ -3,6 +3,7 @@ import os
 from rl_environments.single_agent.miac.two_paths import RVOMiacTwoPaths
 from tests.helpers.trainer_testers import parse_cli_args, PPOTrainerTester
 
+
 def main(env_class, args):
     config_file = args.config_file if args.config_file != '' else './simulator/worlds/miac/two_paths/two_paths_level_3.yaml'
 
@@ -21,9 +22,11 @@ def main(env_class, args):
     device = args.device
     progress_bar = args.progress_bar
     if args.mode == 'train':
-        trainer_tester.train(total_timesteps=args.total_timesteps, device=device, progress_bar=progress_bar)
+        trainer_tester.train(total_timesteps=args.total_timesteps, device=device,
+                             progress_bar=progress_bar, n_envs=args.n_envs, n_steps=args.n_steps)
     elif args.mode == 'test':
         trainer_tester.test()
+
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))

@@ -46,11 +46,35 @@ class RVOBaseEnv(gym.Env):
 
         # Initialize default spaces (child classes may override these)
         # Example: assume 2D action, 92D observation
-        obs_d = 3 + 720 + 15 * 6
+        obs_d = 3 + 360 + 360 + 15 * 6 + 15
+
+        # Let's assume angle delta ∈ [-π, π], magnitude delta ∈ [-1.0, 1.0]
         self.action_space = spaces.Box(
-            low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+            low=np.array([-np.pi, -1.0], dtype=np.float32),
+            high=np.array([np.pi, 1.0], dtype=np.float32),
+            dtype=np.float32
+        )
         self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(obs_d,), dtype=np.float32)
+            low=np.array(
+                [0] +                               # step
+                [-1000, -1000] +                         # agent position
+                [0.0] * 360 +                      # ray distances
+                [0.0] * 360 +                      # ray mask
+                [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 +  # neighbor data
+                [0.0] * 15                         # neighbor mask
+                , dtype=np.float32
+            ),
+            high=np.array(
+                [1] +                # agent position
+                [1000, 1000] +                         # agent orientation
+                [1.0] * 360 +                     # ray distances
+                [1.0] * 360 +                     # ray mask
+                [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15 +  # neighbor data
+                [1.0] * 15                        # neighbor mask
+                , dtype=np.float32
+            ),
+            dtype=np.float32
+        )
 
     def _load_config(self, config_file):
         """Load YAML configuration and store it in self.world_config."""
@@ -131,10 +155,21 @@ class RVOBaseEnv(gym.Env):
         else:
             raise ValueError("Unknown step_mode: {}".format(self.step_mode))
 
-        # 2. Combine base velocity with the action
-        new_vel = base_vel + np.array(action)
+         # 2. Interpret action as (delta_angle, delta_magnitude)
+        delta_angle, delta_mag = action
 
-        # 3. Clip velocity magnitude
+        # 3. Convert base_vel to polar form
+        base_theta = np.arctan2(base_vel[1], base_vel[0])
+
+        # 4. Compute deviation vector in (x, y)
+        angle = base_theta + delta_angle
+        dev_vector = delta_mag * \
+            np.array([np.cos(angle), np.sin(angle)], dtype=np.float32)
+
+        # 5. Add deviation to base_vel
+        new_vel = base_vel + dev_vector
+
+        # 6. Clip velocity magnitude
         min_magnitude = self.sim.get_agent_min_speed(0)
         max_magnitude = self.sim.get_agent_max_speed(0)
         magnitude = np.linalg.norm(new_vel)

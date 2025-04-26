@@ -7,6 +7,7 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import SubprocVecEnv
 import os
 import csv
+from torch import nn
 
 
 def parse_cli_args(script_dir):
@@ -80,8 +81,8 @@ class PPOTrainerTester:
 
     def create_env(self, n_envs):
         # vec_env_cls=SubprocVecEnv
-        # return make_vec_env(self.env_class, n_envs=n_envs, vec_env_cls=SubprocVecEnv, env_kwargs={
-        return make_vec_env(self.env_class, n_envs=n_envs, env_kwargs={
+        return make_vec_env(self.env_class, n_envs=n_envs, vec_env_cls=SubprocVecEnv, env_kwargs={
+            # return make_vec_env(self.env_class, n_envs=n_envs, env_kwargs={
             "config_file": self.config_file, "render_mode": self.render_mode, "seed": self.seed,
         })
 
@@ -125,7 +126,14 @@ class PPOTrainerTester:
         elif self.env_name:
             run_name = f"PPO_{self.env_name}"
 
-        model = PPO("MlpPolicy", vec_env, n_steps=n_steps, verbose=1, device=device,
+        policy_kwargs = dict(
+            # asymmetric nets
+            net_arch=dict(pi=[256, 256], vf=[256, 256]),
+            activation_fn=nn.Tanh,
+            ortho_init=True,  # or False, depending on stability in your env
+        )
+
+        model = PPO("MlpPolicy", vec_env, n_steps=n_steps, verbose=1, policy_kwargs=policy_kwargs, device=device,
                     tensorboard_log=self.log_dir, **self.hyperparams)
 
         # Include run_name in the learn method

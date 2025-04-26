@@ -6,7 +6,7 @@ PROJECT_ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 echo "Project root: $PROJECT_ROOT"
 
 # Set the number of timesteps
-TIMESTEPS=2000000
+TIMESTEPS=1000000
 
 # Generate a common timestamp for this batch run
 BATCH_TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")
@@ -58,7 +58,10 @@ run_ppo_test() {
             --log_dir "tests/miac/${env_logs_dir}" \
             --save_path "tests/miac/${model_save_path}" \
             --env_name "$env_name" \
-            --level "$level"
+            --level "$level" \
+            --n_envs 16 \
+            --n_steps 32 \
+            --progress_bar False
         
         echo $? > "${SUMMARY_DIR}/.exit_status"
     )
@@ -101,7 +104,8 @@ echo "======================================================================="
 
 # Find all PPO test files excluding optuna related ones
 echo "Scanning for PPO test files..."
-ALL_PPO_FILES=$(find . -name "ppo_*_level_*.py" | grep -v "optuna" | sed 's|^./||')
+# ALL_PPO_FILES=$(find . -name "ppo_*_level_*.py" | grep -v "optuna" | grep -v "circle" | sed 's|^./||')
+ALL_PPO_FILES=$(find . -name "ppo_incoming_level_*.py" | grep -v "optuna" | sed 's|^./||')
 TOTAL_FILES=$(echo "$ALL_PPO_FILES" | wc -l)
 
 if [ $TOTAL_FILES -eq 0 ]; then
