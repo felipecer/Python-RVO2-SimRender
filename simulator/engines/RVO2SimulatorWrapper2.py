@@ -1,33 +1,14 @@
 from typing import Dict, Tuple
 import rvo2_rl
-import argparse
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 import math
-import sys
-import yaml
-import numpy as np
-from rendering.pygame_renderer import PyGameRenderer
-from rendering.text_renderer import TextRenderer
 from simulator.engines.base import SimulationEngine, SimulationState
-from simulator.models.observer import SimulationSubject
-from simulator.models.simulation import Simulation
-from simulator.models.messages import (
-    RayCastingUpdateMessage,
-    SimulationInitializedMessage,
-    AgentPositionsUpdateMessage,
-    ObstaclesProcessedMessage,
-    GoalsProcessedMessage
-)
-from simulator.models.simulation_configuration.simulation_events import GoalReachedEvent
 from simulator.models.simulation_configuration.registry import global_registry
-import traceback
-import pprint
 
 
-class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
+class RVO2SimulatorWrapper2(SimulationEngine):
     def __init__(self, world_config: BaseModel, simulation_id: str, seed: int = None):
         SimulationEngine.__init__(self, seed=seed)
-        SimulationSubject.__init__(self)
         """
         Initializes the RVO2 simulator with the world configuration and an optional renderer.
 
@@ -44,21 +25,6 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         self._manual_velocity_updates = []
         self.intersect_list = None
         self.initial_distance_from_goal_array = []
-
-    def calculate_preferred_velocity(self, agent_position, goal_position, max_speed):
-        vector_to_goal = (
-            goal_position[0] - agent_position[0],
-            goal_position[1] - agent_position[1]
-        )
-        distance = math.sqrt(vector_to_goal[0] ** 2 + vector_to_goal[1] ** 2)
-
-        if distance > 0:
-            return (
-                vector_to_goal[0] / distance * max_speed,
-                vector_to_goal[1] / distance * max_speed
-            )
-        else:
-            return (0, 0)
 
     def set_agent_defaults(self, agent_idx, agent_defaults):
         self.sim.set_agent_neighbor_dist(
@@ -93,14 +59,11 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         # Initialize the global agent_id counter
         global_agent_id = 0
         agent_behaviours = {}
-        # pprint.pprint(config.agents, indent=4)
         # Iterate over each group of agents
         for agent_group in config.agents:
             positions = agent_group.pattern.generate_positions()
-
             # Generate goal positions for this group if they exist
             goals = agent_group.goals.pattern.generate_positions() if agent_group.goals else None
-
             # Iterate over the generated agent positions
             for local_agent_index, position in enumerate(positions):
                 agent_defaults = agent_group.agent_defaults or config.agent_defaults
@@ -121,12 +84,9 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 self.sim.set_agent_pref_velocity(
                     agent_id, rvo2_rl.Vector2(*agent_defaults.velocity))
                 self.agent_initial_positions.append(position)
-                # If goals are defined for the agent group
                 if goals:
                     # Assign the correct goal to the agent using the local index
                     self.agent_goals[agent_id] = goals[local_agent_index]
-                    self.notify_observers(GoalsProcessedMessage(
-                        step=-1, goals=self.agent_goals))
 
                 if agent_group.assigned_behaviors:
                     final_behavior_name = agent_group.assigned_behaviors[local_agent_index]
@@ -151,8 +111,6 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 self.sim.add_obstacle(shape)
                 obstacle_shapes.append(vertices)
             self.sim.process_obstacles()
-            self.notify_observers(ObstaclesProcessedMessage(
-                step=-1, obstacles=obstacle_shapes))
 
         agent_initialization_data = [
             {
@@ -171,9 +129,6 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         ]
 
         self.sim.init_raycasting_engine(360, 18.0)
-        # Send initialization information to observers
-        self.notify_observers(SimulationInitializedMessage(
-            step=-1, agent_initialization_data=agent_initialization_data))
         # self._setup_obstacle_vertex_array()
         self.initial_distance_from_goal_array = [self.distance_from_goal(
             agent_id) for agent_id in range(self.sim.get_num_agents())]
@@ -225,18 +180,6 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         self.update_agent_velocities()
         self.sim.do_step()
 
-        # Collect more data from each agent
-        agent_data = self.sim.get_agent_data_batch()
-        # print(agent_data)
-
-        # Send the message with additional data
-        self.notify_observers(AgentPositionsUpdateMessage(
-            step=self.current_step, agent_positions=agent_data))
-        # if self.intersect_list != None:
-        #     self.notify_observers(RayCastingUpdateMessage(
-        #         step=self.current_step, intersections=self.intersect_list))
-        # self.store_step(self.current_step)
-
     def update_agent_velocity(self, agent_id: int, velocity: Tuple[float, float]):
         """
         Registers a manual velocity update for a specific agent.
@@ -254,9 +197,6 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         Returns the maximum speed of the agent with the specified ID.
         """
         return self.sim.get_agent_max_speed(agent_id)
-
-    def get_collision_free_velocity(self, agent_id: int) -> Tuple[float, float]:
-        return self.sim.get_agent_velocity(agent_id)
 
     def get_velocity_min_euclid_dist(self, agent_id: int) -> Tuple[float, float]:
         """
@@ -293,6 +233,9 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
                 agent_id, rvo2_rl.Vector2(*velocity))
         # Clear the queue after applying updates
         self._manual_velocity_updates.clear()
+
+    def clear_buffer(self):
+        self.steps_buffer = []
 
     def get_agent_max_num_neighbors(self, agent_id):
         return self.sim.get_agent_max_neighbors(agent_id)
@@ -362,58 +305,3 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
 
     def get_all_distances_from_goals(self):
         return self.sim.get_all_distances_from_goals
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description='Simulador de Navegación de Agentes')
-    parser.add_argument('world_file', type=str,
-                        help='Archivo YAML de configuración del mundo')
-    parser.add_argument('--renderer', type=str, choices=['pygame', 'text'], default='pygame',
-                        help='El tipo de renderer a usar: pygame o text (por defecto: pygame)')
-    args = parser.parse_args()
-
-    world_file = args.world_file
-    try:
-        with open(world_file, 'r') as stream:
-            data = yaml.safe_load(stream)
-            world_config = Simulation(**data['simulation'])
-
-    except FileNotFoundError:
-        print(f"File {world_file} not found.")
-        sys.exit(1)
-    except yaml.YAMLError as exc:
-        print(f"Error reading YAML file: {exc}")
-        sys.exit(1)
-    except ValidationError as exc:
-        print(f"Validation error: {exc}")
-        sys.exit(1)
-
-    window_width = int((world_config.map_settings.x_max -
-                        world_config.map_settings.x_min) * world_config.map_settings.cell_size)
-    window_height = int((world_config.map_settings.y_max -
-                         world_config.map_settings.y_min) * world_config.map_settings.cell_size)
-
-    if args.renderer == 'pygame':
-        renderer = PyGameRenderer(
-            window_width,
-            window_height,
-            obstacles=[], goals={}, cell_size=int(world_config.map_settings.cell_size)
-        )
-        renderer.setup()
-    else:
-        renderer = TextRenderer()
-        renderer.setup()
-
-    rvo2_simulator = RVO2SimulatorWrapper(world_config, "test_simulation")
-    rvo2_simulator.register_observer(renderer)
-
-    for dynamic_config in world_config.dynamics:
-        rvo2_simulator.register_dynamic(dynamic_config)
-
-    rvo2_simulator.run_pipeline(5000)  # Se asume 5000 pasos como ejemplo
-    rvo2_simulator.save_simulation_runs()
-
-
-if __name__ == "__main__":
-    main()

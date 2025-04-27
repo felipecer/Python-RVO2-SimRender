@@ -20,7 +20,7 @@ class RVOMiacTwoPaths(RVOBaseEnv):
         :param step_mode: 'naive' or 'min_dist'
         """
         super().__init__(config_file=config_file,
-                         render_mode=render_mode, seed=seed, step_mode=step_mode)
+                         render_mode=render_mode, seed=seed, step_mode=step_mode, includes_lidar=True)
 
     def _get_obs(self):
         """
@@ -34,15 +34,14 @@ class RVOMiacTwoPaths(RVOBaseEnv):
         ray_casting = self.sim.get_lidar_reading(0)  # already numpy array
 
         # Store ray_casting for visualization purposes
-        self.ray_casting = ray_casting.tolist()
-        self.sim.intersect_list = self.ray_casting
-
+        # self.ray_casting = ray_casting[0].tolist()
+        # self.sim.intersect_list = self.ray_casting
         # Create the goal offset array
         goal_offset = np.array(
             [self.sim.current_step/256.0, goal[0] - pos.x(), goal[1] - pos.y()], dtype=np.float32)
 
         # Concatenate all parts of the observation
-        return np.concatenate([goal_offset, ray_casting.ravel(), neighbor_data])
+        return np.concatenate([goal_offset, ray_casting[0], ray_casting[1], neighbor_data[0], neighbor_data[1]])
 
     def calculate_reward(self, agent_id):
         """

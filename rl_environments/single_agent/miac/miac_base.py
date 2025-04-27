@@ -22,7 +22,7 @@ class RVOBaseEnv(gym.Env):
 
     metadata = {'render.modes': ['ansi', 'rgb_array', 'human']}
 
-    def __init__(self, config_file=None, render_mode="human", seed=None, step_mode='min_dist'):
+    def __init__(self, config_file=None, render_mode="human", seed=None, step_mode='min_dist', includes_lidar=False):
         """
         :param config_file: path to YAML config (optional)
         :param render_mode: 'rgb', 'ansi', or None
@@ -46,35 +46,57 @@ class RVOBaseEnv(gym.Env):
 
         # Initialize default spaces (child classes may override these)
         # Example: assume 2D action, 92D observation
-        obs_d = 3 + 360 + 360 + 15 * 6 + 15
 
-        # Let's assume angle delta ∈ [-π, π], magnitude delta ∈ [-1.0, 1.0]
+            # Let's assume angle delta ∈ [-π, π], magnitude delta ∈ [-1.0, 1.0]
         self.action_space = spaces.Box(
             low=np.array([-np.pi, -1.0], dtype=np.float32),
             high=np.array([np.pi, 1.0], dtype=np.float32),
             dtype=np.float32
         )
-        self.observation_space = spaces.Box(
-            low=np.array(
-                [0] +                               # step
-                [-1000, -1000] +                         # agent position
-                [0.0] * 360 +                      # ray distances
-                [0.0] * 360 +                      # ray mask
-                [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 +  # neighbor data
-                [0.0] * 15                         # neighbor mask
-                , dtype=np.float32
-            ),
-            high=np.array(
-                [1] +                # agent position
-                [1000, 1000] +                         # agent orientation
-                [1.0] * 360 +                     # ray distances
-                [1.0] * 360 +                     # ray mask
-                [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15 +  # neighbor data
-                [1.0] * 15                        # neighbor mask
-                , dtype=np.float32
-            ),
-            dtype=np.float32
-        )
+
+        if includes_lidar:
+            obs_d = 3 + 360 + 360 + 15 * 6 + 15
+            self.observation_space = spaces.Box(
+                low=np.array(
+                    [0] +                               # step
+                    [-1000, -1000] +                         # agent position
+                    [0.0] * 360 +                      # ray distances
+                    [0.0] * 360 +                      # ray mask
+                    # neighbor data
+                    [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 +
+                    [0.0] * 15                         # neighbor mask
+                    , dtype=np.float32
+                ),
+                high=np.array(
+                    [1] +                # agent position
+                    [1000, 1000] +                         # agent orientation
+                    [1.0] * 360 +                     # ray distances
+                    [1.0] * 360 +                     # ray mask
+                    [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15 +  # neighbor data
+                    [1.0] * 15                        # neighbor mask
+                    , dtype=np.float32
+                ),
+                dtype=np.float32
+            )
+        else:
+            self.observation_space = spaces.Box(
+                low=np.array(
+                    [0] +                               # step
+                    [-1000, -1000] +                         # agent position
+                    # neighbor data
+                    [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 +
+                    [0.0] * 15                         # neighbor mask
+                    , dtype=np.float32
+                ),
+                high=np.array(
+                    [1] +                # agent position
+                    [1000, 1000] +                         # agent orientation
+                    [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15 +  # neighbor data
+                    [1.0] * 15                        # neighbor mask
+                    , dtype=np.float32
+                ),
+                dtype=np.float32
+            )
 
     def _load_config(self, config_file):
         """Load YAML configuration and store it in self.world_config."""
@@ -149,7 +171,8 @@ class RVOBaseEnv(gym.Env):
 
         # 1. Determine base velocity
         if self.step_mode == 'min_dist':
-            base_vel = np.array(self.sim.get_velocity_min_euclid_dist(0))
+            coll_free_vel = self.sim.get_collision_free_velocity(0)
+            base_vel = np.array([coll_free_vel.x(), coll_free_vel.y()])
         elif self.step_mode == 'naive':
             base_vel = np.zeros(2, dtype=np.float32)
         else:
