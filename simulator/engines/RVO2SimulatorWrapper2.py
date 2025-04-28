@@ -222,6 +222,9 @@ class RVO2SimulatorWrapper2(SimulationEngine):
 
         return preferred_velocity
 
+    def get_collision_free_velocity(self, agent_id: int) -> Tuple[float, float]:
+        return self.sim.get_agent_velocity(agent_id)
+
     def update_agent_velocities(self):
         """
         Updates the preferred velocities of agents in the simulation, considering manual updates.

@@ -226,12 +226,12 @@ class RVO2SimulatorWrapper(SimulationEngine, SimulationSubject):
         self.sim.do_step()
 
         # Collect more data from each agent
-        agent_data = self.sim.get_agent_data_batch()
-        # print(agent_data)
+        # agent_data = self.sim.get_agent_data_batch()
+        # # print(agent_data)
 
-        # Send the message with additional data
-        self.notify_observers(AgentPositionsUpdateMessage(
-            step=self.current_step, agent_positions=agent_data))
+        # # Send the message with additional data
+        # self.notify_observers(AgentPositionsUpdateMessage(
+        #     step=self.current_step, agent_positions=agent_data))
         # if self.intersect_list != None:
         #     self.notify_observers(RayCastingUpdateMessage(
         #         step=self.current_step, intersections=self.intersect_list))

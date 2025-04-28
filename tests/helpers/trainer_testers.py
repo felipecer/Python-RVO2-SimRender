@@ -4,7 +4,7 @@ from datetime import datetime
 import uuid
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
-from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 import os
 import csv
 from torch import nn
@@ -81,7 +81,7 @@ class PPOTrainerTester:
 
     def create_env(self, n_envs):
         # vec_env_cls=SubprocVecEnv
-        return make_vec_env(self.env_class, n_envs=n_envs, vec_env_cls=SubprocVecEnv, env_kwargs={
+        return make_vec_env(self.env_class, n_envs=n_envs, vec_env_cls=DummyVecEnv, env_kwargs={
             # return make_vec_env(self.env_class, n_envs=n_envs, env_kwargs={
             "config_file": self.config_file, "render_mode": self.render_mode, "seed": self.seed,
         })
@@ -138,7 +138,7 @@ class PPOTrainerTester:
 
         # Include run_name in the learn method
         model.learn(total_timesteps=total_timesteps,
-                    progress_bar=progress_bar, tb_log_name=run_name)
+                    progress_bar=progress_bar, tb_log_name=run_name, log_interval=10)
         model.save(self.save_path)
         print("Training completed")
         del model
