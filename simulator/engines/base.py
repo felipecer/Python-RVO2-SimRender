@@ -16,7 +16,7 @@ class DynamicsQueueManager:
 
     def add_dynamic(self, dynamic: Callable, timing: ExecutionTiming, on_demand: bool = False):        
         """Adds a dynamic to the corresponding list."""
-        print(dynamic)
+        # print(dynamic)
         if timing == ExecutionTiming.BEFORE:
             if on_demand:
                 self.on_demand_before.append(dynamic)

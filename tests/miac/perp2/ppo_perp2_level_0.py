@@ -27,4 +27,5 @@ def main(env_class, args):
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     args = parse_cli_args(script_dir)
+    args.total_timesteps = 66000
     main(RVOMiacPerp2, args)
