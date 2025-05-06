@@ -44,7 +44,7 @@ class ORCARLEngine(SimulationEngine):
         """
         Method to initialize the RVO2 simulation with the provided configuration.
         This method will convert Pydantic objects into RVO2-compatible objects.
-        """
+        """        
         config = self.world_config  # Access the world configuration.
         self.wrapper = RVO2RLWrapper(
             time_step=config.time_step,

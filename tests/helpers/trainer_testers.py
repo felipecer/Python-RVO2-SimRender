@@ -125,20 +125,21 @@ class PPOTrainerTester:
             run_name = f"PPO_{self.env_name}_level_{self.level}"
         elif self.env_name:
             run_name = f"PPO_{self.env_name}"
-
+        print("holi")
         policy_kwargs = dict(
             # asymmetric nets
             net_arch=dict(pi=[256, 256], vf=[256, 256]),
             activation_fn=nn.Tanh,
             ortho_init=True,  # or False, depending on stability in your env
         )
-
+        print("holi2")
         model = PPO("MlpPolicy", vec_env, n_steps=n_steps, verbose=1, policy_kwargs=policy_kwargs, device=device,
                     tensorboard_log=self.log_dir, **self.hyperparams)
-
+        print("holi3")
         # Include run_name in the learn method
         model.learn(total_timesteps=total_timesteps,
                     progress_bar=progress_bar, tb_log_name=run_name, log_interval=10)
+        print("holi4")
         model.save(self.save_path)
         print("Training completed")
         del model

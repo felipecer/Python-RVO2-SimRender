@@ -75,6 +75,6 @@ if __name__ == "__main__":
         obs, reward, done, truncated, info = env.step(action)
         env.render()
         if done or truncated:
-            logger.info(f"Episode done: {done}, truncated: {truncated}")
+            # logger.info(f"Episode done: {done}, truncated: {truncated}")
             break
         i += 1
