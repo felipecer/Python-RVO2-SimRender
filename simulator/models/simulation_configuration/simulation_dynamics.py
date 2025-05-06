@@ -165,7 +165,7 @@ class MaxStepsReachedDynamic(OnStepDynamic):
     max_steps: int
 
     def execute(self):
-        if self._simulator.current_step >= self.max_steps:
+        if self._simulator.get_step_count() >= self.max_steps:
             # print(f"Maximum steps of {self.max_steps} reached. Stopping simulation.")
             self._simulator.stop_simulation()
 

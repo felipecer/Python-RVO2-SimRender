@@ -2,14 +2,16 @@ import gymnasium as gym
 import yaml
 import numpy as np
 from gymnasium import spaces, logger
-from simulator.engines.RVO2SimulatorWrapper import RVO2SimulatorWrapper
+from simulator.engines.ORCARLEngine import ORCARLEngine
 from simulator.engines.base import SimulationState
+from simulator.models.messages import SimulationInitializedMessage
+from simulator.models.observer import SimulationSubject
 from simulator.models.simulation import Simulation as SimulationModel
 from rendering.pygame_renderer import PyGameRenderer
 from rendering.text_renderer import TextRenderer
 
 
-class RVOBaseEnv(gym.Env):
+class RVOBaseEnv2(gym.Env, SimulationSubject):
     """
     Base environment for MIAC single-agent scenarios.
     Centralizes:
@@ -29,12 +31,13 @@ class RVOBaseEnv(gym.Env):
         :param seed: optional random seed
         :param step_mode: 'naive' or 'min_dist'; defines how step interprets the action
         """
-        super().__init__()
+        gym.Env().__init__()
+        SimulationSubject.__init__(self)
         self.config_file = config_file
         self.render_mode = render_mode
         self.seed_val = seed
         self.step_mode = step_mode  # either 'naive' or 'min_dist'
-        self.sim = None
+        self.engine = None
 
         # Load config if provided
         if config_file:
@@ -54,7 +57,7 @@ class RVOBaseEnv(gym.Env):
             dtype=np.float32
         )
 
-        if includes_lidar:            
+        if includes_lidar:
             self.observation_space = spaces.Box(
                 low=np.array(
                     [0] +                               # step
@@ -105,12 +108,15 @@ class RVOBaseEnv(gym.Env):
 
     def _init_simulator(self):
         """Initialize the RVO2 simulator and register dynamics."""
-        self.sim = RVO2SimulatorWrapper(
+        self.engine = ORCARLEngine(
             self.world_config, "test_simulation", seed=self.seed_val)
         for dynamic_config in self.world_config.dynamics:
-            self.sim.register_dynamic(dynamic_config)
+            self.engine.register_dynamic(dynamic_config)
         self._init_renderers()
-        self.sim.initialize_simulation()
+        self.engine.initialize_simulation()
+        if self.render_mode != None:
+            self.notify_observers(SimulationInitializedMessage(
+                step=-1, agent_initialization_data=self.engine.agent_initialization_data))
 
     def _init_renderers(self):
         """
@@ -124,7 +130,7 @@ class RVOBaseEnv(gym.Env):
             self.renderer = None
             return
 
-        wcfg = self.sim.world_config.map_settings
+        wcfg = self.engine.world_config.map_settings
         window_width = int((wcfg.x_max - wcfg.x_min) * wcfg.cell_size)
         window_height = int((wcfg.y_max - wcfg.y_min) * wcfg.cell_size)
 
@@ -137,7 +143,7 @@ class RVOBaseEnv(gym.Env):
                 goals={}
             )
             self.renderer.setup()
-            self.sim.register_observer(self.renderer)
+            self.register_observer(self.renderer)
 
         elif self.render_mode == "rgb_array":
             # IMPORTANT: import the recordable renderer
@@ -152,76 +158,155 @@ class RVOBaseEnv(gym.Env):
                 record_all=False
             )
             self.renderer.setup()
-            self.sim.register_observer(self.renderer)
+            self.register_observer(self.renderer)
 
         elif self.render_mode == "ansi":
             self.renderer = TextRenderer()
             self.renderer.setup()
-            self.sim.register_observer(self.renderer)
+            self.register_observer(self.renderer)
 
         else:
             # No known render mode
             self.renderer = None
 
     def step(self, action):
-        if self.sim is None:
+        # print("Step function called with action:", action)
+        if self.engine is None:
             raise RuntimeError(
-                "Simulator not initialized. Please check your config_file.")
+            "Simulator not initialized. Please check your config_file.")
 
         # 1. Determine base velocity
         if self.step_mode == 'min_dist':
-            coll_free_vel = self.sim.get_collision_free_velocity(0)
+            coll_free_vel = self.engine.get_collision_free_velocity(0)
             base_vel = np.array([coll_free_vel.x(), coll_free_vel.y()])
+            # print("Base velocity (min_dist):", base_vel)
         elif self.step_mode == 'naive':
             base_vel = np.zeros(2, dtype=np.float32)
+            # print("Base velocity (naive):", base_vel)
         else:
             raise ValueError("Unknown step_mode: {}".format(self.step_mode))
 
-         # 2. Interpret action as (delta_angle, delta_magnitude)
+        # 2. Interpret action as (delta_angle, delta_magnitude)
         delta_angle, delta_mag = action
+        # print("Delta angle:", delta_angle, "Delta magnitude:", delta_mag)
 
         # 3. Convert base_vel to polar form
         base_theta = np.arctan2(base_vel[1], base_vel[0])
+        # print("Base velocity angle (theta):", base_theta)
 
         # 4. Compute deviation vector in (x, y)
         angle = base_theta + delta_angle
         dev_vector = delta_mag * \
             np.array([np.cos(angle), np.sin(angle)], dtype=np.float32)
+        # print("Deviation vector:", dev_vector)
 
         # 5. Add deviation to base_vel
         new_vel = base_vel + dev_vector
+        # print("New velocity before clipping:", new_vel)
 
         # 6. Clip velocity magnitude
-        min_magnitude = self.sim.get_agent_min_speed(0)
-        max_magnitude = self.sim.get_agent_max_speed(0)
+        min_magnitude = self.engine.get_agent_min_speed(0)
+        max_magnitude = self.engine.get_agent_max_speed(0)
         magnitude = np.linalg.norm(new_vel)
+        # print("Velocity magnitude before clipping:", magnitude)
         if magnitude < min_magnitude:
             if magnitude > 1e-9:
                 clipped = (new_vel / magnitude) * min_magnitude
             else:
                 clipped = np.zeros_like(new_vel)
+            # print("Velocity clipped to minimum:", clipped)
         elif magnitude > max_magnitude:
             clipped = (new_vel / magnitude) * max_magnitude
+            # print("Velocity clipped to maximum:", clipped)
         else:
             clipped = new_vel
+            # print("Velocity within bounds, no clipping:", clipped)
 
-        # 4. Update simulator
-        self.sim.update_agent_velocity(0, tuple(clipped))
-        # self.sim.update_agent_velocities()
-        self.sim.execute_simulation_step()
-        self.sim.current_step += 1
-
-        # 5. Collect results
+        # 7. Update simulator
+        self.engine.update_agent_velocity(0, tuple(clipped))
+        # print("Updated agent velocity in simulator:", tuple(clipped))
+        self.engine.execute_simulation_step()
+        self.engine.current_step += 1
+        print("Simulation step executed. Current step:", self.engine.get_step_count())
+        print("Agent 0: ", self.engine.get_agent_position(0))
+        # 8. Collect results
         obs = self._get_obs()
+        # print("Observation collected:", obs)
         reward = self.calculate_reward(0)
+        print("Reward calculated:", reward)
         done = self.is_done(0)
-        truncated = (self.sim.get_state() == SimulationState.STOPPED)
-        if truncated and not done:
-            reward += (1 - (self.sim.distance_from_goal(0) /
-                       self.sim.initial_distance_from_goal_array[0])) * 2560
+        # print("Done status:", done)
+        truncated = (self.engine.get_state() == SimulationState.STOPPED)
+        # print("Truncated status:", truncated)
+        if truncated and not done:            
+            # print(self.engine.get_distance_to_goal(0, True))
+            reward += (1 - (self.engine.get_distance_to_goal(0, True))) * 2560
+            # print("Agent position: ", self.engine.get_agent_position(0))
+            print("Reward adjusted for truncation:", reward)
         info = self._get_info()
-
+        # print("Info collected:", info)
+        # print("----------------------------------")        
+        print("----------------------------------")
+        # print("Step function returning:", obs, reward, done, truncated, info)
         return obs, reward, done, truncated, info
+        # if self.engine is None:
+        #     raise RuntimeError(
+        #         "Simulator not initialized. Please check your config_file.")
+
+        # # 1. Determine base velocity
+        # if self.step_mode == 'min_dist':
+        #     coll_free_vel = self.engine.get_collision_free_velocity(0)
+        #     base_vel = np.array([coll_free_vel.x(), coll_free_vel.y()])
+        # elif self.step_mode == 'naive':
+        #     base_vel = np.zeros(2, dtype=np.float32)
+        # else:
+        #     raise ValueError("Unknown step_mode: {}".format(self.step_mode))
+
+        #  # 2. Interpret action as (delta_angle, delta_magnitude)
+        # delta_angle, delta_mag = action
+
+        # # 3. Convert base_vel to polar form
+        # base_theta = np.arctan2(base_vel[1], base_vel[0])
+
+        # # 4. Compute deviation vector in (x, y)
+        # angle = base_theta + delta_angle
+        # dev_vector = delta_mag * \
+        #     np.array([np.cos(angle), np.sin(angle)], dtype=np.float32)
+
+        # # 5. Add deviation to base_vel
+        # new_vel = base_vel + dev_vector
+
+        # # 6. Clip velocity magnitude
+        # min_magnitude = self.engine.get_agent_min_speed(0)
+        # max_magnitude = self.engine.get_agent_max_speed(0)
+        # magnitude = np.linalg.norm(new_vel)
+        # if magnitude < min_magnitude:
+        #     if magnitude > 1e-9:
+        #         clipped = (new_vel / magnitude) * min_magnitude
+        #     else:
+        #         clipped = np.zeros_like(new_vel)
+        # elif magnitude > max_magnitude:
+        #     clipped = (new_vel / magnitude) * max_magnitude
+        # else:
+        #     clipped = new_vel
+
+        # # 4. Update simulator
+        # self.engine.update_agent_velocity(0, tuple(clipped))
+        # # self.engine.update_agent_velocities()
+        # self.engine.execute_simulation_step()
+        # self.engine.current_step += 1
+
+        # # 5. Collect results
+        # obs = self._get_obs()
+        # reward = self.calculate_reward(0)
+        # done = self.is_done(0)
+        # truncated = (self.engine.get_state() == SimulationState.STOPPED)
+        # if truncated and not done:
+        #     reward += (1 - (self.engine.distance_from_goal(0) /
+        #                self.engine.initial_distance_from_goal_array[0])) * 2560
+        # info = self._get_info()
+
+        # return obs, reward, done, truncated, info
 
     def render(self):
         """
@@ -249,13 +334,14 @@ class RVOBaseEnv(gym.Env):
 
     def reset(self, seed=None, options=None):
         """Resets the environment and the simulation."""
-        if self.sim is None:
+        if self.engine is None:
             raise RuntimeError(
                 "Simulator is not initialized. Make sure config_file is valid.")
 
         if seed is not None:
-            self.sim.reset_rng_with_seed(seed)
-        self.sim.reset()
+            self.engine.reset_rng_with_seed(seed)
+        else: 
+            self.engine.reset()
         return self._get_obs(), self._get_info()
 
     # def render(self):

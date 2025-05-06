@@ -25,6 +25,7 @@ class ORCARLEngine(SimulationEngine):
         self._manual_velocity_updates = []
         self.goal_reached_threshhold = 0.02
         self.normalized = True
+        self.agent_goals = {}
 
     def set_agent_defaults(self, agent_idx, agent_defaults):
         self.sim.set_agent_neighbor_dist(
@@ -57,8 +58,7 @@ class ORCARLEngine(SimulationEngine):
             use_obs_mask=False,
             use_lidar=False
         )
-
-        self.sim = self.wrapper.get_simulator()
+        self.sim = self.wrapper.get_simulator()        
 
         # Add agents and save their goals
         # Initialize the global agent_id counter
@@ -86,7 +86,7 @@ class ORCARLEngine(SimulationEngine):
                 )
 
                 # Set the agent's preferred velocity
-                self.wrapper.set_agent_pref_velocity(
+                self.wrapper.get_simulator().set_agent_pref_velocity(
                     agent_id, Vector2(*agent_defaults.velocity))
                 if goals:
                     # Assign the correct goal to the agent using the local index
@@ -97,7 +97,8 @@ class ORCARLEngine(SimulationEngine):
                     agent_behaviours[agent_id] = final_behavior_name
                     self.update_agent_with_behavior_params(
                         agent_id, final_behavior_name)
-                    self.wrapper.set_agent_behavior(final_behavior_name)
+                    self.wrapper.set_agent_behavior(
+                        agent_id, final_behavior_name)
                 else:
                     final_behavior_name = None
                 # Increment the global agent ID for the next agent
@@ -115,6 +116,8 @@ class ORCARLEngine(SimulationEngine):
                 self.sim.add_obstacle(shape)
             self.sim.process_obstacles()
 
+        self.wrapper.initialize()
+        
         agent_initialization_data = [
             {
                 "agent_id": agent_id,
@@ -150,8 +153,8 @@ class ORCARLEngine(SimulationEngine):
                 agent_id, Vector2(*agent_defaults.velocity))
             # print(f"Agent {agent_id} updated with {behavior_name} parameters")
 
-    def get_obs(self):
-        return self.wrapper.get_observation()
+    def get_obs(self, agent_id):
+        return self.wrapper.get_observation(agent_id)
 
     def get_obs_limits(self):
         return self.wrapper.get_observation_limits()
@@ -161,14 +164,18 @@ class ORCARLEngine(SimulationEngine):
 
     def reset(self):
         """Resets the simulation to its initial state."""
-        self.current_step = 0
+        print("RESET")
+        
         self._state = SimulationState.SETUP
 
-        self.wrap.reset_position_and_goals_to_init()
-        self.wrap.get_simulator().set_time_step(0)
+        self.wrapper.reset_position_and_goals_to_init()
+        self.wrapper.reset_step_count()       
 
         self.update_agent_velocities()
 
+    def get_step_count(self):
+        return self.wrapper.get_step_count()
+    
     def step(self):
         """
         Executes the simulation for a specified number of steps.
@@ -176,8 +183,8 @@ class ORCARLEngine(SimulationEngine):
         Args:
             steps (int): Number of steps the simulation should execute.
         """
-        self.update_agent_velocities()
-        self.sim.do_step()
+        self.update_agent_velocities()        
+        self.wrapper.do_step()
 
     def update_agent_velocity(self, agent_id: int, velocity: Tuple[float, float]):
         """
@@ -195,33 +202,37 @@ class ORCARLEngine(SimulationEngine):
         """
         Returns the maximum speed of the agent with the specified ID.
         """
-        return self.wrap.get_simulator().get_agent_max_speed(agent_id)
+        return self.wrapper.get_simulator().get_agent_max_speed(agent_id)
 
     def get_collision_free_velocity(self, agent_id: int) -> Tuple[float, float]:
-        return self.wrap.get_simulator().get_agent_velocity(agent_id)
+        return self.wrapper.get_simulator().get_agent_velocity(agent_id)
 
     def update_agent_velocities(self):
         """
         Updates the preferred velocities of agents in the simulation, considering manual updates.
         """
-        self.wrap.set_preferred_velocities()
+        self.wrapper.set_preferred_velocities()
         # print("Manual updates:", self._manual_velocity_updates)
         for agent_id, velocity in self._manual_velocity_updates:
-            self.wrap.get_simulator().set_agent_pref_velocity(
+            # print("manual update. id: ", agent_id, " velocity: ", velocity)
+            self.wrapper.set_preferred_velocity(
                 agent_id, Vector2(*velocity))
         # Clear the queue after applying updates
         self._manual_velocity_updates.clear()
 
     def get_agent_max_num_neighbors(self, agent_id):
-        return self.wrap.get_simulator().get_agent_max_neighbors(agent_id)
+        return self.wrapper.get_simulator().get_agent_max_neighbors(agent_id)
 
     def get_agent_position(self, agent_id) -> Tuple[float, float]:
         """Returns the current position of the agent."""
-        return self.wrap.get_simulator().get_agent_position(agent_id)
+        return self.wrapper.get_simulator().get_agent_position(agent_id)
+
+    def get_agent_positions(self) -> Dict[int, Tuple[float, float]]:
+        pass
 
     def set_goal(self, agent_id: int, goal: Tuple[float, float]) -> None:
         """Adds or updates the goal of the agent given its ID."""
-        self.wrap.set_goal(agent_id, goal)
+        self.wrapper.set_goal(agent_id, goal)
 
     def get_goal(self, agent_id: int) -> Tuple[float, float]:
         """
@@ -233,7 +244,7 @@ class ORCARLEngine(SimulationEngine):
         Returns:
             Tuple[float, float]: The position of the agent's goal.
         """
-        return self.wrap.get_goal(agent_id)
+        return self.wrapper.get_goal(agent_id)
 
     def is_goal_reached(self, agent_id: int) -> bool:
         """
@@ -244,10 +255,14 @@ class ORCARLEngine(SimulationEngine):
 
         Returns:
             bool: True if the agent has reached its goal, False otherwise.
-        """
-        distance = self.wrap.get_distance_to_goal(agent_id, self.normalized)
+        """        
+        distance = self.wrapper.get_distance_to_goal(agent_id, self.normalized)        
         # Consider the goal reached if the distance is less than or equal to a threshold
         return distance <= self.goal_reached_threshhold
+    
+    def get_distance_to_goal(self, agent_id, normalized):
+        return self.wrapper.get_distance_to_goal(agent_id, normalized)
+        
 
     def get_all_distances_from_goals(self):
-        return self.wrap.get_all_distances_to_goals()
+        return self.wrapper.get_all_distances_to_goals()
