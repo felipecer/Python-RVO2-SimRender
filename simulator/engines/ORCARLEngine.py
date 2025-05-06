@@ -40,7 +40,7 @@ class ORCARLEngine(SimulationEngine):
         self.sim.set_agent_velocity(agent_idx, Vector2(
             agent_defaults.velocity[0], agent_defaults.velocity[1]))
 
-    def initialize_simulation(self):
+    def initialize_simulation(self, mode=ObsMode.Cartesian, use_obs_mask=False, use_lidar=False):
         """
         Method to initialize the RVO2 simulation with the provided configuration.
         This method will convert Pydantic objects into RVO2-compatible objects.
@@ -54,9 +54,9 @@ class ORCARLEngine(SimulationEngine):
             time_horizon_obst=config.agent_defaults.time_horizon_obst,
             radius=config.agent_defaults.radius,
             max_speed=config.agent_defaults.max_speed,
-            mode=ObsMode.Cartesian,
-            use_obs_mask=False,
-            use_lidar=False
+            mode=mode,
+            use_obs_mask=use_obs_mask,
+            use_lidar=use_lidar
         )
         self.sim = self.wrapper.get_simulator()        
 
@@ -159,12 +159,8 @@ class ORCARLEngine(SimulationEngine):
     def get_obs_limits(self):
         return self.wrapper.get_observation_limits()
 
-    def get_agent_for_vis(self):
-        return self.wrapper.get_agent_data_for_vis()
-
     def reset(self):
         """Resets the simulation to its initial state."""
-        print("RESET")
         
         self._state = SimulationState.SETUP
 
@@ -266,3 +262,6 @@ class ORCARLEngine(SimulationEngine):
 
     def get_all_distances_from_goals(self):
         return self.wrapper.get_all_distances_to_goals()
+    
+    def collect_agents_batch_data(self):
+        return self.wrapper.get_agent_data_for_vis()

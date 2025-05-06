@@ -3,6 +3,7 @@ import os
 import numpy as np
 from gymnasium import logger
 from rl_environments.single_agent.miac.v2.miac_base2 import RVOBaseEnv2
+from rvo2_rl.rl import ObsMode
 
 
 class RVOMiacIncoming2(RVOBaseEnv2):
@@ -11,9 +12,9 @@ class RVOMiacIncoming2(RVOBaseEnv2):
     Inherits simulator initialization, rendering, seed setup, and step logic from the base class.
     """
 
-    def __init__(self, config_file=None, render_mode="rgb_array", seed=None, step_mode='min_dist'):
+    def __init__(self, config_file=None, render_mode="rgb_array", seed=None, step_mode='min_dist', use_lidar=False, use_obs_mask=False, mode=ObsMode.Cartesian):
         super().__init__(config_file=config_file,
-                         render_mode=render_mode, seed=seed, step_mode=step_mode)
+                         render_mode=render_mode, seed=seed, step_mode=step_mode, use_lidar=use_lidar, use_obs_mask=use_obs_mask, mode=mode)
 
     def _get_obs(self):
         """
@@ -52,7 +53,10 @@ if __name__ == "__main__":
         config_file='./simulator/worlds/miac/incoming/incoming_level_3.yaml',
         render_mode=None,
         seed=42,
-        step_mode='min_dist'
+        step_mode='min_dist', 
+        use_lidar=False, 
+        use_obs_mask=True, 
+        mode=ObsMode.Polar
     )
     # Extract filename without extension from config_file path
     config_filename = os.path.basename(
@@ -69,7 +73,7 @@ if __name__ == "__main__":
     while not done:
         action = env.action_space.sample()  # Random actions
         obs, reward, done, truncated, info = env.step(action)
-        # env.render()
+        env.render()
         if done or truncated:
             logger.info(f"Episode done: {done}, truncated: {truncated}")
             break
