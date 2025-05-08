@@ -59,8 +59,8 @@ run_ppo_test() {
             --save_path "tests/miac/${model_save_path}" \
             --env_name "$env_name" \
             --level "$level" \
-            --n_envs 64 \
-            --n_steps 64 \
+            --n_envs 16 \
+            --n_steps 32 \
             --progress_bar True
         
         echo $? > "${SUMMARY_DIR}/.exit_status"

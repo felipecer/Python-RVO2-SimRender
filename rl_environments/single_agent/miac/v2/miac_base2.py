@@ -59,57 +59,57 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             dtype=np.float32
         )
 
-        # agent_bounds = self.engine.get_obs_limits()
+        agent_bounds = self.engine.get_obs_limits()
         # print("get obs limits")
         # pprint(agent_bounds, indent= 8)
-        # self.observation_space = spaces.Box(
-        #     low=agent_bounds["low"],
-        #     high=agent_bounds["high"]
-        # )
+        self.observation_space = spaces.Box(
+            low=agent_bounds["low"],
+            high=agent_bounds["high"]
+        )
         # print("obs space")
-        use_lidar = False
-        if use_lidar:
-            self.observation_space = spaces.Box(
-                low=np.array(
-                    [0] +                               # step
-                    [-1000, -1000] +                         # agent position
-                    [0.0] * 360 +                      # ray distances
-                    [0.0] * 360 +                      # ray mask
-                    # neighbor data
-                    [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 
-                    # [0.0] * 15                         # neighbor mask
-                    , dtype=np.float32
-                ),
-                high=np.array(
-                    [1] +                # agent position
-                    [1000, 1000] +                         # agent orientation
-                    [1.0] * 360 +                     # ray distances
-                    [1.0] * 360 +                     # ray mask
-                    [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15   # neighbor data
-                    # [1.0] * 15                        # neighbor mask
-                    , dtype=np.float32
-                ),
-                dtype=np.float32
-            )
-        else:
-            self.observation_space = spaces.Box(
-                low=np.array(
-                    [0] +                               # step
-                    [-1000, -1000] +                         # agent position
-                    # neighbor data
-                    [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 
-                    # [0.0] * 15                         # neighbor mask
-                    , dtype=np.float32
-                ),
-                high=np.array(
-                    [1] +                # agent position
-                    [1000, 1000] +                         # agent orientation
-                    [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15   # neighbor data
-                    # [1.0] * 15                        # neighbor mask
-                    , dtype=np.float32
-                ),
-                dtype=np.float32
-            )
+        # use_lidar = False
+        # if use_lidar:
+        #     self.observation_space = spaces.Box(
+        #         low=np.array(
+        #             [0] +                               # step
+        #             [-1000, -1000] +                         # agent position
+        #             [0.0] * 360 +                      # ray distances
+        #             [0.0] * 360 +                      # ray mask
+        #             # neighbor data
+        #             [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 
+        #             # [0.0] * 15                         # neighbor mask
+        #             , dtype=np.float32
+        #         ),
+        #         high=np.array(
+        #             [1] +                # agent position
+        #             [1000, 1000] +                         # agent orientation
+        #             [1.0] * 360 +                     # ray distances
+        #             [1.0] * 360 +                     # ray mask
+        #             [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15   # neighbor data
+        #             # [1.0] * 15                        # neighbor mask
+        #             , dtype=np.float32
+        #         ),
+        #         dtype=np.float32
+        #     )
+        # else:
+        #     self.observation_space = spaces.Box(
+        #         low=np.array(
+        #             [0] +                               # step
+        #             [-1000, -1000] +                         # agent position
+        #             # neighbor data
+        #             [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 
+        #             # [0.0] * 15                         # neighbor mask
+        #             , dtype=np.float32
+        #         ),
+        #         high=np.array(
+        #             [1] +                # agent position
+        #             [1000, 1000] +                         # agent orientation
+        #             [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15   # neighbor data
+        #             # [1.0] * 15                        # neighbor mask
+        #             , dtype=np.float32
+        #         ),
+        #         dtype=np.float32
+        #     )
 
     def _load_config(self, config_file):
         """Load YAML configuration and store it in self.world_config."""
@@ -190,7 +190,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         if self.engine is None:
             raise RuntimeError(
             "Simulator not initialized. Please check your config_file.")
-        print("step_lineno: ", 184)
+        
         # 1. Determine base velocity
         if self.step_mode == 'min_dist':
             coll_free_vel = self.engine.get_collision_free_velocity(0)
@@ -199,7 +199,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             base_vel = np.zeros(2, dtype=np.float32)
         else:
             raise ValueError("Unknown step_mode: {}".format(self.step_mode))
-        print("step_lineno: ", 193)
+        
         # 2. Interpret action as (delta_angle, delta_magnitude)
         delta_angle, delta_mag = action       
         # 3. Convert base_vel to polar form
@@ -215,7 +215,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         min_magnitude = self.engine.get_agent_min_speed(0)
         max_magnitude = self.engine.get_agent_max_speed(0)
         magnitude = np.linalg.norm(new_vel)
-        print("step_lineno: ", 209)
+        
         if magnitude < min_magnitude:
             if magnitude > 1e-9:
                 clipped = (new_vel / magnitude) * min_magnitude
@@ -228,20 +228,20 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
 
         # 7. Update simulator
         self.engine.update_agent_velocity(0, tuple(clipped))
-        print("step_lineno: ", 222)
+        
         self.engine.execute_simulation_step()
         self.engine.current_step += 1
         # 8. Collect results
         obs = self._get_obs()
-        print("step_lineno: ", 226)
+        
         reward = self.calculate_reward(0)
         done = self.is_done(0)
 
         truncated = (self.engine.get_state() == SimulationState.STOPPED)
-        print("step_lineno: ", 230)    
+        
         if truncated and not done:            
             reward += (1 - (self.engine.get_distance_to_goal(0, True))) * 2560            
-        print("step_lineno: ", 233)
+        
         info = self._get_info()        
         return obs, reward, done, truncated, info        
 
