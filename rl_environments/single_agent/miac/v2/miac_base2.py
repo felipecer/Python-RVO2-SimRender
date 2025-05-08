@@ -59,56 +59,57 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             dtype=np.float32
         )
 
-        agent_bounds = self.engine.get_obs_limits()
+        # agent_bounds = self.engine.get_obs_limits()
         # print("get obs limits")
         # pprint(agent_bounds, indent= 8)
-        self.observation_space = spaces.Box(
-            low=agent_bounds["low"],
-            high=agent_bounds["high"]
-        )
+        # self.observation_space = spaces.Box(
+        #     low=agent_bounds["low"],
+        #     high=agent_bounds["high"]
+        # )
         # print("obs space")
-        # if use_lidar:
-        #     self.observation_space = spaces.Box(
-        #         low=np.array(
-        #             [0] +                               # step
-        #             [-1000, -1000] +                         # agent position
-        #             [0.0] * 360 +                      # ray distances
-        #             [0.0] * 360 +                      # ray mask
-        #             # neighbor data
-        #             [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 +
-        #             [0.0] * 15                         # neighbor mask
-        #             , dtype=np.float32
-        #         ),
-        #         high=np.array(
-        #             [1] +                # agent position
-        #             [1000, 1000] +                         # agent orientation
-        #             [1.0] * 360 +                     # ray distances
-        #             [1.0] * 360 +                     # ray mask
-        #             [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15 +  # neighbor data
-        #             [1.0] * 15                        # neighbor mask
-        #             , dtype=np.float32
-        #         ),
-        #         dtype=np.float32
-        #     )
-        # else:
-        #     self.observation_space = spaces.Box(
-        #         low=np.array(
-        #             [0] +                               # step
-        #             [-1000, -1000] +                         # agent position
-        #             # neighbor data
-        #             [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 +
-        #             [0.0] * 15                         # neighbor mask
-        #             , dtype=np.float32
-        #         ),
-        #         high=np.array(
-        #             [1] +                # agent position
-        #             [1000, 1000] +                         # agent orientation
-        #             [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15 +  # neighbor data
-        #             [1.0] * 15                        # neighbor mask
-        #             , dtype=np.float32
-        #         ),
-        #         dtype=np.float32
-        #     )
+        use_lidar = False
+        if use_lidar:
+            self.observation_space = spaces.Box(
+                low=np.array(
+                    [0] +                               # step
+                    [-1000, -1000] +                         # agent position
+                    [0.0] * 360 +                      # ray distances
+                    [0.0] * 360 +                      # ray mask
+                    # neighbor data
+                    [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 
+                    # [0.0] * 15                         # neighbor mask
+                    , dtype=np.float32
+                ),
+                high=np.array(
+                    [1] +                # agent position
+                    [1000, 1000] +                         # agent orientation
+                    [1.0] * 360 +                     # ray distances
+                    [1.0] * 360 +                     # ray mask
+                    [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15   # neighbor data
+                    # [1.0] * 15                        # neighbor mask
+                    , dtype=np.float32
+                ),
+                dtype=np.float32
+            )
+        else:
+            self.observation_space = spaces.Box(
+                low=np.array(
+                    [0] +                               # step
+                    [-1000, -1000] +                         # agent position
+                    # neighbor data
+                    [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 
+                    # [0.0] * 15                         # neighbor mask
+                    , dtype=np.float32
+                ),
+                high=np.array(
+                    [1] +                # agent position
+                    [1000, 1000] +                         # agent orientation
+                    [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15   # neighbor data
+                    # [1.0] * 15                        # neighbor mask
+                    , dtype=np.float32
+                ),
+                dtype=np.float32
+            )
 
     def _load_config(self, config_file):
         """Load YAML configuration and store it in self.world_config."""
