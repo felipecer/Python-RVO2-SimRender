@@ -65,51 +65,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         self.observation_space = spaces.Box(
             low=agent_bounds["low"],
             high=agent_bounds["high"]
-        )
-        # print("obs space")
-        # use_lidar = False
-        # if use_lidar:
-        #     self.observation_space = spaces.Box(
-        #         low=np.array(
-        #             [0] +                               # step
-        #             [-1000, -1000] +                         # agent position
-        #             [0.0] * 360 +                      # ray distances
-        #             [0.0] * 360 +                      # ray mask
-        #             # neighbor data
-        #             [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 
-        #             # [0.0] * 15                         # neighbor mask
-        #             , dtype=np.float32
-        #         ),
-        #         high=np.array(
-        #             [1] +                # agent position
-        #             [1000, 1000] +                         # agent orientation
-        #             [1.0] * 360 +                     # ray distances
-        #             [1.0] * 360 +                     # ray mask
-        #             [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15   # neighbor data
-        #             # [1.0] * 15                        # neighbor mask
-        #             , dtype=np.float32
-        #         ),
-        #         dtype=np.float32
-        #     )
-        # else:
-        #     self.observation_space = spaces.Box(
-        #         low=np.array(
-        #             [0] +                               # step
-        #             [-1000, -1000] +                         # agent position
-        #             # neighbor data
-        #             [-1000.0, -1000.0, 0.0, -np.pi, 0.0, -np.pi] * 15 
-        #             # [0.0] * 15                         # neighbor mask
-        #             , dtype=np.float32
-        #         ),
-        #         high=np.array(
-        #             [1] +                # agent position
-        #             [1000, 1000] +                         # agent orientation
-        #             [1000.0, 1000.0, 1.0, np.pi, 1.0, np.pi] * 15   # neighbor data
-        #             # [1.0] * 15                        # neighbor mask
-        #             , dtype=np.float32
-        #         ),
-        #         dtype=np.float32
-        #     )
+        )        
 
     def _load_config(self, config_file):
         """Load YAML configuration and store it in self.world_config."""
@@ -130,6 +86,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         # print("init3")
         self.engine.initialize_simulation(use_lidar=use_lidar, use_obs_mask=use_obs_mask, mode=mode)
         # print("init4")
+        # pprint(self.engine.agent_initialization_data, indent=10)
         if self.render_mode != None:
             self.notify_observers(SimulationInitializedMessage(
                 step=-1, agent_initialization_data=self.engine.agent_initialization_data))
@@ -190,6 +147,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         if self.engine is None:
             raise RuntimeError(
             "Simulator not initialized. Please check your config_file.")
+        step_count = self.engine.get_step_count()        
         
         # 1. Determine base velocity
         if self.step_mode == 'min_dist':
@@ -225,7 +183,9 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             clipped = (new_vel / magnitude) * max_magnitude
         else:
             clipped = new_vel
-
+        current_pos = self.engine.get_agent_position(0)
+        # print("----------------------------------------------------")
+        # print("step count: ", step_count, " clipped vel: ", clipped, " position: ", current_pos)
         # 7. Update simulator
         self.engine.update_agent_velocity(0, tuple(clipped))
         
@@ -239,7 +199,8 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
 
         truncated = (self.engine.get_state() == SimulationState.STOPPED)
         
-        if truncated and not done:            
+        if truncated and not done:     
+            # print("truncated, step: ", self.engine.get_step_count())       
             reward += (1 - (self.engine.get_distance_to_goal(0, True))) * 2560            
         
         info = self._get_info()        
@@ -284,10 +245,10 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             raise RuntimeError(
                 "Simulator is not initialized. Make sure config_file is valid.")
 
-        if seed is not None:
-            self.engine.reset_rng_with_seed(seed)
-        else: 
-            self.engine.reset()
+        # if seed is not None:
+        #     self.engine.reset_rng_with_seed(seed)
+        # else: 
+        self.engine.reset()
         return self._get_obs(), self._get_info()   
 
     def calculate_reward(self, agent_id):

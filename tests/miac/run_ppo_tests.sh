@@ -60,7 +60,7 @@ run_ppo_test() {
             --env_name "$env_name" \
             --level "$level" \
             --n_envs 16 \
-            --n_steps 32 \
+            --n_steps 128 \
             --progress_bar True
         
         echo $? > "${SUMMARY_DIR}/.exit_status"

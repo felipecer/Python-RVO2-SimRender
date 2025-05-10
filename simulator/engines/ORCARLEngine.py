@@ -44,7 +44,8 @@ class ORCARLEngine(SimulationEngine):
         """
         Method to initialize the RVO2 simulation with the provided configuration.
         This method will convert Pydantic objects into RVO2-compatible objects.
-        """        
+        """
+        self._state = SimulationState.SETUP
         config = self.world_config  # Access the world configuration.
         self.wrapper = RVO2RLWrapper(
             time_step=config.time_step,
@@ -58,7 +59,7 @@ class ORCARLEngine(SimulationEngine):
             use_obs_mask=use_obs_mask,
             use_lidar=use_lidar
         )
-        self.sim = self.wrapper.get_simulator()        
+        self.sim = self.wrapper.get_simulator()
 
         # Add agents and save their goals
         # Initialize the global agent_id counter
@@ -117,7 +118,7 @@ class ORCARLEngine(SimulationEngine):
             self.sim.process_obstacles()
 
         self.wrapper.initialize()
-        
+
         agent_initialization_data = [
             {
                 "agent_id": agent_id,
@@ -161,17 +162,17 @@ class ORCARLEngine(SimulationEngine):
 
     def reset(self):
         """Resets the simulation to its initial state."""
-        
+
         self._state = SimulationState.SETUP
 
         self.wrapper.reset_position_and_goals_to_init()
-        self.wrapper.reset_step_count()       
+        self.wrapper.reset_step_count()
 
         self.update_agent_velocities()
 
     def get_step_count(self):
         return self.wrapper.get_step_count()
-    
+
     def step(self):
         """
         Executes the simulation for a specified number of steps.
@@ -179,7 +180,7 @@ class ORCARLEngine(SimulationEngine):
         Args:
             steps (int): Number of steps the simulation should execute.
         """
-        self.update_agent_velocities()        
+        self.update_agent_velocities()
         self.wrapper.do_step()
 
     def update_agent_velocity(self, agent_id: int, velocity: Tuple[float, float]):
@@ -251,17 +252,16 @@ class ORCARLEngine(SimulationEngine):
 
         Returns:
             bool: True if the agent has reached its goal, False otherwise.
-        """        
-        distance = self.wrapper.get_distance_to_goal(agent_id, self.normalized)        
+        """
+        distance = self.wrapper.get_distance_to_goal(agent_id, self.normalized)
         # Consider the goal reached if the distance is less than or equal to a threshold
         return distance <= self.goal_reached_threshhold
-    
+
     def get_distance_to_goal(self, agent_id, normalized):
         return self.wrapper.get_distance_to_goal(agent_id, normalized)
-        
 
     def get_all_distances_from_goals(self):
         return self.wrapper.get_all_distances_to_goals()
-    
+
     def collect_agents_batch_data(self):
         return self.wrapper.get_agent_data_for_vis()

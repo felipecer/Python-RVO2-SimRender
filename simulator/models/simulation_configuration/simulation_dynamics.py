@@ -58,7 +58,7 @@ class OnStepDynamic(SimulationDynamic):
 
     def apply(self):
         """Apply the dynamic depending on the current step."""
-        if self.every_n_steps and self._simulator.current_step % self.every_n_steps == 0:
+        if self.every_n_steps and self._simulator.get_step_count() % self.every_n_steps == 0:
             self.execute()
 
     @abstractmethod
@@ -165,7 +165,7 @@ class MaxStepsReachedDynamic(OnStepDynamic):
     max_steps: int
 
     def execute(self):
-        if self._simulator.get_step_count() >= self.max_steps:
+        if self._simulator.get_step_count() >= self.max_steps:            
             # print(f"Maximum steps of {self.max_steps} reached. Stopping simulation.")
             self._simulator.stop_simulation()
 
