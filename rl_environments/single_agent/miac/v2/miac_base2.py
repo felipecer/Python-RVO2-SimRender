@@ -46,9 +46,11 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             self._load_config(config_file)
 
         # Set up simulator if config was loaded
+        self.max_step_count = 256
         if hasattr(self, 'world_config'):
-            self._init_simulator(use_lidar=use_lidar, use_obs_mask=use_obs_mask, mode=mode)
-             
+            self._init_simulator(max_step_count=self.max_step_count, use_lidar=use_lidar,
+                                 use_obs_mask=use_obs_mask, mode=mode)
+
         # Initialize default spaces (child classes may override these)
         # Example: assume 2D action, 92D observation
         # print("acftion space")
@@ -65,7 +67,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         self.observation_space = spaces.Box(
             low=agent_bounds["low"],
             high=agent_bounds["high"]
-        )        
+        )
 
     def _load_config(self, config_file):
         """Load YAML configuration and store it in self.world_config."""
@@ -73,7 +75,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             config_data = yaml.safe_load(stream)
         self.world_config = SimulationModel(**config_data['simulation'])
 
-    def _init_simulator(self, use_lidar=False, use_obs_mask=False, mode=ObsMode.Cartesian):
+    def _init_simulator(self, max_step_count, use_lidar=False, use_obs_mask=False, mode=ObsMode.Cartesian):
         """Initialize the RVO2 simulator and register dynamics."""
         # print("init0")
         self.engine = ORCARLEngine(
@@ -84,7 +86,8 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         # print("init2")
         self._init_renderers()
         # print("init3")
-        self.engine.initialize_simulation(use_lidar=use_lidar, use_obs_mask=use_obs_mask, mode=mode)
+        self.engine.initialize_simulation(max_step_count=max_step_count,
+                                          use_lidar=use_lidar, use_obs_mask=use_obs_mask, mode=mode)
         # print("init4")
         # pprint(self.engine.agent_initialization_data, indent=10)
         if self.render_mode != None:
@@ -143,37 +146,38 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             # No known render mode
             self.renderer = None
 
-    def step(self, action):          
+    def step(self, action):
         if self.engine is None:
             raise RuntimeError(
-            "Simulator not initialized. Please check your config_file.")
-        step_count = self.engine.get_step_count()        
-        
+                "Simulator not initialized. Please check your config_file.")
+        # step_count = self.engine.get_step_count()
+
         # 1. Determine base velocity
+        self.engine.set_pref_vel_all_agents()
         if self.step_mode == 'min_dist':
-            coll_free_vel = self.engine.get_collision_free_velocity(0)
-            base_vel = np.array([coll_free_vel.x(), coll_free_vel.y()])            
+            pref_vel_ag_0 = self.engine.get_agent_pref_velocity(0)
+            base_vel = np.array([pref_vel_ag_0.x(), pref_vel_ag_0.y()])
         elif self.step_mode == 'naive':
             base_vel = np.zeros(2, dtype=np.float32)
         else:
             raise ValueError("Unknown step_mode: {}".format(self.step_mode))
-        
+
         # 2. Interpret action as (delta_angle, delta_magnitude)
-        delta_angle, delta_mag = action       
+        delta_angle, delta_mag = action
         # 3. Convert base_vel to polar form
-        base_theta = np.arctan2(base_vel[1], base_vel[0])        
+        base_theta = np.arctan2(base_vel[1], base_vel[0])
         # 4. Compute deviation vector in (x, y)
         angle = base_theta + delta_angle
         dev_vector = delta_mag * \
             np.array([np.cos(angle), np.sin(angle)], dtype=np.float32)
         # 5. Add deviation to base_vel
         new_vel = base_vel + dev_vector
-        
+
         # 6. Clip velocity magnitude
         min_magnitude = self.engine.get_agent_min_speed(0)
         max_magnitude = self.engine.get_agent_max_speed(0)
         magnitude = np.linalg.norm(new_vel)
-        
+
         if magnitude < min_magnitude:
             if magnitude > 1e-9:
                 clipped = (new_vel / magnitude) * min_magnitude
@@ -183,28 +187,27 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             clipped = (new_vel / magnitude) * max_magnitude
         else:
             clipped = new_vel
-        current_pos = self.engine.get_agent_position(0)
+        # current_pos = self.engine.get_agent_position(0)
         # print("----------------------------------------------------")
         # print("step count: ", step_count, " clipped vel: ", clipped, " position: ", current_pos)
         # 7. Update simulator
-        self.engine.update_agent_velocity(0, tuple(clipped))
-        
+        # if step_count % 31 == 0:
+        #     print("step: ", step_count, "pref_vel: (", pref_vel_ag_0.x(), ", ",
+        #           pref_vel_ag_0.y(), "); nn vel: (", clipped, ")")
+        self.engine.store_pref_vel_man_update(0, tuple(clipped))
+
         self.engine.execute_simulation_step()
         self.engine.current_step += 1
         # 8. Collect results
         obs = self._get_obs()
-        
-        reward = self.calculate_reward(0)
+
         done = self.is_done(0)
 
         truncated = (self.engine.get_state() == SimulationState.STOPPED)
-        
-        if truncated and not done:     
-            # print("truncated, step: ", self.engine.get_step_count())       
-            reward += (1 - (self.engine.get_distance_to_goal(0, True))) * 2560            
-        
-        info = self._get_info()        
-        return obs, reward, done, truncated, info        
+        reward = self.calculate_reward(0, done, truncated)
+
+        info = self._get_info()
+        return obs, reward, done, truncated, info
 
     def render(self):
         """
@@ -221,7 +224,8 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             # Typically do nothing except possibly handle PyGame events,
             agent_data = self.engine.collect_agents_batch_data()
             step = self.engine.get_step_count()
-            self.notify_observers(AgentPositionsUpdateMessage(step=step, agent_positions=agent_data))
+            self.notify_observers(AgentPositionsUpdateMessage(
+                step=step, agent_positions=agent_data))
         # if self.intersect_list != None:
         #     self.notify_observers(RayCastingUpdateMessage(
         #         step=self.current_step, intersections=self.intersect_list))
@@ -231,7 +235,8 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         elif self.render_mode == "rgb_array":
             agent_data = self.engine.collect_agents_batch_data()
             step = self.engine.get_step_count()
-            self.notify_observers(AgentPositionsUpdateMessage(step=step, agent_positions=agent_data))
+            self.notify_observers(AgentPositionsUpdateMessage(
+                step=step, agent_positions=agent_data))
             return self.renderer.get_rgb_array()
 
         elif self.render_mode == "ansi":
@@ -247,14 +252,24 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
 
         # if seed is not None:
         #     self.engine.reset_rng_with_seed(seed)
-        # else: 
+        # else:
         self.engine.reset()
-        return self._get_obs(), self._get_info()   
+        return self._get_obs(), self._get_info()
 
-    def calculate_reward(self, agent_id):
+    def calculate_reward(self, agent_id, done, truncated):
         """Override in child classes (default raises error)."""
-        raise NotImplementedError(
-            "Please implement calculate_reward() in the child class.")
+
+        reward = -10
+        if done:
+            winning_bonus = 10000
+            step_count = self.engine.get_step_count()
+            step_bonus = (step_count/self.max_step_count) * 10000
+            reward += (winning_bonus+step_bonus)
+            return reward
+        if truncated and not done:
+            # print("truncated, step: ", self.engine.get_step_count())
+            reward += (1 - (self.engine.get_distance_to_goal(0, True))) * 2560
+        return reward
 
     def is_done(self, agent_id):
         """Override in child classes (default raises error)."""

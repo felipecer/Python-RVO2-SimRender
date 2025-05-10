@@ -40,7 +40,7 @@ class ORCARLEngine(SimulationEngine):
         self.sim.set_agent_velocity(agent_idx, Vector2(
             agent_defaults.velocity[0], agent_defaults.velocity[1]))
 
-    def initialize_simulation(self, mode=ObsMode.Cartesian, use_obs_mask=False, use_lidar=False):
+    def initialize_simulation(self, max_step_count=256, mode=ObsMode.Cartesian, use_obs_mask=False, use_lidar=False):
         """
         Method to initialize the RVO2 simulation with the provided configuration.
         This method will convert Pydantic objects into RVO2-compatible objects.
@@ -55,6 +55,7 @@ class ORCARLEngine(SimulationEngine):
             time_horizon_obst=config.agent_defaults.time_horizon_obst,
             radius=config.agent_defaults.radius,
             max_speed=config.agent_defaults.max_speed,
+            max_step_count=max_step_count,
             mode=mode,
             use_obs_mask=use_obs_mask,
             use_lidar=use_lidar
@@ -168,7 +169,7 @@ class ORCARLEngine(SimulationEngine):
         self.wrapper.reset_position_and_goals_to_init()
         self.wrapper.reset_step_count()
 
-        self.update_agent_velocities()
+        self.set_pref_vel_all_agents()
 
     def get_step_count(self):
         return self.wrapper.get_step_count()
@@ -180,10 +181,10 @@ class ORCARLEngine(SimulationEngine):
         Args:
             steps (int): Number of steps the simulation should execute.
         """
-        self.update_agent_velocities()
+        self.apply_pref_vel_man_updates()
         self.wrapper.do_step()
 
-    def update_agent_velocity(self, agent_id: int, velocity: Tuple[float, float]):
+    def store_pref_vel_man_update(self, agent_id: int, velocity: Tuple[float, float]):
         """
         Registers a manual velocity update for a specific agent.
         """
@@ -201,14 +202,17 @@ class ORCARLEngine(SimulationEngine):
         """
         return self.wrapper.get_simulator().get_agent_max_speed(agent_id)
 
-    def get_collision_free_velocity(self, agent_id: int) -> Tuple[float, float]:
-        return self.wrapper.get_simulator().get_agent_velocity(agent_id)
+    def get_agent_pref_velocity(self, agent_id: int) -> Tuple[float, float]:
+        # return self.wrapper.get_simulator().get_agent_velocity(agent_id)
+        return self.wrapper.get_simulator().get_agent_pref_velocity(agent_id)
 
-    def update_agent_velocities(self):
+    def set_pref_vel_all_agents(self):
+        self.wrapper.set_preferred_velocities()
+
+    def apply_pref_vel_man_updates(self):
         """
         Updates the preferred velocities of agents in the simulation, considering manual updates.
         """
-        self.wrapper.set_preferred_velocities()
         # print("Manual updates:", self._manual_velocity_updates)
         for agent_id, velocity in self._manual_velocity_updates:
             # print("manual update. id: ", agent_id, " velocity: ", velocity)

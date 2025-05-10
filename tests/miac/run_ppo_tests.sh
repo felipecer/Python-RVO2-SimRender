@@ -6,7 +6,7 @@ PROJECT_ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 echo "Project root: $PROJECT_ROOT"
 
 # Set the number of timesteps
-TIMESTEPS=1000000
+TIMESTEPS=250000
 
 # Generate a common timestamp for this batch run
 BATCH_TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")

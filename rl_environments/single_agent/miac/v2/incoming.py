@@ -25,15 +25,6 @@ class RVOMiacIncoming2(RVOBaseEnv2):
         observation = self.engine.get_obs(0)
         return observation
 
-    def calculate_reward(self, agent_id=0):
-        """
-        Simple reward function: -10 per step, +10000 on reaching goal.
-        """
-        reward = -10
-        if self.is_done(agent_id):
-            reward += 10000
-        return reward
-
     def is_done(self, agent_id=0):
         """
         Determines if the agent has reached its goal.
@@ -53,9 +44,9 @@ if __name__ == "__main__":
         config_file='./simulator/worlds/miac/incoming/incoming_level_3.yaml',
         render_mode=None,
         seed=42,
-        step_mode='min_dist', 
-        use_lidar=False, 
-        use_obs_mask=True, 
+        step_mode='min_dist',
+        use_lidar=False,
+        use_obs_mask=True,
         mode=ObsMode.Polar
     )
     # Extract filename without extension from config_file path
