@@ -46,7 +46,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             self._load_config(config_file)
 
         # Set up simulator if config was loaded
-        self.max_step_count = 256
+        self.max_step_count = 128
         if hasattr(self, 'world_config'):
             self._init_simulator(max_step_count=self.max_step_count, use_lidar=use_lidar,
                                  use_obs_mask=use_obs_mask, mode=mode)

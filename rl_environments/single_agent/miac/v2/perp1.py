@@ -20,15 +20,6 @@ class RVOMiacPerp1V2(RVOBaseEnv2):
         observation = self.engine.get_obs(0)
         return observation
     
-    def calculate_reward(self, agent_id=0):
-        """
-        Example reward function: -10 per step, +10000 on reaching the goal.
-        """
-        reward = -10
-        if self.is_done(agent_id):
-            reward += 10000
-        return reward
-
     def is_done(self, agent_id=0):
         """
         Determines if the agent has reached its goal.
@@ -46,7 +37,7 @@ if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo
     env = RVOMiacPerp1V2(
         config_file='./simulator/worlds/miac/perp1/perp1_level_3.yaml',
-        render_mode='ansi',
+        render_mode='human',
         seed=42,
         step_mode='min_dist',
         use_lidar=False, 

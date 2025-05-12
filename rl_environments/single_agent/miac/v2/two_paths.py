@@ -23,16 +23,7 @@ class RVOMiacTwoPathsV2(RVOBaseEnv2):
         Optimized to work directly with numpy arrays and minimize copying.
         """
         observation = self.engine.get_obs(0)
-        return observation
-
-    def calculate_reward(self, agent_id):
-        """
-        Example reward function: small negative reward per step, large reward on reaching goal.
-        """
-        reward = -10
-        if self.is_done(agent_id):
-            reward += 10000
-        return reward
+        return observation    
 
     def is_done(self, agent_id=0):
         """
@@ -49,7 +40,7 @@ if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo
     env = RVOMiacTwoPathsV2(
         config_file='./simulator/worlds/miac/two_paths/two_paths_level_3.yaml',
-        render_mode='ansi',
+        render_mode='human',
         seed=42,
         step_mode='min_dist',         
         use_lidar=False, 
