@@ -6,7 +6,7 @@ PROJECT_ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 echo "Project root: $PROJECT_ROOT"
 
 # Set the number of timesteps
-TIMESTEPS=250000
+TIMESTEPS=1000000
 
 # Generate a common timestamp for this batch run
 BATCH_TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")
@@ -60,7 +60,7 @@ run_ppo_test() {
             --env_name "$env_name" \
             --level "$level" \
             --n_envs 16 \
-            --n_steps 128 \
+            --n_steps 64 \
             --progress_bar True
         
         echo $? > "${SUMMARY_DIR}/.exit_status"

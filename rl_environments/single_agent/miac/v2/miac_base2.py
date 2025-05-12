@@ -55,12 +55,16 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         # Example: assume 2D action, 92D observation
         # print("acftion space")
             # Let's assume angle delta ∈ [-π, π], magnitude delta ∈ [-1.0, 1.0]
+        # self.action_space = spaces.Box(
+        #     low=np.array([-np.pi, -1.0], dtype=np.float32),
+        #     high=np.array([np.pi, 1.0], dtype=np.float32),
+        #     dtype=np.float32
+        # )
         self.action_space = spaces.Box(
-            low=np.array([-np.pi, -1.0], dtype=np.float32),
-            high=np.array([np.pi, 1.0], dtype=np.float32),
+            low=np.array([-np.pi, -2.0], dtype=np.float32),
+            high=np.array([np.pi, 2.0], dtype=np.float32),
             dtype=np.float32
         )
-
         agent_bounds = self.engine.get_obs_limits()
         # print("get obs limits")
         # pprint(agent_bounds, indent= 8)
@@ -187,11 +191,12 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             clipped = (new_vel / magnitude) * max_magnitude
         else:
             clipped = new_vel
-        # current_pos = self.engine.get_agent_position(0)
+        current_pos = self.engine.get_agent_position(0)
         # print("----------------------------------------------------")
-        # print("step count: ", step_count, " clipped vel: ", clipped, " position: ", current_pos)
+        # print("step count: ", step_count, " clipped vel: ",
+        #       clipped, " position: ", current_pos)
         # 7. Update simulator
-        # if step_count % 31 == 0:
+        # if step_count % 12 == 0:
         #     print("step: ", step_count, "pref_vel: (", pref_vel_ag_0.x(), ", ",
         #           pref_vel_ag_0.y(), "); nn vel: (", clipped, ")")
         self.engine.store_pref_vel_man_update(0, tuple(clipped))
@@ -258,17 +263,28 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
 
     def calculate_reward(self, agent_id, done, truncated):
         """Override in child classes (default raises error)."""
+        reward = -20
+        step_count = self.engine.get_step_count()
+        max_steps = self.max_step_count
+        steps_saved = max_steps - step_count
 
-        reward = -10
         if done:
-            winning_bonus = 10000
-            step_count = self.engine.get_step_count()
-            step_bonus = (step_count/self.max_step_count) * 10000
-            reward += (winning_bonus+step_bonus)
+            # flat bonus for winning
+            winning_bonus = 5120
+
+            # triangular bonus: 1 + 2 + … + steps_saved = steps_saved*(steps_saved+1)/2
+            step_bonus = steps_saved * (steps_saved + 1) / 2
+
+            reward += winning_bonus + (step_bonus * 20)
             return reward
+
         if truncated and not done:
-            # print("truncated, step: ", self.engine.get_step_count())
-            reward += (1 - (self.engine.get_distance_to_goal(0, True))) * 2560
+            penalty = (max_steps / step_count) * 1000
+            dist_to_goal = self.engine.get_distance_to_goal(agent_id, True)
+            bonus = (1-dist_to_goal if dist_to_goal >
+                     1 else dist_to_goal) * 5120
+            reward += bonus - penalty
+
         return reward
 
     def is_done(self, agent_id):
