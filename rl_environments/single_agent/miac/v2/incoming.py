@@ -42,7 +42,7 @@ if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo  # type: ignore
     env = RVOMiacIncoming2(
         config_file='./simulator/worlds/miac/incoming/incoming_level_3.yaml',
-        render_mode=None,
+        render_mode='human',
         seed=42,
         step_mode='min_dist',
         use_lidar=False,
