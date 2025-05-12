@@ -273,3 +273,6 @@ class ORCARLEngine(SimulationEngine):
 
     def collect_agents_batch_data(self):
         return self.wrapper.get_agent_data_for_vis()
+    
+    def get_lidar_readings(self, agent_id):
+        return self.wrapper.get_lidar(agent_id)

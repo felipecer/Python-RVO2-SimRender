@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import math
 import sys
 import pygame
 
@@ -24,7 +25,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         # Load the color scheme
         self.color_scheme_config = load_color_schemes(color_scheme_file)
         self.color_scheme = self.color_scheme_config.schemes[color_scheme_name]
-
+        self.max_ray_length = 18
         self.font_name = font_name
         self.font_size = font_size
         self.map = map
@@ -102,12 +103,19 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             # Add text inside the goal circle
             draw_text(self.window, f"G_{agent_id}", x, y)
 
-    def draw_intersections(self):
-        if self.raycasting_intersections:
-            for intersection in self.raycasting_intersections:
-                if intersection[0] != None and intersection[1] != None:
-                    x, y = self.transform_coordinates(*intersection)
-                    pygame.draw.circle(self.window, (255, 105, 180), (x, y), 2)
+    def draw_intersections(self, agent_x, agent_y):
+        # if self.raycasting_intersections.any():
+        max_ray_length = self.max_ray_length
+        for intersection in self.raycasting_intersections:
+            if intersection[2] != 0:                
+                x = agent_x 
+                y = agent_y
+                ray_ang = intersection[0]
+                ray_len = intersection[1] * max_ray_length  # Correctly scale ray_len
+                ray_x = x + ray_len * math.cos(ray_ang)
+                ray_y = y + ray_len * math.sin(ray_ang)
+                t_ray_x, t_ray_y = self.transform_coordinates(ray_x, ray_y)                    
+                pygame.draw.circle(self.window, (255, 105, 180), (t_ray_x, t_ray_y), 2)
 
     def game_loop(self):
         step = 0
@@ -160,7 +168,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
         draw_text(self.window, f"Step: {step}", self.window_width - 150, 50)
         self.draw_goals()
-        self.draw_intersections()
+        self.draw_intersections(agents[0][1], agents[0][2])
         self.update_display()
         pygame.time.delay(int(self.delay))
 

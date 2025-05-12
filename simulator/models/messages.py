@@ -46,4 +46,4 @@ class NewObstacleAddedMessage(BaseMessage):
 
 @dataclass
 class RayCastingUpdateMessage(BaseMessage):
-    intersections: List[Tuple[Optional[float], Optional[float]]]
+    intersections: List[Tuple[Optional[float], Optional[float], Optional[float]]]

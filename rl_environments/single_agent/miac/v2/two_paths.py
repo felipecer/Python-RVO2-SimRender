@@ -43,7 +43,7 @@ if __name__ == "__main__":
         render_mode='human',
         seed=42,
         step_mode='min_dist',         
-        use_lidar=False, 
+        use_lidar=True, 
         use_obs_mask=True, 
         mode=ObsMode.Polar
     )
