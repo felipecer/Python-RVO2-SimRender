@@ -26,6 +26,7 @@ class ORCARLEngine(SimulationEngine):
         self.goal_reached_threshhold = 0.02
         self.normalized = True
         self.agent_goals = {}
+        self.obstacle_shapes = []
 
     def set_agent_defaults(self, agent_idx, agent_defaults):
         self.sim.set_agent_neighbor_dist(
@@ -111,11 +112,14 @@ class ORCARLEngine(SimulationEngine):
         self.wrapper.set_goals(goals_v2)
         # Add obstacles to the simulation
         if config.obstacles:
+            obstacle_shapes = []
             for obstacle_shape in config.obstacles:
                 vertices = obstacle_shape.generate_shape()
                 shape = [Vector2(vertex[0], vertex[1])
                          for vertex in vertices]
                 self.sim.add_obstacle(shape)
+                obstacle_shapes.append(vertices)
+            self.obstacle_shapes = obstacle_shapes
             self.sim.process_obstacles()
 
         self.wrapper.initialize()

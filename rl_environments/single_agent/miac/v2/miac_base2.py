@@ -5,7 +5,7 @@ import numpy as np
 from gymnasium import spaces, logger
 from simulator.engines.ORCARLEngine import ORCARLEngine
 from simulator.engines.base import SimulationState
-from simulator.models.messages import AgentPositionsUpdateMessage, SimulationInitializedMessage
+from simulator.models.messages import AgentPositionsUpdateMessage, GoalsProcessedMessage, ObstaclesProcessedMessage, SimulationInitializedMessage
 from simulator.models.observer import SimulationSubject
 from simulator.models.simulation import Simulation as SimulationModel
 from rendering.pygame_renderer import PyGameRenderer
@@ -97,6 +97,10 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         if self.render_mode != None:
             self.notify_observers(SimulationInitializedMessage(
                 step=-1, agent_initialization_data=self.engine.agent_initialization_data))
+            self.notify_observers(GoalsProcessedMessage(
+                        step=-1, goals=self.engine.agent_goals))
+            self.notify_observers(ObstaclesProcessedMessage(
+                step=-1, obstacles=self.engine.obstacle_shapes))
         # print("init5")
 
     def _init_renderers(self):
