@@ -97,7 +97,7 @@ class ORCARLEngine(SimulationEngine):
                     self.agent_goals[agent_id] = goals[local_agent_index]
 
                 if agent_group.assigned_behaviors:
-                    final_behavior_name = agent_group.assigned_behaviors[local_agent_index]
+                    final_behavior_name = agent_group.assigned_behaviors[local_agent_index] if agent_id != self.world_config.intelligent_agent_id else "default"
                     agent_behaviours[agent_id] = final_behavior_name
                     self.update_agent_with_behavior_params(
                         agent_id, final_behavior_name)
@@ -140,6 +140,9 @@ class ORCARLEngine(SimulationEngine):
             }
             for agent_id in range(self.sim.get_num_agents())
         ]
+
+        self.set_agent_defaults(self.world_config.intelligent_agent_id, self.world_config.agent_defaults)
+        
         self.agent_initialization_data = agent_initialization_data
 
     def update_agent_with_behavior_params(self, agent_id: int, behavior_name: str):

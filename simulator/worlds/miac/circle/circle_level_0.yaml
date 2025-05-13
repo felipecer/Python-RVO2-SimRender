@@ -1,6 +1,7 @@
 simulation:
   time_step: 0.2
   max_steps: 72
+  intelligent_agent_id: 0
   map_settings:
     x_min: -18.0  
     x_max: 18

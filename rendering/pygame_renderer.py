@@ -90,8 +90,12 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         if step in self.simulation_steps:
             for agent_id, x, y in self.simulation_steps[step]:
                 x, y = self.transform_coordinates(x, y)
-                pygame.draw.circle(
-                    self.window, self.color_scheme.obstacle_color, (x, y), 10)
+                if agent_id == self.intelligent_agent_id:
+                    pygame.draw.circle(
+                        self.window, self.color_scheme.obstacle_color, (x, y), 10)
+                else: 
+                    pygame.draw.circle(
+                        self.window, self.color_scheme.obstacle_color, (x, y), 10)
 
     def draw_goals(self):
         if len(self.goals) == 0:
@@ -177,6 +181,9 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
             # Get the agent's behavior
             behaviour = self.agent_behaviours.get(agent_id, "default")
             # Get the appropriate color for the agent
+            if agent_id == 0:
+                print(behaviour)
+            
             agent_color = self.color_scheme.get_agent_color(behaviour)
             pygame.draw.circle(self.window, agent_color,
                                (x_screen, y_screen), int(radius * self.cell_size))

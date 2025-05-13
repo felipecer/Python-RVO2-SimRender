@@ -48,6 +48,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
 
         # Set up simulator if config was loaded
         self.max_step_count = self.world_config.max_steps
+        self.intelligent_agent_id = self.world_config.intelligent_agent_id
         if hasattr(self, 'world_config'):
             self._init_simulator(use_lidar=use_lidar,
                                  use_obs_mask=use_obs_mask, mode=mode)
@@ -109,8 +110,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         wcfg = self.engine.world_config.map_settings
         window_width = int((wcfg.x_max - wcfg.x_min) * wcfg.cell_size)
         window_height = int((wcfg.y_max - wcfg.y_min) * wcfg.cell_size)
-        show_goals = wcfg.show_goals
-        intelligent_agent_id = self.engine.world_config.intelligent_agent_id
+        show_goals = wcfg.show_goals        
         if self.render_mode == "human":
             self.renderer = PyGameRenderer(
                 width=window_width,
@@ -119,7 +119,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
                 obstacles=[],
                 goals={},
                 show_goals = show_goals,
-                intelligent_agent_id = intelligent_agent_id
+                intelligent_agent_id = self.intelligent_agent_id
             )
             self.renderer.setup()
             self.register_observer(self.renderer)
@@ -157,7 +157,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         # 1. Determine base velocity
         self.engine.set_pref_vel_all_agents()
         if self.step_mode == 'min_dist':
-            pref_vel_ag_0 = self.engine.get_agent_pref_velocity(0)
+            pref_vel_ag_0 = self.engine.get_agent_pref_velocity(self.intelligent_agent_id)
             base_vel = np.array([pref_vel_ag_0.x(), pref_vel_ag_0.y()])
         elif self.step_mode == 'naive':
             base_vel = np.zeros(2, dtype=np.float32)
@@ -176,8 +176,8 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         new_vel = base_vel + dev_vector
 
         # 6. Clip velocity magnitude
-        min_magnitude = self.engine.get_agent_min_speed(0)
-        max_magnitude = self.engine.get_agent_max_speed(0)
+        min_magnitude = self.engine.get_agent_min_speed(self.intelligent_agent_id)
+        max_magnitude = self.engine.get_agent_max_speed(self.intelligent_agent_id)
         magnitude = np.linalg.norm(new_vel)
 
         if magnitude < min_magnitude:
@@ -189,7 +189,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             clipped = (new_vel / magnitude) * max_magnitude
         else:
             clipped = new_vel
-        current_pos = self.engine.get_agent_position(0)
+        current_pos = self.engine.get_agent_position(self.intelligent_agent_id)
         # print("----------------------------------------------------")
         # print("step count: ", step_count, " clipped vel: ",
         #       clipped, " position: ", current_pos)
@@ -197,17 +197,17 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         # if step_count % 12 == 0:
         #     print("step: ", step_count, "pref_vel: (", pref_vel_ag_0.x(), ", ",
         #           pref_vel_ag_0.y(), "); nn vel: (", clipped, ")")
-        self.engine.store_pref_vel_man_update(0, tuple(clipped))
+        self.engine.store_pref_vel_man_update(self.intelligent_agent_id, tuple(clipped))
 
         self.engine.execute_simulation_step()
         self.engine.current_step += 1
         # 8. Collect results
         obs = self._get_obs()
 
-        done = self.is_done(0)
+        done = self.is_done(self.intelligent_agent_id)
 
         truncated = (self.engine.get_state() == SimulationState.STOPPED)
-        reward = self.calculate_reward(0, done, truncated)
+        reward = self.calculate_reward(self.intelligent_agent_id, done, truncated)
 
         info = self._get_info()
         return obs, reward, done, truncated, info
@@ -228,7 +228,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             agent_data = self.engine.collect_agents_batch_data()            
             step = self.engine.get_step_count()
             if self.use_lidar:
-                lidar_readings= self.engine.get_lidar_readings(0)                
+                lidar_readings= self.engine.get_lidar_readings(self.intelligent_agent_id)                
                 self.notify_observers(RayCastingUpdateMessage(
                     step=step, intersections=lidar_readings))        
             self.notify_observers(AgentPositionsUpdateMessage(

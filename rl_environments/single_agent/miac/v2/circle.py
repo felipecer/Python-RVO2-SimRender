@@ -22,7 +22,7 @@ class RVOMiacCircleV2(RVOBaseEnv2):
         By default, we expect 2 values for (goal-pos), plus neighbor data.
         Optimized to work directly with numpy arrays and minimize copying.
         """
-        observation = self.engine.get_obs(0)
+        observation = self.engine.get_obs(self.intelligent_agent_id)
         return observation
 
     def is_done(self, agent_id=0):
