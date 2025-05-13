@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from rl_environments.single_agent.miac.two_paths import RVOMiacTwoPaths
+from rl_environments.single_agent.miac.v2.two_paths import RVOMiacTwoPathsV2
 from tests.helpers.trainer_testers import parse_cli_args, PPOTrainerTester
 
 
@@ -31,4 +31,4 @@ def main(env_class, args):
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     args = parse_cli_args(script_dir)
-    main(RVOMiacTwoPaths, args)
+    main(RVOMiacTwoPathsV2, args)
