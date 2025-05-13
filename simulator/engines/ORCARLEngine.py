@@ -9,7 +9,7 @@ from rvo2_rl.rvo2 import Vector2
 
 
 class ORCARLEngine(SimulationEngine):
-    def __init__(self, world_config: BaseModel, simulation_id: str, seed: int = None):
+    def __init__(self, max_steps: int, world_config: BaseModel, simulation_id: str, seed: int = None):
         SimulationEngine.__init__(self, seed=seed)
         """
         Initializes the RVO2 simulator with the world configuration and an optional renderer.
@@ -18,12 +18,13 @@ class ORCARLEngine(SimulationEngine):
             world_config (BaseModel): The world configuration in Pydantic format.
             simulation_id (str): The ID of the current simulation.
         """
+        self.max_steps = max_steps
         self.world_config = world_config  # Stores the provided world configuration
         self.simulation_id = simulation_id  # Stores the simulation ID
         self.sim = None  # Instance of the RVO2 simulator, will be initialized later
         self.wrapper = None
         self._manual_velocity_updates = []
-        self.goal_reached_threshhold = 0.02
+        self.goal_reached_threshhold = 0.001
         self.normalized = True
         self.agent_goals = {}
         self.obstacle_shapes = []
@@ -41,7 +42,7 @@ class ORCARLEngine(SimulationEngine):
         self.sim.set_agent_velocity(agent_idx, Vector2(
             agent_defaults.velocity[0], agent_defaults.velocity[1]))
 
-    def initialize_simulation(self, max_step_count=256, mode=ObsMode.Cartesian, use_obs_mask=False, use_lidar=False):
+    def initialize_simulation(self, mode=ObsMode.Cartesian, use_obs_mask=False, use_lidar=False):
         """
         Method to initialize the RVO2 simulation with the provided configuration.
         This method will convert Pydantic objects into RVO2-compatible objects.
@@ -56,7 +57,7 @@ class ORCARLEngine(SimulationEngine):
             time_horizon_obst=config.agent_defaults.time_horizon_obst,
             radius=config.agent_defaults.radius,
             max_speed=config.agent_defaults.max_speed,
-            max_step_count=max_step_count,
+            max_step_count=self.max_steps,
             mode=mode,
             use_obs_mask=use_obs_mask,
             use_lidar=use_lidar

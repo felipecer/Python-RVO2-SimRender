@@ -41,7 +41,7 @@ class RVOMiacCircleV2(RVOBaseEnv2):
 if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo
     env = RVOMiacCircleV2(
-        config_file='./simulator/worlds/miac/circle/circle_level_3.yaml',
+        config_file='./simulator/worlds/miac/circle/circle_level_0.yaml',
         render_mode='human',
         seed=42,
         step_mode='min_dist', 

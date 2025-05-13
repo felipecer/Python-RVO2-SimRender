@@ -109,17 +109,20 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
                 # Add text inside the goal circle
                 draw_text(self.window, f"G_{agent_id}", x, y)
         elif self.show_goals == 'intelligent_agent':
-            print(self.goals)
             goal = self.goals[self.intelligent_agent_id]
             x,y = self.transform_coordinates(*goal)
             radius = self.agent_radii.get(self.intelligent_agent_id, 10) 
             pygame.draw.circle(self.window, self.color_scheme.goal_color, (x, y),
                                 int(radius * self.cell_size))
             # Add text inside the goal circle
-            draw_text(self.window, f"G_{agent_id}", x, y)
+            draw_text(self.window, f"G_{self.intelligent_agent_id}", x, y)
 
     def draw_intersections(self, agent_x, agent_y):
         # if self.raycasting_intersections.any():
+        if self.raycasting_intersections is None:
+            return
+        # if len(self.raycasting_intersections) == 0:
+        #     return
         max_ray_length = self.max_ray_length
         for intersection in self.raycasting_intersections:
             if intersection[2] != 0:                

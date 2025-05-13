@@ -39,7 +39,7 @@ class RVOMiacTwoPathsV2(RVOBaseEnv2):
 if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo
     env = RVOMiacTwoPathsV2(
-        config_file='./simulator/worlds/miac/two_paths/two_paths_level_3.yaml',
+        config_file='./simulator/worlds/miac/two_paths/two_paths_level_2.yaml',
         render_mode='human',
         seed=42,
         step_mode='min_dist',         

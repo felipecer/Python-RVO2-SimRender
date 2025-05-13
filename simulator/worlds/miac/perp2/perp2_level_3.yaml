@@ -1,11 +1,13 @@
 simulation:
   time_step: 0.2
+  max_steps: 196
   map_settings:
     x_min: -18.0
     x_max: 18
     y_min: -18.0
     y_max: 18.0
     cell_size: 30
+    show_goals: "intelligent_agent"
   agent_defaults:
     max_speed: 1.0
     radius: 0.25
@@ -117,7 +119,6 @@ simulation:
   dynamics:
     - name: "max_steps"
       when: "before"
-      max_steps: 256
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"

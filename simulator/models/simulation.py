@@ -27,6 +27,7 @@ class MapSettings(BaseModel):
 
 class Simulation(BaseModel):
     time_step: float
+    max_steps: Optional[int] = 0
     map_settings: Optional[MapSettings] = None
     agent_defaults: AgentDefaults
     agents: List[AgentGroup]

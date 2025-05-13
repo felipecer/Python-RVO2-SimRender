@@ -47,9 +47,9 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             self._load_config(config_file)
 
         # Set up simulator if config was loaded
-        self.max_step_count = 192
+        self.max_step_count = self.world_config.max_steps
         if hasattr(self, 'world_config'):
-            self._init_simulator(max_step_count=self.max_step_count, use_lidar=use_lidar,
+            self._init_simulator(use_lidar=use_lidar,
                                  use_obs_mask=use_obs_mask, mode=mode)
         
         self.action_space = spaces.Box(
@@ -71,19 +71,17 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             config_data = yaml.safe_load(stream)
         self.world_config = SimulationModel(**config_data['simulation'])
 
-    def _init_simulator(self, max_step_count, use_lidar=False, use_obs_mask=False, mode=ObsMode.Cartesian):
+    def _init_simulator(self, use_lidar=False, use_obs_mask=False, mode=ObsMode.Cartesian):
         """Initialize the RVO2 simulator and register dynamics."""
         # print("init0")
-        self.engine = ORCARLEngine(
-            self.world_config, "test_simulation", seed=self.seed_val)
+        self.engine = ORCARLEngine(max_steps=self.max_step_count, world_config=self.world_config, simulation_id="test_simulation", seed=self.seed_val)
         # print("init1")
         for dynamic_config in self.world_config.dynamics:
             self.engine.register_dynamic(dynamic_config)
         # print("init2")
         self._init_renderers()
         # print("init3")
-        self.engine.initialize_simulation(max_step_count=max_step_count,
-                                          use_lidar=use_lidar, use_obs_mask=use_obs_mask, mode=mode)
+        self.engine.initialize_simulation(use_lidar=use_lidar, use_obs_mask=use_obs_mask, mode=mode)
         # print("init4")
         # pprint(self.engine.agent_initialization_data, indent=10)
         if self.render_mode != None:

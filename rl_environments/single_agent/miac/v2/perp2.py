@@ -42,7 +42,7 @@ class RVOMiacPerp2V2(RVOBaseEnv2):
 if __name__ == "__main__":
     # from gymnasium.wrappers import RecordVideo
     env = RVOMiacPerp2V2(
-        config_file='./simulator/worlds/miac/perp2/perp2_level_1.yaml',
+        config_file='./simulator/worlds/miac/perp2/perp2_level_3.yaml',
         render_mode='human',
         seed=42,
         step_mode='min_dist',         
