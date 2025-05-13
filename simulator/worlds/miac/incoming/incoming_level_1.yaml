@@ -1,6 +1,7 @@
 simulation:
   time_step: 0.2
   max_steps: 196
+  intelligent_agent_id: 0
   map_settings:
     x_min: -18.0
     x_max: 18.0
@@ -9,13 +10,13 @@ simulation:
     cell_size: 30
     show_goals: "intelligent_agent"
   agent_defaults:
-    max_speed: 1.0
+    max_speed: 1.5
     radius: 0.25
     time_horizon: 5.0
     time_horizon_obst: 5.0
     max_neighbors: 15
     neighbor_dist: 5
-    velocity: [0.0, 0.0]
+    velocity: [ 0.0, 0.0 ]
   agents:
     - agent_defaults:
         max_speed: 1.5

@@ -180,9 +180,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
 
             # Get the agent's behavior
             behaviour = self.agent_behaviours.get(agent_id, "default")
-            # Get the appropriate color for the agent
-            if agent_id == 0:
-                print(behaviour)
+            # Get the appropriate color for the agent           
             
             agent_color = self.color_scheme.get_agent_color(behaviour)
             pygame.draw.circle(self.window, agent_color,

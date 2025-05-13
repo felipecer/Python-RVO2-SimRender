@@ -15,7 +15,7 @@ simulation:
     time_horizon: 5.0
     time_horizon_obst: 5.0
     max_neighbors: 15
-    neighbor_dist: 10
+    neighbor_dist: 5
     velocity: [ 0.0, 0.0 ]
   agents:
     - behaviour: "diverse-crowd-mostly-non-reactive-0"

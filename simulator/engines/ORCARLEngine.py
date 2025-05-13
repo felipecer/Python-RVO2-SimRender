@@ -124,6 +124,7 @@ class ORCARLEngine(SimulationEngine):
             self.sim.process_obstacles()
 
         self.wrapper.initialize()
+        self.set_agent_defaults(self.world_config.intelligent_agent_id, self.world_config.agent_defaults)
 
         agent_initialization_data = [
             {
@@ -141,7 +142,7 @@ class ORCARLEngine(SimulationEngine):
             for agent_id in range(self.sim.get_num_agents())
         ]
 
-        self.set_agent_defaults(self.world_config.intelligent_agent_id, self.world_config.agent_defaults)
+        
         
         self.agent_initialization_data = agent_initialization_data
 
