@@ -46,20 +46,11 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             self._load_config(config_file)
 
         # Set up simulator if config was loaded
-        self.max_step_count = 128
+        self.max_step_count = 192
         if hasattr(self, 'world_config'):
             self._init_simulator(max_step_count=self.max_step_count, use_lidar=use_lidar,
                                  use_obs_mask=use_obs_mask, mode=mode)
-
-        # Initialize default spaces (child classes may override these)
-        # Example: assume 2D action, 92D observation
-        # print("acftion space")
-            # Let's assume angle delta ∈ [-π, π], magnitude delta ∈ [-1.0, 1.0]
-        # self.action_space = spaces.Box(
-        #     low=np.array([-np.pi, -1.0], dtype=np.float32),
-        #     high=np.array([np.pi, 1.0], dtype=np.float32),
-        #     dtype=np.float32
-        # )
+        
         self.action_space = spaces.Box(
             low=np.array([-np.pi, -2.0], dtype=np.float32),
             high=np.array([np.pi, 2.0], dtype=np.float32),
@@ -114,14 +105,17 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         wcfg = self.engine.world_config.map_settings
         window_width = int((wcfg.x_max - wcfg.x_min) * wcfg.cell_size)
         window_height = int((wcfg.y_max - wcfg.y_min) * wcfg.cell_size)
-
+        show_goals = wcfg.show_goals
+        intelligent_agent_id = self.engine.world_config.intelligent_agent_id
         if self.render_mode == "human":
             self.renderer = PyGameRenderer(
                 width=window_width,
                 height=window_height,
                 cell_size=int(wcfg.cell_size),
                 obstacles=[],
-                goals={}
+                goals={},
+                show_goals = show_goals,
+                intelligent_agent_id = intelligent_agent_id
             )
             self.renderer.setup()
             self.register_observer(self.renderer)

@@ -20,11 +20,11 @@ from simulator.models.observer import SimulationObserver
 class PyGameRenderer(RendererInterface, SimulationObserver):
     def __init__(self, width, height, color_scheme_file='./rendering/color_schemes.yaml', color_scheme_name='orca-behaviors',
                  map=None, simulation_steps={}, obstacles=[], goals={}, agents=[], display_caption='Simulador de Navegación de Agentes',
-                 font_size=8, font_name='arial', cell_size=50):
+                 font_size=8, font_name='arial', cell_size=50, show_goals='all', intelligent_agent_id=0):
         # Load the color scheme
         self.color_scheme_config = load_color_schemes(color_scheme_file)
         self.color_scheme = self.color_scheme_config.schemes[color_scheme_name]
-
+        self.show_goals = show_goals
         self.font_name = font_name
         self.font_size = font_size
         self.map = map
@@ -36,6 +36,7 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
         self.cell_size = cell_size
         self.grid = Grid(width, height, cell_size)
         self.raycasting_intersections = None
+        self.intelligent_agent_id = intelligent_agent_id
 
         # Window settings
         self.window = None
@@ -91,14 +92,27 @@ class PyGameRenderer(RendererInterface, SimulationObserver):
                     self.window, self.color_scheme.obstacle_color, (x, y), 10)
 
     def draw_goals(self):
-        for agent_id, goal in self.goals.items():
-            x, y = self.transform_coordinates(*goal)
-            # Use the same radius as the agent
-            radius = self.agent_radii.get(agent_id, 10)
-            # Draw the goal circle with the same radius as the agent
+        if len(self.goals) == 0:
+            return
+        if self.show_goals == 'none':
+            return
+        if self.show_goals == 'all':
+            for agent_id, goal in self.goals.items():
+                x, y = self.transform_coordinates(*goal)
+                # Use the same radius as the agent
+                radius = self.agent_radii.get(agent_id, 10)
+                # Draw the goal circle with the same radius as the agent
+                pygame.draw.circle(self.window, self.color_scheme.goal_color, (x, y),
+                                int(radius * self.cell_size))
+                # Add text inside the goal circle
+                draw_text(self.window, f"G_{agent_id}", x, y)
+        elif self.show_goals == 'intelligent_agent':
+            print(self.goals)
+            goal = self.goals[self.intelligent_agent_id]
+            x,y = self.transform_coordinates(*goal)
+            radius = self.agent_radii.get(self.intelligent_agent_id, 10) 
             pygame.draw.circle(self.window, self.color_scheme.goal_color, (x, y),
-                               int(radius * self.cell_size))
-
+                                int(radius * self.cell_size))
             # Add text inside the goal circle
             draw_text(self.window, f"G_{agent_id}", x, y)
 

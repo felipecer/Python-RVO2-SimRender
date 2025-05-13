@@ -6,6 +6,7 @@ simulation:
     y_min: -18.0
     y_max: 18.0
     cell_size: 30
+    show_goals: "intelligent_agent"
   agent_defaults:
     max_speed: 1.5
     radius: 0.25

@@ -13,6 +13,16 @@ class MapSettings(BaseModel):
     y_min: float
     y_max: float
     cell_size: int
+    show_goals: Optional[str] = 'all'
+
+    @model_validator(mode='before')
+    def validate_show_goals(cls, values):
+        valid_options = {'all', 'none', 'intelligent_agent'}
+        show_goals_value = values.get('show_goals')
+        if show_goals_value not in valid_options:
+            raise ValueError(
+                f"Invalid value for 'show_goals'. Must be one of {valid_options}.")
+        return values
 
 
 class Simulation(BaseModel):
@@ -21,7 +31,8 @@ class Simulation(BaseModel):
     agent_defaults: AgentDefaults
     agents: List[AgentGroup]
     obstacles: Optional[List] = None
-    dynamics: Optional[List] = None
+    dynamics: Optional[List] = None    
+    intelligent_agent_id: Optional[int] = 0   
 
     @staticmethod
     def validate_entities(category: str, entities_data: List[dict]):
