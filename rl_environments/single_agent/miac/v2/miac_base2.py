@@ -5,7 +5,7 @@ import numpy as np
 from gymnasium import spaces, logger
 from simulator.engines.ORCARLEngine import ORCARLEngine
 from simulator.engines.base import SimulationState
-from simulator.models.messages import AgentPositionsUpdateMessage, SimulationInitializedMessage
+from simulator.models.messages import AgentPositionsUpdateMessage, GoalsProcessedMessage, ObstaclesProcessedMessage, RayCastingUpdateMessage, SimulationInitializedMessage
 from simulator.models.observer import SimulationSubject
 from simulator.models.simulation import Simulation as SimulationModel
 from rendering.pygame_renderer import PyGameRenderer
@@ -40,6 +40,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         self.seed_val = seed
         self.step_mode = step_mode  # either 'naive' or 'min_dist'
         self.engine = None
+        self.use_lidar = use_lidar
 
         # Load config if provided
         if config_file:
@@ -88,6 +89,11 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         if self.render_mode != None:
             self.notify_observers(SimulationInitializedMessage(
                 step=-1, agent_initialization_data=self.engine.agent_initialization_data))
+            self.notify_observers(GoalsProcessedMessage(
+                        step=-1, goals=self.engine.agent_goals))
+            self.notify_observers(ObstaclesProcessedMessage(
+                step=-1, obstacles=self.engine.obstacle_shapes))
+            
         # print("init5")
 
     def _init_renderers(self):
@@ -221,14 +227,15 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
 
         if self.render_mode == "human":
             # Typically do nothing except possibly handle PyGame events,
-            agent_data = self.engine.collect_agents_batch_data()
+            agent_data = self.engine.collect_agents_batch_data()            
             step = self.engine.get_step_count()
+            if self.use_lidar:
+                lidar_readings= self.engine.get_lidar_readings(0)                
+                self.notify_observers(RayCastingUpdateMessage(
+                    step=step, intersections=lidar_readings))        
             self.notify_observers(AgentPositionsUpdateMessage(
                 step=step, agent_positions=agent_data))
-        # if self.intersect_list != None:
-        #     self.notify_observers(RayCastingUpdateMessage(
-        #         step=self.current_step, intersections=self.intersect_list))
-        # self.store_step(self.current_step)
+            
             return None
 
         elif self.render_mode == "rgb_array":
