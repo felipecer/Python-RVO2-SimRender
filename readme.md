@@ -15,7 +15,7 @@ Each environment presents a distinct challenge scenario. Animated videos are inc
 Agents are arranged evenly around a circle. Each agent’s goal is the position directly opposite its start on the circumference. They must coordinate to cross the center without collisions.
 
 <div align="center">
-  <video src="./docs/videos/circle.mp4" controls width="480"></video>
+  <video src="./documentation/video/circle.mp4" controls width="480"></video>
 </div>
 
 **Key Features**  
@@ -29,7 +29,7 @@ Agents are arranged evenly around a circle. Each agent’s goal is the position 
 A single “ego” agent must traverse a crowd moving in the opposite direction. All other agents have goals on the side the ego agent starts from, so they move head-on toward the ego.
 
 <div align="center">
-  <video src="./docs/videos/incoming.mp4" controls width="480"></video>
+  <video src="./documentation/video/incoming.mp4" controls width="480"></video>
 </div>
 
 **Key Features**  
@@ -41,7 +41,7 @@ A single “ego” agent must traverse a crowd moving in the opposite direction.
 
 Simulates a one-way street crossing. The ego agent needs to cross a perpendicularly moving crowd to reach its goal on the opposite sidewalk.
 
-[▶️ View Perpendicular 1 Environment Video (mp4)](./docs/videos/perp1.mp4)
+[▶️ View Perpendicular 1 Environment Video (mp4)](./documentation/video/perp1.mp4)
 
 **Key Features**  
 - Ego crosses a single-direction flow  
@@ -52,7 +52,7 @@ Simulates a one-way street crossing. The ego agent needs to cross a perpendicula
 
 Like Perpendicular 1, but the crowd moves in both directions (two-way street). The ego agent must find gaps in bidirectional traffic to cross.
 
-[▶️ View Perpendicular 2 Environment Video (mp4)](./docs/videos/perp2.mp4)
+[▶️ View Perpendicular 2 Environment Video (mp4)](./documentation/video/perp2.mp4)
 
 **Key Features**  
 - Bi-directional pedestrian flow  
@@ -63,7 +63,7 @@ Like Perpendicular 1, but the crowd moves in both directions (two-way street). T
 
 The ego agent chooses between two parallel corridors leading to its goal. Each path has different crowd density. Other agents move against the ego’s direction.
 
-[▶️ View Two Paths Environment Video (mp4)](./docs/videos/two_paths.mp4)
+[▶️ View Two Paths Environment Video (mp4)](./documentation/video/two_paths.mp4)
 
 **Key Features**  
 - Choice between high-density vs. low-density path  
