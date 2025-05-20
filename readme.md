@@ -14,22 +14,18 @@ Each environment presents a distinct challenge scenario. Animated videos are inc
 
 Agents are arranged evenly around a circle. Each agent’s goal is the position directly opposite its start on the circumference. They must coordinate to cross the center without collisions.
 
-<video src="./documentation/video/circle.mp4" controls width="480"></video>
-
+[![▶️ View Circle Environment Video](https://i.sstatic.net/Vp2cE.png)](https://youtube.com/shorts/YE2kNdFOf-w)
 
 **Key Features**  
 - **N-agents** on a circle  
 - Goals on opposite points  
 - Dense crossing at center  
 
-
 ### Incoming
 
 A single “ego” agent must traverse a crowd moving in the opposite direction. All other agents have goals on the side the ego agent starts from, so they move head-on toward the ego.
 
-<div align="center">
-  <video src="./documentation/video/incoming.mp4" controls width="480"></video>
-</div>
+[![▶️ View Incoming Environment Video](https://i.sstatic.net/Vp2cE.png)](https://youtube.com/shorts/OY2l7HwcXdU)
 
 **Key Features**  
 - One agent vs. oncoming crowd  
@@ -40,7 +36,7 @@ A single “ego” agent must traverse a crowd moving in the opposite direction.
 
 Simulates a one-way street crossing. The ego agent needs to cross a perpendicularly moving crowd to reach its goal on the opposite sidewalk.
 
-[▶️ View Perpendicular 1 Environment Video (mp4)](./documentation/video/perp1.mp4)
+[![▶️ View Perpendicular 1 Environment Video](https://i.sstatic.net/Vp2cE.png)](https://youtube.com/shorts/wsN25D8eAqQ)
 
 **Key Features**  
 - Ego crosses a single-direction flow  
@@ -51,7 +47,7 @@ Simulates a one-way street crossing. The ego agent needs to cross a perpendicula
 
 Like Perpendicular 1, but the crowd moves in both directions (two-way street). The ego agent must find gaps in bidirectional traffic to cross.
 
-[▶️ View Perpendicular 2 Environment Video (mp4)](./documentation/video/perp2.mp4)
+[![▶️ View Perpendicular 2 Environment Video](https://i.sstatic.net/Vp2cE.png)](https://youtube.com/shorts/iEqD5o-MSsc)
 
 **Key Features**  
 - Bi-directional pedestrian flow  
