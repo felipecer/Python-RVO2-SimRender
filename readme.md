@@ -62,7 +62,7 @@ Like Perpendicular 1, but the crowd moves in both directions (two-way street). T
 
 The ego agent chooses between two parallel corridors leading to its goal. Each path has different crowd density. Other agents move against the ego’s direction.
 
-[▶️ View Two Paths Environment Video (mp4)](./documentation/video/two_paths.mp4)
+[![▶️ View Two Paths Environment Video](https://i.sstatic.net/Vp2cE.png)](https://youtube.com/shorts/NoTI-r2x8ns)
 
 **Key Features**  
 - Choice between high-density vs. low-density path  
