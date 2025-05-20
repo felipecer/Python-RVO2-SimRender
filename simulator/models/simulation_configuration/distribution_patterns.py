@@ -38,8 +38,8 @@ class LineDistributionPattern(SpatialDistributionPattern):
         import random
         return [(x + random.gauss(0, self.std_dev), y) for x, y in positions]
 
-@register(alias='circle', category="distribution_pattern")
-class CircleDistributionPattern(SpatialDistributionPattern):
+@register(alias='ring', category="distribution_pattern")
+class RingDistributionPattern(SpatialDistributionPattern):
     center: Tuple[float, float]
     radius: float
     start_position: str = "right"  # Options: "right", "top", "left", "bottom"
@@ -87,3 +87,157 @@ class ExplicitDistributionPattern(SpatialDistributionPattern):
                 f"Expected {self.count} positions, but only {len(self.positions)} were provided."
             )
         return self.positions[:self.count]
+    
+@register(alias='rectangle', category="distribution_pattern")
+class RectangleDistributionPattern(SpatialDistributionPattern):
+    """
+    Distribution pattern that places agents inside a rectangle in a grid formation.
+    Agents are evenly distributed throughout the rectangle area.
+    """
+    x_min: float
+    y_min: float
+    x_max: float
+    y_max: float
+
+    def generate_positions(self) -> List[Tuple[float, float]]:
+        import math
+        positions = []
+        
+        # Calculate rectangle dimensions
+        width = self.x_max - self.x_min
+        height = self.y_max - self.y_min
+        
+        # Determine optimal grid dimensions
+        # Try to make cells roughly square by maintaining aspect ratio
+        aspect_ratio = width / height
+        num_cols = math.ceil(math.sqrt(self.count * aspect_ratio))
+        num_rows = math.ceil(self.count / num_cols)
+        
+        # Adjust if we end up with too many grid cells
+        while num_rows * num_cols > self.count * 1.5:
+            if num_cols > num_rows:
+                num_cols -= 1
+            else:
+                num_rows -= 1
+        
+        # Calculate step sizes
+        x_step = width / max(1, num_cols - 1) if num_cols > 1 else 0
+        y_step = height / max(1, num_rows - 1) if num_rows > 1 else 0
+        
+        # Special case for single agent
+        if self.count == 1:
+            positions.append((self.x_min + width/2, self.y_min + height/2))
+        else:
+            # Generate grid positions
+            count = 0
+            for row in range(num_rows):
+                for col in range(num_cols):
+                    if count >= self.count:
+                        break
+                    
+                    # Calculate position
+                    if num_cols == 1:
+                        x = self.x_min + width/2
+                    else:
+                        x = self.x_min + col * x_step
+                        
+                    if num_rows == 1:
+                        y = self.y_min + height/2
+                    else:
+                        y = self.y_min + row * y_step
+                        
+                    positions.append((x, y))
+                    count += 1
+                    
+                if count >= self.count:
+                    break
+        
+        # Apply variability if specified
+        if self.std_dev and self.std_dev > 0:
+            positions = self.apply_variability(positions)
+        
+        return positions
+
+    def apply_variability(self, positions: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
+        import random
+        
+        # Apply Gaussian noise to both coordinates
+        return [(x + random.gauss(0, self.std_dev), y + random.gauss(0, self.std_dev)) 
+                for x, y in positions]
+    
+@register(alias='rectangle', category="distribution_pattern")
+class RectangleDistributionPattern(SpatialDistributionPattern):
+    """
+    Distribution pattern that places agents inside a rectangle in a grid formation.
+    Agents are evenly distributed throughout the rectangle area.
+    """
+    x_min: float
+    y_min: float
+    x_max: float
+    y_max: float
+
+    def generate_positions(self) -> List[Tuple[float, float]]:
+        import math
+        positions = []
+        
+        # Calculate rectangle dimensions
+        width = self.x_max - self.x_min
+        height = self.y_max - self.y_min
+        
+        # Determine optimal grid dimensions
+        # Try to make cells roughly square by maintaining aspect ratio
+        aspect_ratio = width / height
+        num_cols = math.ceil(math.sqrt(self.count * aspect_ratio))
+        num_rows = math.ceil(self.count / num_cols)
+        
+        # Adjust if we end up with too many grid cells
+        while num_rows * num_cols > self.count * 1.5:
+            if num_cols > num_rows:
+                num_cols -= 1
+            else:
+                num_rows -= 1
+        
+        # Calculate step sizes
+        x_step = width / max(1, num_cols - 1) if num_cols > 1 else 0
+        y_step = height / max(1, num_rows - 1) if num_rows > 1 else 0
+        
+        # Special case for single agent
+        if self.count == 1:
+            positions.append((self.x_min + width/2, self.y_min + height/2))
+        else:
+            # Generate grid positions
+            count = 0
+            for row in range(num_rows):
+                for col in range(num_cols):
+                    if count >= self.count:
+                        break
+                    
+                    # Calculate position
+                    if num_cols == 1:
+                        x = self.x_min + width/2
+                    else:
+                        x = self.x_min + col * x_step
+                        
+                    if num_rows == 1:
+                        y = self.y_min + height/2
+                    else:
+                        y = self.y_min + row * y_step
+                        
+                    positions.append((x, y))
+                    count += 1
+                    
+                if count >= self.count:
+                    break
+        
+        # Apply variability if specified
+        if self.std_dev and self.std_dev > 0:
+            positions = self.apply_variability(positions)
+        
+        return positions
+
+    def apply_variability(self, positions: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
+        import random
+        
+        # Apply Gaussian noise to both coordinates
+        return [(x + random.gauss(0, self.std_dev), y + random.gauss(0, self.std_dev)) 
+                for x, y in positions]

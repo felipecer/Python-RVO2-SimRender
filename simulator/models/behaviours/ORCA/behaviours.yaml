@@ -55,3 +55,25 @@ orcabehaviours:
     max_neighbors: 2
     neighbor_dist: 30
     velocity: [0.0, 0.0]
+eitherbehaviours:
+  shy-or-aggressive:
+    behaviors: ["shy", "aggressive"]
+    weights: [0.7, 0.3]      
+  mix-three:
+    behaviors: ["tense", "assertive", "non-reactive"]        
+  diverse-crowd:
+    behaviors: ["shy", "tense", "assertive", "aggressive", "non-reactive"]
+    weights: [0.2, 0.2, 0.3, 0.1, 0.2]
+  diverse-crowd-mostly-non-reactive-0:
+    behaviors: ["shy", "tense", "non-reactive", "aggressive", "assertive", "impulsive"]
+    weights: [0.2, 0.1, 0.25, 0.15, 0.2, 0.1]
+  diverse-crowd-mostly-non-reactive-1:
+    behaviors: ["shy", "tense", "non-reactive", "aggressive", "assertive", "impulsive"]
+    weights: [0.2, 0.1, 0.30, 0.1, 0.2, 0.1]
+  diverse-crowd-mostly-non-reactive-2:
+    behaviors: ["shy", "tense", "non-reactive", "aggressive", "assertive", "impulsive"]
+    weights: [0.2, 0.1, 0.35, 0.1, 0.15, 0.1]
+  diverse-crowd-mostly-non-reactive-3:
+    behaviors: ["shy", "tense", "non-reactive", "aggressive", "assertive", "impulsive"]
+    weights: [0.2, 0.1, 0.4, 0.1, 0.1, 0.1]
+    

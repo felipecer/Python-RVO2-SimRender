@@ -63,3 +63,7 @@ Thumbs.db
 .idea/
 logs/
 saves/
+baseline_results/
+ppo_results/
+videos/
+*.svg

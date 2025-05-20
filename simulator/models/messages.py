@@ -43,3 +43,7 @@ class GoalPositionUpdatedMessage(BaseMessage):
 @dataclass
 class NewObstacleAddedMessage(BaseMessage):
     obstacle: List[Tuple[float, float]]
+
+@dataclass
+class RayCastingUpdateMessage(BaseMessage):
+    intersections: List[Tuple[Optional[float], Optional[float], Optional[float]]]

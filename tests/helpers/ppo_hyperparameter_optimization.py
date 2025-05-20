@@ -32,8 +32,8 @@ def objective(trial, env_class, config_file, total_timesteps, n_steps, n_envs, s
 
     # Generate a unique ID for the trial
     unique_id = str(uuid.uuid4())
-    log_dir = os.path.join(base_path, 'logs', unique_id)
-    save_path = os.path.join(base_path, 'saves', f'ppo_model_{unique_id}')
+    log_dir = os.path.join(base_path, 'logs', 'optuna', unique_id)
+    save_path = os.path.join(base_path, 'saves', 'optuna', f'ppo_model_{unique_id}')
 
     # Create the PPOTrainerTester instance
     trainer_tester = PPOTrainerTester(

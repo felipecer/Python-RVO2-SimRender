@@ -58,7 +58,7 @@ class OnStepDynamic(SimulationDynamic):
 
     def apply(self):
         """Apply the dynamic depending on the current step."""
-        if self.every_n_steps and self._simulator.current_step % self.every_n_steps == 0:
+        if self.every_n_steps and self._simulator.get_step_count() % self.every_n_steps == 0:
             self.execute()
 
     @abstractmethod
@@ -162,10 +162,8 @@ class AnnulusGoalSpawnerDynamic(GoalSpawnerDynamic):
 
 @register(alias="max_steps", category="dynamic")
 class MaxStepsReachedDynamic(OnStepDynamic):
-    max_steps: int
-
     def execute(self):
-        if self._simulator.current_step >= self.max_steps:
+        if self._simulator.get_step_count() >= self._simulator.max_steps:            
             # print(f"Maximum steps of {self.max_steps} reached. Stopping simulation.")
             self._simulator.stop_simulation()
 
@@ -202,3 +200,18 @@ class UpdateInitialPositionOnGoalReachedDynamic(EventBasedDynamic):
         current_position = event.current_position
         # Update the initial position in the simulator
         self._simulator.agent_initial_positions[agent_id] = current_position
+
+
+@register(alias="stop_on_exit_area", category="dynamic")
+class StopOnExitAreaDynamic(OnStepDynamic):
+    boundary_x: float
+    boundary_y: float
+    agent_id: int
+
+    def execute(self):
+        agent_position = self._simulator.get_agent_position(self.agent_id)
+        x, y = agent_position.x(), agent_position.y()
+        if not (-self.boundary_x <= x <= self.boundary_x and -self.boundary_y <= y <= self.boundary_y):
+            # print(f"Position: {x},{y} is outside the boundary x[-{self.boundary_x}:+{self.boundary_x}], y[-{self.boundary_y}:+{self.boundary_y}]")
+            # print(f"Agent {self.agent_id} stepped outside the boundary. Stopping simulation.")
+            self._simulator.stop_simulation()

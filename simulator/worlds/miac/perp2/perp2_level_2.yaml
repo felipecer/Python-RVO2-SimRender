@@ -1,19 +1,22 @@
 simulation:
-  time_step: 0.1
+  time_step: 0.2
+  max_steps: 196
+  intelligent_agent_id: 0
   map_settings:
     x_min: -18.0
     x_max: 18
     y_min: -18.0
     y_max: 18.0
     cell_size: 30
+    show_goals: "intelligent_agent"
   agent_defaults:
-    max_speed: 1.0
+    max_speed: 1.5
     radius: 0.25
     time_horizon: 5.0
     time_horizon_obst: 5.0
-    max_neighbors: 10
-    neighbor_dist: 10
-    velocity: [0.0, 0.0]
+    max_neighbors: 15
+    neighbor_dist: 5
+    velocity: [ 0.0, 0.0 ]
   agents:
     - agent_defaults:
         max_speed: 1.5
@@ -34,233 +37,95 @@ simulation:
           name: "explicit"
           count: 1
           positions:
-            - [ 0, -5 ]
-    - behaviour: "aggressive"
+            - [ 0, -8 ]
+    # Left side group (moving rightward)
+    - behaviour: "diverse-crowd-mostly-non-reactive-2"
       pattern:
-        name: "line"
-        count: 9
-        x_value: -7.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
+        name: "rectangle"
+        count: 100  # 6 groups × 19 agents
+        x_min: -14.0
+        x_max: -9.0
+        y_min: -3.3
+        y_max: 3.3
+        std_dev: 0.50
       goals:
         radius: 0.4
         pattern:
-          name: "line"
-          count: 9
-          x_value: 19.0
-          y_start: -3.3
-          y_end: 3.3
+          name: "rectangle"
+          count: 100
+          x_min: 19.0
+          x_max: 29.0
+          y_min: -3.3
+          y_max: 3.3
           std_dev: 0
-    - behaviour: "aggressive"
+    # Left side group (moving rightward)
+    - behaviour: "diverse-crowd-mostly-non-reactive-2"
       pattern:
-        name: "line"
-        count: 9
-        x_value: -6.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
+        name: "rectangle"
+        count: 100  # 6 groups × 19 agents
+        x_min: -7.0
+        x_max: -2.0
+        y_min: -3.3
+        y_max: 3.3
+        std_dev: 0.50
       goals:
         radius: 0.4
         pattern:
-          name: "line"
-          count: 9
-          x_value: 21.0
-          y_start: -3.3
-          y_end: 3.3
+          name: "rectangle"
+          count: 100
+          x_min: 31.0
+          x_max: 41.0
+          y_min: -3.3
+          y_max: 3.3
           std_dev: 0
-    - behaviour: "aggressive"
+    # Right side group (moving leftward)
+    - behaviour: "diverse-crowd-mostly-non-reactive-2"
       pattern:
-        name: "line"
-        count: 9
-        x_value: -5.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
+        name: "rectangle"
+        count: 100  # 6 groups × 19 agents
+        x_min: 11.0
+        x_max: 17.0
+        y_min: -3.3
+        y_max: 3.3
+        std_dev: 0.50
       goals:
         radius: 0.4
         pattern:
-          name: "line"
-          count: 9
-          x_value: 23.0
-          y_start: -3.3
-          y_end: 3.3
+          name: "rectangle"
+          count: 100
+          x_min: -31.0
+          x_max: -19.0
+          y_min: -3.3
+          y_max: 3.3
           std_dev: 0
-    - behaviour: "aggressive"
+    - behaviour: "diverse-crowd-mostly-non-reactive-2"
       pattern:
-        name: "line"
-        count: 9
-        x_value: -4.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
+        name: "rectangle"
+        count: 100  # 6 groups × 19 agents
+        x_min: 3.0
+        x_max: 9.0
+        y_min: -3.3
+        y_max: 3.3
+        std_dev: 0.50
       goals:
         radius: 0.4
         pattern:
-          name: "line"
-          count: 9
-          x_value: 25.0
-          y_start: -3.3
-          y_end: 3.3
-          std_dev: 0
-    - behaviour: "aggressive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: -3.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 9
-          x_value: 27.0
-          y_start: -3.3
-          y_end: 3.3
-          std_dev: 0
-    - behaviour: "aggressive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: -2.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 9
-          x_value: 29.0
-          y_start: -3.3
-          y_end: 3.3
-          std_dev: 0
-    - behaviour: "aggressive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: 3.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 9
-          x_value: -31.0
-          y_start: -3.3
-          y_end: 3.3
-          std_dev: 0
-    - behaviour: "aggressive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: 4.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 9
-          x_value: -29.0
-          y_start: -3.3
-          y_end: 3.3
-          std_dev: 0
-    - behaviour: "aggressive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: 5.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 9
-          x_value: -27.0
-          y_start: -3.3
-          y_end: 3.3
-          std_dev: 0
-    - behaviour: "aggressive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: 6.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 9
-          x_value: -25.0
-          y_start: -3.3
-          y_end: 3.3
-          std_dev: 0
-    - behaviour: "aggressive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: 7.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 9
-          x_value: -23.0
-          y_start: -3.3
-          y_end: 3.3
-          std_dev: 0
-    - behaviour: "aggressive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: 8.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 9
-          x_value: -21.0
-          y_start: -3.3
-          y_end: 3.3
-          std_dev: 0
-    - behaviour: "aggressive"
-      pattern:
-        name: "line"
-        count: 9
-        x_value: 9.0
-        y_start: -3.3
-        y_end: 3.3
-        std_dev: 0.5
-      goals:
-        radius: 0.4
-        pattern:
-          name: "line"
-          count: 9
-          x_value: -19.0
-          y_start: -3.3
-          y_end: 3.3
+          name: "rectangle"
+          count: 100
+          x_min: -45.0
+          x_max: -33.0
+          y_min: -3.3
+          y_max: 3.3
           std_dev: 0
   dynamics:
     - name: "max_steps"
       when: "before"
-      max_steps: 256
     - name: "log_step_info"
       when: "after"
     - name: "cleanup_resources"
       when: "before"
+    - name: "stop_on_exit_area"
+      when: "before"
+      boundary_x: 18
+      boundary_y: 18
+      agent_id: 0
