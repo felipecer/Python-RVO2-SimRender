@@ -14,9 +14,8 @@ Each environment presents a distinct challenge scenario. Animated videos are inc
 
 Agents are arranged evenly around a circle. Each agent’s goal is the position directly opposite its start on the circumference. They must coordinate to cross the center without collisions.
 
-<div align="center">
-  <video src="./documentation/video/circle.mp4" controls width="480"></video>
-</div>
+<video src="./documentation/video/circle.mp4" controls width="480"></video>
+
 
 **Key Features**  
 - **N-agents** on a circle  
