@@ -42,7 +42,7 @@ if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo  # type: ignore
     env = RVOMiacIncoming2(
         config_file='./simulator/worlds/miac/incoming/incoming_level_0.yaml',
-        render_mode='human',
+        render_mode='rgb_array',
         seed=42,
         step_mode='min_dist',
         use_lidar=False,
@@ -54,18 +54,25 @@ if __name__ == "__main__":
         env.config_file)  # Gets 'two_paths_level_0.yaml'
     config_name = os.path.splitext(config_filename)[
         0]  # Gets 'two_paths_level_0'
-
+    
     # Generate a unique name_prefix with filename and datetime
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     name_prefix = f"{config_name}_{timestamp}"
+
+    env = RecordVideo(
+        env, 
+        video_folder="videos/",
+        name_prefix=name_prefix,
+    )
     obs, info = env.reset()
     done = False
     i = 0
     while not done:
         action = env.action_space.sample()  # Random actions
         obs, reward, done, truncated, info = env.step(action)
-        env.render()
+        # env.render()
         if done or truncated:
             # logger.info(f"Episode done: {done}, truncated: {truncated}")
             break
         i += 1
+    env.close()

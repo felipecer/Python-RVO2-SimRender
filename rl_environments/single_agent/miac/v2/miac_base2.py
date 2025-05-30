@@ -189,7 +189,7 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
             clipped = (new_vel / magnitude) * max_magnitude
         else:
             clipped = new_vel
-        current_pos = self.engine.get_agent_position(self.intelligent_agent_id)
+        # current_pos = self.engine.get_agent_position(self.intelligent_agent_id)
         # print("----------------------------------------------------")
         # print("step count: ", step_count, " clipped vel: ",
         #       clipped, " position: ", current_pos)
@@ -239,6 +239,10 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         elif self.render_mode == "rgb_array":
             agent_data = self.engine.collect_agents_batch_data()
             step = self.engine.get_step_count()
+            if self.use_lidar:
+                lidar_readings= self.engine.get_lidar_readings(self.intelligent_agent_id)                
+                self.notify_observers(RayCastingUpdateMessage(
+                    step=step, intersections=lidar_readings))
             self.notify_observers(AgentPositionsUpdateMessage(
                 step=step, agent_positions=agent_data))
             return self.renderer.get_rgb_array()
