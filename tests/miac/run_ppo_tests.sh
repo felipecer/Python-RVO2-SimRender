@@ -8,6 +8,10 @@ echo "Project root: $PROJECT_ROOT"
 # Set the number of timesteps
 TIMESTEPS=1000000
 
+# Define available environments and levels
+ENVIRONMENTS=("incoming" "circle" "perp1" "perp2" "two_paths")
+LEVELS=(0 1 2 3)
+
 # Generate a common timestamp for this batch run
 BATCH_TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")
 echo "Using batch timestamp: $BATCH_TIMESTAMP"
@@ -27,38 +31,34 @@ echo "=========================================================" >> "$LOG_FILE"
 # Initialize summary file with headers
 echo "Timestamp,Test File,Environment,Level,Duration,Exit Status" > "$SUMMARY_FILE"
 
-# Function to run a PPO test file and measure execution time
+# Function to run a PPO test with unified test file and measure execution time
 run_ppo_test() {
-    local test_file=$1
+    local env_name=$1
+    local level=$2
     local start_time=$(date +%s)
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting: $test_file with $TIMESTEPS timesteps"
-    
-    # Extract environment directory, name and level from filename
-    local env_dir=$(dirname "$test_file")  # This gives us 'circle', 'incoming', etc.
-    local env_name=$(echo "$test_file" | grep -o -E '[a-z_]+_level_[0-9]+' | cut -d '_' -f 1)
-    local level=$(echo "$test_file" | grep -o -E 'level_[0-9]+' | cut -d '_' -f 2)
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting: $env_name level $level with $TIMESTEPS timesteps"
     
     # Create environment-specific timestamped subdirectories
-    local env_logs_dir="${env_dir}/logs/${BATCH_TIMESTAMP}"
-    local env_saves_dir="${env_dir}/saves/${BATCH_TIMESTAMP}"
+    local env_logs_dir="${env_name}/logs/${BATCH_TIMESTAMP}"
+    local env_saves_dir="${env_name}/saves/${BATCH_TIMESTAMP}"
     mkdir -p "$env_logs_dir"
     mkdir -p "$env_saves_dir"
     
-    local model_name=$(basename "$test_file" .py)
+    local model_name="ppo_${env_name}_level_${level}"
     local model_save_path="${env_saves_dir}/${model_name}"
     
-    # Run from project root with correct PYTHONPATH
+    # Run from project root with correct PYTHONPATH using unified test file
     (
         cd "$PROJECT_ROOT"
         export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
-        python "tests/miac/$test_file" \
+        python "tests/miac/ppo_unified.py" \
             --mode train \
+            --env_name "$env_name" \
+            --level "$level" \
             --total_timesteps $TIMESTEPS \
             --device cpu \
             --log_dir "tests/miac/${env_logs_dir}" \
             --save_path "tests/miac/${model_save_path}" \
-            --env_name "$env_name" \
-            --level "$level" \
             --n_envs 8 \
             --n_steps 32 \
             --progress_bar True
@@ -79,18 +79,18 @@ run_ppo_test() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     if [ $exit_status -eq 0 ]; then
-        echo "$timestamp - Completed: $test_file (Duration: $time_str)"
+        echo "$timestamp - Completed: $env_name level $level (Duration: $time_str)"
     else
-        echo "$timestamp - FAILED: $test_file (Duration: $time_str)"
+        echo "$timestamp - FAILED: $env_name level $level (Duration: $time_str)"
     fi
     
     # Log to file
-    echo "$timestamp | $test_file | $time_str | Exit: $exit_status" >> "$LOG_FILE"
+    echo "$timestamp | $env_name level $level | $time_str | Exit: $exit_status" >> "$LOG_FILE"
     
     # Log to summary file with locking to prevent race conditions
     (
         flock -x 200
-        echo "$timestamp,$test_file,$env_name,$level,$time_str,$exit_status" >> "$SUMMARY_FILE"
+        echo "$timestamp,ppo_unified.py,$env_name,$level,$time_str,$exit_status" >> "$SUMMARY_FILE"
     ) 200>"${SUMMARY_DIR}/.lock"
 }
 
@@ -102,46 +102,59 @@ echo "Batch timestamp: $BATCH_TIMESTAMP"
 echo "Summary will be logged in real-time to $SUMMARY_FILE"
 echo "======================================================================="
 
-# Find all PPO test files excluding optuna related ones
-echo "Scanning for PPO test files..."
-# ALL_PPO_FILES=$(find . -name "ppo_*_level_0.py" | grep -v "optuna" | grep -v "circle" | sed 's|^./||')
-ALL_PPO_FILES=$(find . -name "ppo_incoming_level_*.py" | grep -v "optuna" | sed 's|^./||')
-TOTAL_FILES=$(echo "$ALL_PPO_FILES" | wc -l)
+# Generate all environment-level combinations
+echo "Generating environment-level combinations..."
+ALL_COMBINATIONS=()
+for env in "${ENVIRONMENTS[@]}"; do
+    for level in "${LEVELS[@]}"; do
+        # Check if config file exists for this combination
+        config_file="./simulator/worlds/miac/$env/${env}_level_${level}.yaml"
+        if [ -f "$config_file" ]; then
+            ALL_COMBINATIONS+=("$env:$level")
+        else
+            echo "Warning: Config file not found for $env level $level, skipping..."
+        fi
+    done
+done
 
-if [ $TOTAL_FILES -eq 0 ]; then
-    echo "No PPO test files found. Please check your directory structure."
-    echo "No PPO test files found. Exiting." >> "$LOG_FILE"
+TOTAL_COMBINATIONS=${#ALL_COMBINATIONS[@]}
+
+if [ $TOTAL_COMBINATIONS -eq 0 ]; then
+    echo "No valid environment-level combinations found. Please check your configuration files."
+    echo "No valid combinations found. Exiting." >> "$LOG_FILE"
     exit 1
 fi
 
-# Shuffle the files
-echo "Shuffling $TOTAL_FILES test files..."
-SHUFFLED_FILES=($(echo "$ALL_PPO_FILES" | sort -R))
+# Shuffle the combinations
+echo "Shuffling $TOTAL_COMBINATIONS environment-level combinations..."
+SHUFFLED_COMBINATIONS=($(printf '%s\n' "${ALL_COMBINATIONS[@]}" | sort -R))
 
-echo "Found and shuffled $TOTAL_FILES total PPO test files to process"
-echo "Found $TOTAL_FILES total PPO test files to process" >> "$LOG_FILE"
+echo "Found and shuffled $TOTAL_COMBINATIONS total combinations to process"
+echo "Found $TOTAL_COMBINATIONS total combinations to process" >> "$LOG_FILE"
 echo "=========================================================" >> "$LOG_FILE"
-echo "Format: TIMESTAMP | FILE | DURATION (HH:MM:SS) | Exit Status" >> "$LOG_FILE"
+echo "Format: TIMESTAMP | ENVIRONMENT LEVEL | DURATION (HH:MM:SS) | Exit Status" >> "$LOG_FILE"
 echo "=========================================================" >> "$LOG_FILE"
 
-# List all files that will be processed
-echo "Files to process in this order:"
-for ((i=0; i<$TOTAL_FILES; i++)); do
-    echo "  $(($i+1)). ${SHUFFLED_FILES[$i]}"
+# List all combinations that will be processed
+echo "Combinations to process in this order:"
+for ((i=0; i<$TOTAL_COMBINATIONS; i++)); do
+    IFS=':' read -r env level <<< "${SHUFFLED_COMBINATIONS[$i]}"
+    echo "  $(($i+1)). $env level $level"
 done
 echo "======================================================================="
 
-# Process files one at a time
-TOTAL_BATCHES=$TOTAL_FILES
+# Process combinations one at a time
+TOTAL_BATCHES=$TOTAL_COMBINATIONS
 
-for ((i=0; i<$TOTAL_FILES; i++)); do
+for ((i=0; i<$TOTAL_COMBINATIONS; i++)); do
     BATCH_NUM=$((i+1))
     
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting batch $BATCH_NUM of $TOTAL_BATCHES"
     echo "----- Batch $BATCH_NUM of $TOTAL_BATCHES -----" >> "$LOG_FILE"
     
-    echo "Launching process for: ${SHUFFLED_FILES[$i]}"
-    run_ppo_test "${SHUFFLED_FILES[$i]}"
+    IFS=':' read -r env_name level <<< "${SHUFFLED_COMBINATIONS[$i]}"
+    echo "Launching process for: $env_name level $level"
+    run_ppo_test "$env_name" "$level"
     
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Completed batch $BATCH_NUM of $TOTAL_BATCHES"
     echo "-----------------------------------------------------"
