@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import os
-from rl_environments.single_agent.miac.v2.two_paths import RVOMiacTwoPathsV2
+from rl_environments.single_agent.miac.v2.circle import RVOMiacCircleV2
 from tests.helpers.trainer_testers import parse_cli_args, PPOTrainerTester
 
 
 def main(env_class, args):
-    config_file = args.config_file if args.config_file != '' else './simulator/worlds/miac/two_paths/two_paths_level_2.yaml'
-
+    config_file = args.config_file if args.config_file != '' else './simulator/worlds/miac/circle/circle_level_0.yaml'
+    level = 0 if args.level is None else args.level
     trainer_tester = PPOTrainerTester(
         env_class=env_class,
         config_file=config_file,
@@ -15,10 +15,9 @@ def main(env_class, args):
         render_mode=args.render_mode,
         seed=args.seed,
         unique_id=args.unique_id,
-        level=2,
-        env_name='two_paths'
+        level=level,
+        env_name='circle'
     )
-
     device = args.device
     progress_bar = args.progress_bar
     if args.mode == 'train':
@@ -31,4 +30,4 @@ def main(env_class, args):
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     args = parse_cli_args(script_dir)
-    main(RVOMiacTwoPathsV2, args)
+    main(RVOMiacCircleV2, args)
