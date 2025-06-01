@@ -30,12 +30,14 @@ def import_env_class(env_name):
 
 def get_config_file(env_name, level):
     """Get the configuration file path for the given environment and level."""
-    config_file = f'./simulator/worlds/miac/{env_name}/{env_name}_level_{level}.yaml'
+    # Get the project root directory (two levels up from this script)
+    project_root = Path(__file__).parent.parent.parent.absolute()
+    config_file = project_root / f'simulator/worlds/miac/{env_name}/{env_name}_level_{level}.yaml'
     
-    if not os.path.exists(config_file):
+    if not config_file.exists():
         raise ValueError(f"Configuration file not found: {config_file}")
     
-    return config_file
+    return str(config_file)
 
 
 def main():

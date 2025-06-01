@@ -20,7 +20,7 @@ ALL_COMBINATIONS=()
 for env in "${ENVIRONMENTS[@]}"; do
     for level in "${LEVELS[@]}"; do
         # Check if config file exists for this combination
-        config_file="./simulator/worlds/miac/$env/${env}_level_${level}.yaml"
+        config_file="$PROJECT_ROOT/simulator/worlds/miac/$env/${env}_level_${level}.yaml"
         if [ -f "$config_file" ]; then
             ALL_COMBINATIONS+=("$env:$level")
             echo "✓ Found: $env level $level"
