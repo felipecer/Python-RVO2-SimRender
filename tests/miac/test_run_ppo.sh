@@ -16,7 +16,7 @@ BATCH_TIMESTAMP=$(date "+%Y-%m-%d_%H-%M-%S")
 echo "Using batch timestamp: $BATCH_TIMESTAMP"
 
 # Set up centralized summary directory and file
-SUMMARY_DIR="./ppo_results"
+SUMMARY_DIR="tests/miac/ppo_results"
 SUMMARY_FILE="${SUMMARY_DIR}/test_ppo_summary_${BATCH_TIMESTAMP}.csv"
 LOG_FILE="${SUMMARY_DIR}/test_ppo_results_${BATCH_TIMESTAMP}.log"
 
@@ -37,9 +37,9 @@ run_ppo_test() {
     local start_time=$(date +%s)
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting: $env_name level $level with $TIMESTEPS timesteps"
     
-    # Create environment-specific timestamped subdirectories
-    local env_logs_dir="${env_name}/logs/${BATCH_TIMESTAMP}"
-    local env_saves_dir="${env_name}/saves/${BATCH_TIMESTAMP}"
+    # Create environment-specific timestamped subdirectories within tests/miac
+    local env_logs_dir="tests/miac/${env_name}/logs/${BATCH_TIMESTAMP}"
+    local env_saves_dir="tests/miac/${env_name}/saves/${BATCH_TIMESTAMP}"
     mkdir -p "$env_logs_dir"
     mkdir -p "$env_saves_dir"
     
@@ -56,8 +56,8 @@ run_ppo_test() {
             --level "$level" \
             --total_timesteps $TIMESTEPS \
             --device cpu \
-            --log_dir "tests/miac/${env_logs_dir}" \
-            --save_path "tests/miac/${model_save_path}" \
+            --log_dir "${env_logs_dir}" \
+            --save_path "${model_save_path}" \
             --n_envs 2 \
             --n_steps 8 \
             --progress_bar True
