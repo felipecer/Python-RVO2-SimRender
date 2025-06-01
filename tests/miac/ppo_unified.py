@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 """
-Unified PPO test file that handles all MIAC environments and difficulty levels.
-Usage: python ppo_unified.py --env_name <environment> --level <level> [other args]
+Enhanced unified PPO test file that handles all MIAC environments and difficulty levels.
+Includes metadata storage, evaluation, and video recording capabilities.
+Usage: python ppo_unified.py --env_name <environment> --level <level> --mode <train|test|evaluate> [other args]
 """
 import os
 import sys
 from pathlib import Path
-from tests.helpers.trainer_testers import parse_cli_args, PPOTrainerTester
+from tests.helpers.enhanced_trainer_testers import parse_cli_args, EnhancedPPOTrainerTester
 
 
 # Environment class mappings
@@ -71,7 +72,7 @@ def main():
     print(f"Using configuration file: {config_file}")
     
     # Create trainer/tester instance
-    trainer_tester = PPOTrainerTester(
+    trainer_tester = EnhancedPPOTrainerTester(
         env_class=env_class,
         config_file=config_file,
         log_dir=args.log_dir,
@@ -97,10 +98,33 @@ def main():
             n_steps=args.n_steps
         )
         print("Training completed!")
-    elif args.mode == 'test':
-        print("Starting testing...")
-        trainer_tester.test()
-        print("Testing completed!")
+        
+        # Automatically run evaluation after training
+        print("\nRunning post-training evaluation...")
+        trainer_tester.test(
+            n_eval_episodes=args.n_eval_episodes,
+            record_video=args.record_video
+        )
+        
+    elif args.mode == 'test' or args.mode == 'evaluate':
+        print("Starting evaluation...")
+        model_path = args.model_path if args.model_path else trainer_tester.save_path
+        
+        if not os.path.exists(model_path):
+            raise ValueError(f"Model not found at: {model_path}")
+        
+        evaluation_results = trainer_tester.evaluate_model(
+            model_path=model_path,
+            n_eval_episodes=args.n_eval_episodes,
+            record_best_video=args.record_video
+        )
+        
+        print("Evaluation completed!")
+        print(f"Results: Mean reward = {evaluation_results['statistics']['mean_reward']:.2f}")
+        print(f"Success rate = {evaluation_results['statistics']['success_rate']:.2%}")
+        
+        if evaluation_results.get('video_recorded'):
+            print(f"Video saved to: {evaluation_results['video_folder']}")
 
 
 if __name__ == "__main__":
