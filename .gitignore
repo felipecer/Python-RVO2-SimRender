@@ -67,3 +67,8 @@ baseline_results/
 ppo_results/
 videos/
 *.svg
+tests/miac/comprehensive_results
+tests/miac/evaluation_videos
+tests/miac/enhanced_runs
+test_videos
+tests/miac/test_logs

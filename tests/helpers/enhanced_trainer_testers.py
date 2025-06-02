@@ -54,36 +54,46 @@ class EnhancedPPOTrainerTester:
     
     def create_env(self, n_envs, record_video=False, video_folder=None, 
                    video_name_prefix=None):
-        """Create vectorized environment with optional video recording."""
-        def _init_env():
-            env = self.env_class(
+        """Create vectorized environment."""
+        return make_vec_env(
+            lambda: self.env_class(
                 config_file=self.config_file,
-                render_mode="rgb_array" if record_video else self.render_mode,
+                render_mode=self.render_mode,
                 seed=self.seed
-            )
+            ),
+            n_envs=n_envs
+        )
+    
+    def create_single_env(self, record_video=False, video_folder=None, 
+                          video_name_prefix=None):
+        """Create a single environment for evaluation and video recording."""
+        env = self.env_class(
+            config_file=self.config_file,
+            render_mode="rgb_array" if record_video else self.render_mode,
+            seed=self.seed
+        )
+        
+        if record_video and video_folder:
+            # Create video folder if it doesn't exist
+            os.makedirs(video_folder, exist_ok=True)
             
-            if record_video and video_folder and n_envs == 1:
-                # Only record video for single environment evaluation
+            # Record video for single environment evaluation
+            # Use disable_logger=True to avoid moviepy dependency issues
+            try:
                 env = RecordVideo(
                     env,
                     video_folder=video_folder,
                     name_prefix=video_name_prefix or "evaluation",
-                    episode_trigger=lambda x: True  # Record all episodes
+                    episode_trigger=lambda x: True,  # Record all episodes
+                    disable_logger=True  # Disable moviepy logging
                 )
-            
-            return env
+            except Exception as e:
+                print(f"Warning: Could not set up video recording: {e}")
+                print("Continuing without video recording...")
+                # Return environment without video recording if it fails
+                return env
         
-        if n_envs == 1:
-            return DummyVecEnv([_init_env])
-        else:
-            return make_vec_env(
-                lambda: self.env_class(
-                    config_file=self.config_file,
-                    render_mode=self.render_mode,
-                    seed=self.seed
-                ),
-                n_envs=n_envs
-            )
+        return env
     
     def save_enhanced_metadata(self, model, training_params: Dict[str, Any], 
                                training_time: float, mean_reward: float = None):
@@ -221,7 +231,7 @@ class EnhancedPPOTrainerTester:
             os.makedirs(video_folder, exist_ok=True)
         
         # Evaluate without video recording first to get performance metrics
-        eval_env = self.create_env(n_envs=1, record_video=False)
+        eval_env = self.create_single_env(record_video=False)
         
         print(f"Evaluating model over {n_eval_episodes} episodes...")
         episode_rewards = []
@@ -230,25 +240,39 @@ class EnhancedPPOTrainerTester:
         
         try:
             for episode in range(n_eval_episodes):
-                obs = eval_env.reset()
+                reset_result = eval_env.reset()
+                # Handle both Gym API (obs, info) and VecEnv API (obs)
+                if isinstance(reset_result, tuple):
+                    obs, info = reset_result
+                else:
+                    obs = reset_result
+                    
                 episode_reward = 0
                 episode_length = 0
                 done = False
                 
                 while not done:
                     action, _ = model.predict(obs, deterministic=True)
-                    obs, reward, done, info = eval_env.step(action)
-                    episode_reward += reward[0]
+                    step_result = eval_env.step(action)
+                    
+                    # Handle both new Gym API (obs, reward, terminated, truncated, info) and old API
+                    if len(step_result) == 5:
+                        obs, reward, terminated, truncated, info = step_result
+                        done = terminated or truncated
+                    else:
+                        obs, reward, done, info = step_result
+                        
+                    episode_reward += reward
                     episode_length += 1
                     
-                    if done[0]:
+                    if done:
                         break
                 
                 episode_rewards.append(episode_reward)
                 episode_lengths.append(episode_length)
                 
                 # Extract success information if available
-                success = info[0].get('success', 0) if info and len(info) > 0 else 0
+                success = info.get('success', 0) if info else 0
                 episode_success_rates.append(success)
                 
                 print(f"Episode {episode + 1}: Reward = {episode_reward:.2f}, Length = {episode_length}")
@@ -284,35 +308,58 @@ class EnhancedPPOTrainerTester:
             print(f"Recording video of best performing run (Episode {evaluation_results['statistics']['best_episode_idx'] + 1})...")
             
             video_name_prefix = f"best_run_{self.env_name}_level_{self.level}"
-            video_env = self.create_env(
-                n_envs=1, 
-                record_video=True, 
-                video_folder=video_folder,
-                video_name_prefix=video_name_prefix
-            )
             
             try:
+                video_env = self.create_single_env(
+                    record_video=True, 
+                    video_folder=video_folder,
+                    video_name_prefix=video_name_prefix
+                )
+                
                 # Run one episode for video recording
-                obs = video_env.reset()
+                reset_result = video_env.reset()
+                # Handle both Gym API (obs, info) and VecEnv API (obs)
+                if isinstance(reset_result, tuple):
+                    obs, info = reset_result
+                else:
+                    obs = reset_result
+                    
                 done = False
                 total_reward = 0
                 
                 while not done:
                     action, _ = model.predict(obs, deterministic=True)
-                    obs, reward, done, info = video_env.step(action)
-                    total_reward += reward[0]
+                    step_result = video_env.step(action)
                     
-                    if done[0]:
+                    # Handle both new Gym API and old API
+                    if len(step_result) == 5:
+                        obs, reward, terminated, truncated, info = step_result
+                        done = terminated or truncated
+                    else:
+                        obs, reward, done, info = step_result
+                        
+                    total_reward += reward
+                    
+                    if done:
                         break
                 
                 evaluation_results['video_folder'] = video_folder
                 evaluation_results['video_recorded'] = True
                 print(f"Video saved to: {video_folder}")
                 
+            except Exception as e:
+                print(f"Warning: Video recording failed: {e}")
+                evaluation_results['video_recorded'] = False
+                evaluation_results['video_error'] = str(e)
+                
             finally:
-                # Always close the video environment
-                video_env.close()
-                del video_env
+                # Always close the video environment if it was created
+                try:
+                    if 'video_env' in locals():
+                        video_env.close()
+                        del video_env
+                except Exception as cleanup_error:
+                    print(f"Warning: Error during video environment cleanup: {cleanup_error}")
         
         # Save evaluation results
         with open(self.evaluation_path, 'w') as f:
