@@ -20,6 +20,7 @@ import sys
 import json
 import time
 import traceback
+import csv
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -89,6 +90,86 @@ def setup_directories(base_dir: str, batch_timestamp: str) -> Dict[str, str]:
         os.makedirs(dir_path, exist_ok=True)
     
     return directories
+
+def log_run_to_csv(base_dir: str, batch_timestamp: str, result: Dict):
+    """Log a training run to the master CSV file."""
+    csv_path = os.path.join(base_dir, 'master_runs_log.csv')
+    
+    # Create run ID
+    run_id = f"{batch_timestamp}_{result['env_name']}_level_{result['level']}"
+    
+    # Check if CSV exists and create header if needed
+    file_exists = os.path.exists(csv_path)
+    
+    with open(csv_path, 'a', newline='') as csvfile:
+        fieldnames = [
+            'run_id', 'batch_timestamp', 'env_name', 'level', 'status',
+            'model_path', 'training_timesteps', 'training_time_sec', 
+            'evaluation_time_sec', 'total_time_sec', 'mean_reward', 
+            'std_reward', 'success_rate', 'video_recorded', 'video_folder',
+            'n_envs', 'n_steps', 'device', 'eval_episodes', 'error_message',
+            'completed_timestamp'
+        ]
+        
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        
+        # Write header if file is new
+        if not file_exists:
+            writer.writeheader()
+        
+        # Prepare row data
+        row_data = {
+            'run_id': run_id,
+            'batch_timestamp': batch_timestamp,
+            'env_name': result['env_name'],
+            'level': result['level'],
+            'status': 'SUCCESS' if result.get('success', False) else 'FAILED',
+            'completed_timestamp': datetime.now().isoformat(),
+        }
+        
+        if result.get('success', False):
+            # Successful run
+            row_data.update({
+                'model_path': result.get('model_path', ''),
+                'training_timesteps': result.get('training_timesteps', 0),
+                'training_time_sec': result.get('training_time', 0),
+                'evaluation_time_sec': result.get('evaluation_time', 0),
+                'total_time_sec': result.get('total_time', 0),
+                'mean_reward': result.get('mean_reward', 0),
+                'std_reward': result.get('std_reward', 0),
+                'success_rate': result.get('success_rate', 0),
+                'video_recorded': result.get('video_recorded', False),
+                'video_folder': result.get('video_folder', ''),
+                'n_envs': 4,  # From training parameters
+                'n_steps': 32,  # From training parameters
+                'device': 'cpu',  # From training parameters
+                'eval_episodes': 10,  # Default value
+                'error_message': ''
+            })
+        else:
+            # Failed run
+            row_data.update({
+                'model_path': '',
+                'training_timesteps': 0,
+                'training_time_sec': result.get('error_time', 0),
+                'evaluation_time_sec': 0,
+                'total_time_sec': result.get('error_time', 0),
+                'mean_reward': 0,
+                'std_reward': 0,
+                'success_rate': 0,
+                'video_recorded': False,
+                'video_folder': '',
+                'n_envs': 4,
+                'n_steps': 32,
+                'device': 'cpu',
+                'eval_episodes': 10,
+                'error_message': result.get('error', '')[:200]  # Truncate long error messages
+            })
+        
+        writer.writerow(row_data)
+    
+    print(f"📝 Logged run to CSV: {run_id}")
+    return run_id
 
 def train_and_evaluate_model(env_name: str, level: int, directories: Dict[str, str], 
                            timesteps: int = 100000, eval_episodes: int = 10) -> Dict:
@@ -355,6 +436,9 @@ def main():
         )
         
         all_results.append(result)
+        
+        # Log this run to the master CSV file
+        log_run_to_csv(base_dir, batch_timestamp, result)
         
         # Save intermediate results
         intermediate_path = os.path.join(directories['reports'], f'intermediate_results_{i:02d}.json')
