@@ -394,7 +394,7 @@ def main():
     print("=" * 60)
     
     # Configuration
-    TIMESTEPS = 100000  # 100k timesteps per model
+    TIMESTEPS = 2000000  # 100k timesteps per model
     EVAL_EPISODES = 10  # 10 episodes per evaluation
     
     # Set up directories
