@@ -30,7 +30,7 @@ import argparse
 PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.insert(0, str(PROJECT_ROOT))
 
-# Environment class mappings for v1 (non-v2) classes used by existing baseline scripts
+# Environment class mappings for v1 classes used by existing baseline scripts
 ENV_CLASSES = {
     'circle': 'rl_environments.single_agent.miac.circle.RVOMiacCircle',
     'incoming': 'rl_environments.single_agent.miac.incoming.RVOMiacIncoming',
@@ -153,11 +153,37 @@ def run_orca_baseline_for_env_level(env_name: str, level: int, num_runs: int = 1
         
         # Set up video recording if requested
         render_mode = None
+        env_video_folder = None
+        videos_saved = []
+        
         if record_video:
             render_mode = "rgb_array"
             if video_folder:
-                env_video_folder = os.path.join(video_folder, f"{env_name}_level_{level}")
+                # Create well-organized video folder structure
+                timestamp_short = datetime.now().strftime("%Y%m%d_%H%M")
+                env_video_folder = os.path.join(
+                    video_folder, 
+                    f"{env_name}_level_{level}",
+                    f"orca_baseline_{timestamp_short}"
+                )
                 os.makedirs(env_video_folder, exist_ok=True)
+                
+                # Create a README for this video set
+                readme_path = os.path.join(env_video_folder, "README.txt")
+                with open(readme_path, 'w') as f:
+                    f.write(f"ORCA Baseline Videos - {env_name} Level {level}\n")
+                    f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                    f.write(f"Configuration: {config_file}\n")
+                    f.write(f"Runs: {num_runs}, Seed: {seed}\n")
+                    f.write(f"Algorithm: Pure ORCA (action=[0,0])\n")
+                    f.write("="*60 + "\n\n")
+                    f.write("Video filename format:\n")
+                    f.write("run_XXXX_STATUS_steps_XXX_reward_XX.X.mp4\n\n")
+                    f.write("Where:\n")
+                    f.write("- XXXX: Run number (0000-9999)\n")
+                    f.write("- STATUS: SUCCESS or FAILED\n")
+                    f.write("- steps_XXX: Number of simulation steps\n")
+                    f.write("- reward_XX.X: Episode reward\n\n")
         
         for run in range(num_runs):
             # Create environment with min_dist mode (same as existing baseline scripts)
@@ -201,13 +227,33 @@ def run_orca_baseline_for_env_level(env_name: str, level: int, num_runs: int = 1
             duration = time.time() - run_start_time
             success = env.is_done(0)  # Check if goal was reached
             
-            # Save video for this run if recording and it was successful
-            if record_video and frames and video_folder and success:
+            # Save video for this run if recording
+            if record_video and frames and video_folder:
                 try:
                     # Save as video using simple method (without moviepy dependency)
                     import imageio
-                    video_path = os.path.join(env_video_folder, f"run_{run:04d}.mp4")
-                    imageio.mimsave(video_path, frames, fps=30)
+                    
+                    # Create descriptive filename with performance info
+                    status = "SUCCESS" if success else "FAILED"
+                    video_filename = f"run_{run:04d}_{status}_steps_{steps}_reward_{episode_reward:.1f}.mp4"
+                    video_path = os.path.join(env_video_folder, video_filename)
+                    
+                    # Save video (limit to reasonable number of videos per environment)
+                    # Save all successful runs and first 5 failed runs for variety
+                    should_save = success or (not success and len([r for r in results if not r.get('success', True)]) < 5)
+                    
+                    if should_save:
+                        imageio.mimsave(video_path, frames, fps=30)
+                        videos_saved.append({
+                            'filename': video_filename,
+                            'run': run,
+                            'success': success,
+                            'steps': steps,
+                            'reward': episode_reward,
+                            'duration': duration
+                        })
+                        print(f"    📹 Video saved: {video_filename}")
+                    
                 except ImportError:
                     print(f"Warning: imageio not available for video saving")
                 except Exception as e:
@@ -257,7 +303,8 @@ def run_orca_baseline_for_env_level(env_name: str, level: int, num_runs: int = 1
             'config_file': config_file,
             'total_time': time.time() - start_time,
             'video_recorded': record_video,
-            'video_folder': env_video_folder if record_video and video_folder else ''
+            'video_folder': env_video_folder if record_video and video_folder else '',
+            'videos_saved': videos_saved if record_video else []
         }
         
         # Print summary statistics
@@ -267,6 +314,39 @@ def run_orca_baseline_for_env_level(env_name: str, level: int, num_runs: int = 1
         print(f"Average reward: {summary_stats['avg_reward']:.2f} ± {summary_stats['std_reward']:.2f}")
         print(f"Average duration: {summary_stats['avg_duration']:.2f} seconds")
         print(f"Total runtime: {summary_stats['total_time']:.2f} seconds")
+        
+        # Video summary
+        if record_video and videos_saved:
+            print(f"📹 Videos saved: {len(videos_saved)} total")
+            successful_videos = [v for v in videos_saved if v['success']]
+            failed_videos = [v for v in videos_saved if not v['success']]
+            print(f"   - Successful runs: {len(successful_videos)}")
+            print(f"   - Failed runs: {len(failed_videos)}")
+            print(f"   - Video folder: {env_video_folder}")
+            
+            # Update README with video summary
+            if env_video_folder:
+                readme_path = os.path.join(env_video_folder, "README.txt")
+                with open(readme_path, 'a') as f:
+                    f.write(f"RESULTS SUMMARY:\n")
+                    f.write(f"Total runs: {num_runs}\n")
+                    f.write(f"Success rate: {summary_stats['success_rate']:.2%}\n")
+                    f.write(f"Videos saved: {len(videos_saved)}\n")
+                    f.write(f"  - Successful: {len(successful_videos)}\n")
+                    f.write(f"  - Failed: {len(failed_videos)}\n\n")
+                    
+                    if successful_videos:
+                        f.write("BEST SUCCESSFUL RUNS (by reward):\n")
+                        best_videos = sorted(successful_videos, key=lambda x: x['reward'], reverse=True)[:3]
+                        for i, video in enumerate(best_videos, 1):
+                            f.write(f"{i}. {video['filename']} (reward: {video['reward']:.1f}, steps: {video['steps']})\n")
+                        f.write("\n")
+                    
+                    if failed_videos:
+                        f.write("SAMPLE FAILED RUNS:\n")
+                        for video in failed_videos[:3]:
+                            f.write(f"- {video['filename']} (reward: {video['reward']:.1f}, steps: {video['steps']})\n")
+                        f.write("\n")
         
         return {
             'success': True,
