@@ -301,5 +301,6 @@ class RVOBaseEnv2(gym.Env, SimulationSubject):
         return np.zeros(self.observation_space.shape, dtype=np.float32)
 
     def _get_info(self):
-        """Override in child classes if you need custom info."""
-        return {}
+        return {
+            "success": int(self.is_done(self.intelligent_agent_id))
+        }

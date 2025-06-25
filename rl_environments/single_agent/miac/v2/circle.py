@@ -31,12 +31,6 @@ class RVOMiacCircleV2(RVOBaseEnv2):
         """
         return self.engine.is_goal_reached(agent_id)
 
-    def _get_info(self):
-        """
-        Returns extra info if needed.
-        """
-        return {}
-
 
 if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo

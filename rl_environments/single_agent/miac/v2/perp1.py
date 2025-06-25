@@ -26,11 +26,7 @@ class RVOMiacPerp1V2(RVOBaseEnv2):
         """
         return self.engine.is_goal_reached(agent_id)
 
-    def _get_info(self):
-        """
-        Returns extra info, if needed.
-        """
-        return {}
+    
 
 
 if __name__ == "__main__":
