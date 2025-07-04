@@ -23,7 +23,7 @@ class RVOMiacTwoPathsV2(RVOBaseEnv2):
         Optimized to work directly with numpy arrays and minimize copying.
         """
         observation = self.engine.get_obs(0)
-        return observation    
+        return observation
 
     def is_done(self, agent_id=0):
         """
@@ -31,15 +31,21 @@ class RVOMiacTwoPathsV2(RVOBaseEnv2):
         """
         return self.engine.is_goal_reached(agent_id)
 
+    def _get_info(self):
+        return {
+            "success": int(self.is_done(self.intelligent_agent_id))
+        }
+
+
 if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo
     env = RVOMiacTwoPathsV2(
         config_file='./simulator/worlds/miac/two_paths/two_paths_level_2.yaml',
         render_mode='rgb_array',
         seed=42,
-        step_mode='min_dist',         
-        use_lidar=True, 
-        use_obs_mask=True, 
+        step_mode='min_dist',
+        use_lidar=True,
+        use_obs_mask=True,
         mode=ObsMode.Polar
     )
     # Extract filename without extension from config_file path
@@ -52,7 +58,7 @@ if __name__ == "__main__":
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     name_prefix = f"{config_name}_{timestamp}"
     env = RecordVideo(
-        env, 
+        env,
         video_folder="videos/",
         name_prefix=name_prefix,
     )

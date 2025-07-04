@@ -30,13 +30,13 @@ import argparse
 PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
 sys.path.insert(0, str(PROJECT_ROOT))
 
-# Environment class mappings for v1 classes used by existing baseline scripts
+# Environment class mappings for v2 classes (the actual classes that exist)
 ENV_CLASSES = {
-    'circle': 'rl_environments.single_agent.miac.circle.RVOMiacCircle',
-    'incoming': 'rl_environments.single_agent.miac.incoming.RVOMiacIncoming',
-    'perp1': 'rl_environments.single_agent.miac.perp1.RVOMiacPerp1', 
-    'perp2': 'rl_environments.single_agent.miac.perp2.RVOMiacPerp2',
-    'two_paths': 'rl_environments.single_agent.miac.two_paths.RVOMiacTwoPaths'
+    'circle': 'rl_environments.single_agent.miac.v2.circle.RVOMiacCircleV2',
+    'incoming': 'rl_environments.single_agent.miac.v2.incoming.RVOMiacIncoming2',
+    'perp1': 'rl_environments.single_agent.miac.v2.perp1.RVOMiacPerp1V2',
+    'perp2': 'rl_environments.single_agent.miac.v2.perp2.RVOMiacPerp2V2',
+    'two_paths': 'rl_environments.single_agent.miac.v2.two_paths.RVOMiacTwoPathsV2'
 }
 
 def import_env_class(env_name: str):
@@ -240,7 +240,8 @@ def run_orca_baseline_for_env_level(env_name: str, level: int, num_runs: int = 1
                     
                     # Save video (limit to reasonable number of videos per environment)
                     # Save all successful runs and first 5 failed runs for variety
-                    should_save = success or (not success and len([r for r in results if not r.get('success', True)]) < 5)
+                    failed_videos_count = len([v for v in videos_saved if not v.get('success', True)])
+                    should_save = success or (not success and failed_videos_count < 5)
                     
                     if should_save:
                         imageio.mimsave(video_path, frames, fps=30)

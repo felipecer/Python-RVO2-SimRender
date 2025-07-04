@@ -31,6 +31,12 @@ class RVOMiacIncoming2(RVOBaseEnv2):
         """
         return self.engine.is_goal_reached(agent_id)
 
+    def _get_info(self):
+        return {
+            "success": int(self.is_done(self.intelligent_agent_id))
+        }
+
+
 if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo  # type: ignore
     env = RVOMiacIncoming2(
@@ -47,13 +53,13 @@ if __name__ == "__main__":
         env.config_file)  # Gets 'two_paths_level_0.yaml'
     config_name = os.path.splitext(config_filename)[
         0]  # Gets 'two_paths_level_0'
-    
+
     # Generate a unique name_prefix with filename and datetime
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     name_prefix = f"{config_name}_{timestamp}"
 
     env = RecordVideo(
-        env, 
+        env,
         video_folder="videos/",
         name_prefix=name_prefix,
     )

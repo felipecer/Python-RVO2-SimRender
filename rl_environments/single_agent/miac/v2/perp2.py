@@ -6,7 +6,6 @@ from rl_environments.single_agent.miac.v2.miac_base2 import RVOBaseEnv2
 from rvo2_rl.rl import ObsMode
 
 
-
 class RVOMiacPerp2V2(RVOBaseEnv2):
     """
     Version 2 of the RVOMiacPerp2 environment, using RVOBaseEnv.
@@ -32,6 +31,11 @@ class RVOMiacPerp2V2(RVOBaseEnv2):
         """
         return self.engine.is_goal_reached(agent_id)
 
+    def _get_info(self):
+        return {
+            "success": int(self.is_done(self.intelligent_agent_id))
+        }
+
 
 if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo
@@ -39,9 +43,9 @@ if __name__ == "__main__":
         config_file='./simulator/worlds/miac/perp2/perp2_level_3.yaml',
         render_mode='rgb_array',
         seed=42,
-        step_mode='min_dist',         
-        use_lidar=False, 
-        use_obs_mask=True, 
+        step_mode='min_dist',
+        use_lidar=False,
+        use_obs_mask=True,
         mode=ObsMode.Polar
     )
     # Extract filename without extension from config_file path
@@ -53,7 +57,7 @@ if __name__ == "__main__":
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     name_prefix = f"{config_name}_{timestamp}"
     env = RecordVideo(
-        env, 
+        env,
         video_folder="videos/",
         name_prefix=name_prefix,
     )

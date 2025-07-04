@@ -22,11 +22,12 @@ from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.vec_env import DummyVecEnv
 from gymnasium.wrappers import RecordVideo
 
+
 class EnhancedPPOTrainerTester:
     """Enhanced PPO trainer/tester with comprehensive metadata storage and evaluation."""
-    
-    def __init__(self, env_class, config_file, log_dir, save_path, render_mode=None, 
-                 seed=13, unique_id=None, tag='', hyperparams=None, env_name=None, 
+
+    def __init__(self, env_class, config_file, log_dir, save_path, render_mode=None,
+                 seed=13, unique_id=None, tag='', hyperparams=None, env_name=None,
                  level=None):
         self.env_class = env_class
         self.config_file = config_file
@@ -39,20 +40,20 @@ class EnhancedPPOTrainerTester:
         self.hyperparams = hyperparams if hyperparams is not None else {}
         self.env_name = env_name
         self.level = level
-        
+
         # Enhanced paths for metadata and evaluation
         self.metadata_path = f"{self.save_path}_metadata.json"
         self.evaluation_path = f"{self.save_path}_evaluation.json"
         self.architecture_path = f"{self.save_path}_architecture.pkl"
-        
+
         # Create directories if they don't exist
         if self.log_dir:
             os.makedirs(self.log_dir, exist_ok=True)
         if self.save_path:
             save_dir = os.path.dirname(self.save_path)
             os.makedirs(save_dir, exist_ok=True)
-    
-    def create_env(self, n_envs, record_video=False, video_folder=None, 
+
+    def create_env(self, n_envs, record_video=False, video_folder=None,
                    video_name_prefix=None):
         """Create vectorized environment."""
         return make_vec_env(
@@ -63,8 +64,8 @@ class EnhancedPPOTrainerTester:
             ),
             n_envs=n_envs
         )
-    
-    def create_single_env(self, record_video=False, video_folder=None, 
+
+    def create_single_env(self, record_video=False, video_folder=None,
                           video_name_prefix=None):
         """Create a single environment for evaluation and video recording."""
         env = self.env_class(
@@ -72,11 +73,11 @@ class EnhancedPPOTrainerTester:
             render_mode="rgb_array" if record_video else self.render_mode,
             seed=self.seed
         )
-        
+
         if record_video and video_folder:
             # Create video folder if it doesn't exist
             os.makedirs(video_folder, exist_ok=True)
-            
+
             # Record video for single environment evaluation
             # Use disable_logger=True to avoid moviepy dependency issues
             try:
@@ -92,13 +93,13 @@ class EnhancedPPOTrainerTester:
                 print("Continuing without video recording...")
                 # Return environment without video recording if it fails
                 return env
-        
+
         return env
-    
-    def save_enhanced_metadata(self, model, training_params: Dict[str, Any], 
+
+    def save_enhanced_metadata(self, model, training_params: Dict[str, Any],
                                training_time: float, mean_reward: float = None):
         """Save comprehensive model metadata including architecture and training details."""
-        
+
         # Extract model architecture information
         policy = model.policy
         architecture_info = {
@@ -125,7 +126,7 @@ class EnhancedPPOTrainerTester:
                 'high': model.action_space.high.tolist() if hasattr(model.action_space, 'high') else None,
             }
         }
-        
+
         # Compile comprehensive metadata
         metadata = {
             'model_info': {
@@ -160,18 +161,18 @@ class EnhancedPPOTrainerTester:
                 'log_dir': self.log_dir,
             }
         }
-        
+
         # Save metadata as JSON
         with open(self.metadata_path, 'w') as f:
             json.dump(metadata, f, indent=2, default=str)
-        
+
         # Save architecture details as pickle for exact reconstruction
         # Extract learning rate value (handle both float and schedule functions)
         lr_value = model.learning_rate
         if callable(lr_value):
             # If it's a schedule function, get the current value
             lr_value = float(lr_value(1.0))  # Get value at progress 1.0
-        
+
         architecture_data = {
             'policy_state_dict': policy.state_dict(),
             'model_parameters': {
@@ -186,58 +187,58 @@ class EnhancedPPOTrainerTester:
                 'vf_coef': model.vf_coef,
             }
         }
-        
+
         with open(self.architecture_path, 'wb') as f:
             pickle.dump(architecture_data, f)
-        
+
         print(f"Enhanced metadata saved to: {self.metadata_path}")
         print(f"Architecture data saved to: {self.architecture_path}")
-    
+
     def load_model_with_metadata(self, model_path: str = None) -> Tuple[PPO, Dict]:
         """Load model along with its metadata."""
         if model_path is None:
             model_path = self.save_path
-        
+
         # Load the model
         model = PPO.load(model_path)
-        
+
         # Load metadata
         metadata_file = f"{model_path}_metadata.json"
         metadata = {}
         if os.path.exists(metadata_file):
             with open(metadata_file, 'r') as f:
                 metadata = json.load(f)
-        
+
         return model, metadata
-    
-    def evaluate_model(self, model_path: str = None, n_eval_episodes: int = 10, 
+
+    def evaluate_model(self, model_path: str = None, n_eval_episodes: int = 10,
                        record_best_video: bool = True, video_folder: str = None) -> Dict[str, Any]:
         """
         Comprehensive model evaluation with multiple episodes and optional video recording.
         """
         if model_path is None:
             model_path = self.save_path
-        
+
         model, metadata = self.load_model_with_metadata(model_path)
-        
+
         # Setup video recording folder
         if record_best_video and video_folder is None:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             video_folder = os.path.join(
-                os.path.dirname(model_path), 
-                'evaluation_videos', 
+                os.path.dirname(model_path),
+                'evaluation_videos',
                 f"{self.env_name}_level_{self.level}_{timestamp}"
             )
             os.makedirs(video_folder, exist_ok=True)
-        
+
         # Evaluate without video recording first to get performance metrics
         eval_env = self.create_single_env(record_video=False)
-        
+
         print(f"Evaluating model over {n_eval_episodes} episodes...")
         episode_rewards = []
         episode_lengths = []
         episode_success_rates = []
-        
+
         try:
             for episode in range(n_eval_episodes):
                 reset_result = eval_env.reset()
@@ -246,42 +247,43 @@ class EnhancedPPOTrainerTester:
                     obs, info = reset_result
                 else:
                     obs = reset_result
-                    
+
                 episode_reward = 0
                 episode_length = 0
                 done = False
-                
+
                 while not done:
                     action, _ = model.predict(obs, deterministic=True)
                     step_result = eval_env.step(action)
-                    
+
                     # Handle both new Gym API (obs, reward, terminated, truncated, info) and old API
                     if len(step_result) == 5:
                         obs, reward, terminated, truncated, info = step_result
                         done = terminated or truncated
                     else:
                         obs, reward, done, info = step_result
-                        
+
                     episode_reward += reward
                     episode_length += 1
-                    
+
                     if done:
                         break
-                
+
                 episode_rewards.append(episode_reward)
                 episode_lengths.append(episode_length)
-                
+
                 # Extract success information if available
                 success = info.get('success', 0) if info else 0
                 episode_success_rates.append(success)
-                
-                print(f"Episode {episode + 1}: Reward = {episode_reward:.2f}, Length = {episode_length}")
-        
+
+                print(
+                    f"Episode {episode + 1}: Reward = {episode_reward:.2f}, Length = {episode_length}")
+
         finally:
             # Always close the evaluation environment
             eval_env.close()
             del eval_env
-        
+
         # Calculate statistics
         evaluation_results = {
             'timestamp': datetime.now().isoformat(),
@@ -302,20 +304,21 @@ class EnhancedPPOTrainerTester:
                 'worst_episode_idx': int(np.argmin(episode_rewards)),
             }
         }
-        
+
         # Record video of the best performing run
         if record_best_video and video_folder:
-            print(f"Recording video of best performing run (Episode {evaluation_results['statistics']['best_episode_idx'] + 1})...")
-            
+            print(
+                f"Recording video of best performing run (Episode {evaluation_results['statistics']['best_episode_idx'] + 1})...")
+
             video_name_prefix = f"best_run_{self.env_name}_level_{self.level}"
-            
+
             try:
                 video_env = self.create_single_env(
-                    record_video=True, 
+                    record_video=True,
                     video_folder=video_folder,
                     video_name_prefix=video_name_prefix
                 )
-                
+
                 # Run one episode for video recording
                 reset_result = video_env.reset()
                 # Handle both Gym API (obs, info) and VecEnv API (obs)
@@ -323,35 +326,35 @@ class EnhancedPPOTrainerTester:
                     obs, info = reset_result
                 else:
                     obs = reset_result
-                    
+
                 done = False
                 total_reward = 0
-                
+
                 while not done:
                     action, _ = model.predict(obs, deterministic=True)
                     step_result = video_env.step(action)
-                    
+
                     # Handle both new Gym API and old API
                     if len(step_result) == 5:
                         obs, reward, terminated, truncated, info = step_result
                         done = terminated or truncated
                     else:
                         obs, reward, done, info = step_result
-                        
+
                     total_reward += reward
-                    
+
                     if done:
                         break
-                
+
                 evaluation_results['video_folder'] = video_folder
                 evaluation_results['video_recorded'] = True
                 print(f"Video saved to: {video_folder}")
-                
+
             except Exception as e:
                 print(f"Warning: Video recording failed: {e}")
                 evaluation_results['video_recorded'] = False
                 evaluation_results['video_error'] = str(e)
-                
+
             finally:
                 # Always close the video environment if it was created
                 try:
@@ -359,66 +362,69 @@ class EnhancedPPOTrainerTester:
                         video_env.close()
                         del video_env
                 except Exception as cleanup_error:
-                    print(f"Warning: Error during video environment cleanup: {cleanup_error}")
-        
+                    print(
+                        f"Warning: Error during video environment cleanup: {cleanup_error}")
+
         # Save evaluation results
         with open(self.evaluation_path, 'w') as f:
             json.dump(evaluation_results, f, indent=2)
-        
+
         print(f"Evaluation results saved to: {self.evaluation_path}")
-        print(f"Mean reward: {evaluation_results['statistics']['mean_reward']:.2f} ± {evaluation_results['statistics']['std_reward']:.2f}")
-        print(f"Success rate: {evaluation_results['statistics']['success_rate']:.2%}")
-        
+        print(
+            f"Mean reward: {evaluation_results['statistics']['mean_reward']:.2f} ± {evaluation_results['statistics']['std_reward']:.2f}")
+        print(
+            f"Success rate: {evaluation_results['statistics']['success_rate']:.2%}")
+
         return evaluation_results
-    
-    def train(self, n_envs=16, total_timesteps=1000000, n_steps=256, device='cpu', 
+
+    def train(self, n_envs=16, total_timesteps=1000000, n_steps=256, device='cpu',
               progress_bar=True):
         """Enhanced training with metadata storage."""
         start_time = time.time()
-        
+
         vec_env = self.create_env(n_envs=n_envs)
-        
+
         # Create a run name that includes environment and level information
         run_name = f"PPO"
         if self.env_name and self.level is not None:
             run_name = f"PPO_{self.env_name}_level_{self.level}"
         elif self.env_name:
             run_name = f"PPO_{self.env_name}"
-        
+
         policy_kwargs = dict(
             net_arch=dict(pi=[256, 256], vf=[256, 256]),
             activation_fn=nn.Tanh,
             ortho_init=True,
         )
-        
+
         model = PPO(
-            "MlpPolicy", 
-            vec_env, 
-            n_steps=n_steps, 
-            verbose=1, 
-            policy_kwargs=policy_kwargs, 
+            "MlpPolicy",
+            vec_env,
+            n_steps=n_steps,
+            verbose=1,
+            policy_kwargs=policy_kwargs,
             device=device,
-            tensorboard_log=self.log_dir, 
+            tensorboard_log=self.log_dir,
             **self.hyperparams
         )
-        
+
         # Train the model
         model.learn(
             total_timesteps=total_timesteps,
-            progress_bar=progress_bar, 
-            tb_log_name=run_name, 
+            progress_bar=progress_bar,
+            tb_log_name=run_name,
             log_interval=10
         )
-        
+
         training_time = time.time() - start_time
-        
+
         # Save model
         model.save(self.save_path)
         print("Training completed")
-        
+
         # Quick evaluation to get mean reward
         mean_reward, _ = evaluate_policy(model, vec_env, n_eval_episodes=5)
-        
+
         # Save enhanced metadata
         training_params = {
             'total_timesteps': total_timesteps,
@@ -427,9 +433,10 @@ class EnhancedPPOTrainerTester:
             'device': device,
             'run_name': run_name,
         }
-        
-        self.save_enhanced_metadata(model, training_params, training_time, mean_reward)
-        
+
+        self.save_enhanced_metadata(
+            model, training_params, training_time, mean_reward)
+
         # Log basic parameters for compatibility
         self.log_parameters({
             'config_file': self.config_file,
@@ -442,12 +449,12 @@ class EnhancedPPOTrainerTester:
             'hyperparameters': self.hyperparams,
             'mean_reward': mean_reward
         })
-        
+
         # Close environment and clean up
         vec_env.close()
         del model
         del vec_env
-    
+
     def test(self, n_eval_episodes: int = 10, record_video: bool = True):
         """Enhanced testing with evaluation metrics and video recording."""
         print("Starting enhanced evaluation...")
@@ -455,22 +462,22 @@ class EnhancedPPOTrainerTester:
             n_eval_episodes=n_eval_episodes,
             record_best_video=record_video
         )
-        
+
         print("Enhanced evaluation completed!")
         return evaluation_results
-    
+
     def log_parameters(self, params):
         """Legacy parameter logging for compatibility."""
         os.makedirs(self.log_dir, exist_ok=True)
         log_file = os.path.join(self.log_dir, 'run_log.csv')
         file_exists = os.path.isfile(log_file)
-        
+
         with open(log_file, mode='a', newline='') as file:
             writer = csv.writer(file)
             if not file_exists:
                 writer.writerow([
-                    'timestamp', 'tag', 'unique_id', 'env_name', 'level', 
-                    'config_file', 'total_timesteps', 'n_steps', 'n_envs', 
+                    'timestamp', 'tag', 'unique_id', 'env_name', 'level',
+                    'config_file', 'total_timesteps', 'n_steps', 'n_envs',
                     'seed', 'log_dir', 'save_path', 'hyperparameters', 'mean_reward'
                 ])
             writer.writerow([
@@ -495,7 +502,7 @@ def parse_cli_args(script_dir):
     """Parse command-line arguments with enhanced options."""
     parser = argparse.ArgumentParser(
         description='Enhanced PPO training/testing with metadata and video recording.')
-    
+
     # Basic arguments (compatible with existing scripts)
     parser.add_argument('--mode', choices=['train', 'test', 'evaluate'],
                         required=True, help='Operation mode', default='train')
@@ -515,7 +522,7 @@ def parse_cli_args(script_dir):
                         help='Device to use for training (cpu or cuda)')
     parser.add_argument('--progress_bar', type=bool, default=True,
                         help='Show progress bar during training')
-    
+
     # Enhanced arguments
     parser.add_argument('--env_name', type=str,
                         help='Environment name')
@@ -527,7 +534,7 @@ def parse_cli_args(script_dir):
                         help='Record video during evaluation')
     parser.add_argument('--model_path', type=str, default=None,
                         help='Path to saved model for evaluation')
-    
+
     # Directory arguments
     parser.add_argument('--log_dir', default=os.path.join(script_dir, 'logs'),
                         help='Directory to save logs')
@@ -535,5 +542,5 @@ def parse_cli_args(script_dir):
                         help='Path to save/load the trained model')
     parser.add_argument('--unique_id', default=None,
                         help='Unique identifier for this run')
-    
+
     return parser.parse_args()
