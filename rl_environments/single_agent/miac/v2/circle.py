@@ -32,21 +32,20 @@ class RVOMiacCircleV2(RVOBaseEnv2):
         return self.engine.is_goal_reached(agent_id)
 
     def _get_info(self):
-        """
-        Returns extra info if needed.
-        """
-        return {}
+        return {
+            "success": int(self.is_done(self.intelligent_agent_id))
+        }
 
 
 if __name__ == "__main__":
     from gymnasium.wrappers import RecordVideo
     env = RVOMiacCircleV2(
         config_file='./simulator/worlds/miac/circle/circle_level_0.yaml',
-        render_mode='human',
+        render_mode='rgb_array',
         seed=42,
-        step_mode='min_dist', 
-        use_lidar=False, 
-        use_obs_mask=True, 
+        step_mode='min_dist',
+        use_lidar=False,
+        use_obs_mask=True,
         mode=ObsMode.Polar
     )
     # Extract filename without extension from config_file path
@@ -58,15 +57,20 @@ if __name__ == "__main__":
     # Generate a unique name_prefix with filename and datetime
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     name_prefix = f"{config_name}_{timestamp}"
+    env = RecordVideo(
+        env,
+        video_folder="videos/",
+        name_prefix=name_prefix,
+    )
     obs, info = env.reset()
     done = False
     i = 0
     while not done:
         action = env.action_space.sample()  # Random actions
         obs, reward, done, truncated, info = env.step(action)
-        env.render()
+        # env.render()
         if done or truncated:
             # logger.info(f"Episode done: {done}, truncated: {truncated}")
             break
         i += 1
-
+    env.close()
